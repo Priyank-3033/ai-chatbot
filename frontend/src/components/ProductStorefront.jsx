@@ -1,4 +1,7 @@
-﻿function getTagTone(tag) {
+﻿import { useState } from "react";
+import { getLocalProductImage, getProductPlaceholder } from "../utils/productVisuals";
+
+function getTagTone(tag) {
   const normalized = tag.toLowerCase();
   if (normalized.includes("camera")) return "camera";
   if (normalized.includes("gaming")) return "gaming";
@@ -36,11 +39,29 @@ function ProductTile({ product, saved, onViewDetails, onToggleWishlist, onAddToC
   const ratingTone = getRatingTone(product.rating);
   const salePercent = getSalePercent(product);
   const originalPrice = getOriginalPrice(product.price, salePercent);
+  const [imageSrc, setImageSrc] = useState(getLocalProductImage(product));
+  const [hidden, setHidden] = useState(false);
+
+  if (hidden) {
+    return null;
+  }
 
   return (
     <article className={`product-card ${compact ? "collection-card" : ""}`}>
       <div className="product-media">
-        <img src={product.image} alt={product.name} />
+        <img
+          src={imageSrc}
+          alt={product.name}
+          loading="lazy"
+          onError={() => {
+            if (imageSrc === getProductPlaceholder(product)) {
+              setHidden(true);
+              return;
+            }
+
+            setImageSrc(getProductPlaceholder(product));
+          }}
+        />
         <div className="product-media-overlay">
           <span className="product-media-chip">{product.stock > 0 ? `${product.stock} ready to ship` : "Out of stock"}</span>
           <button className={`wishlist-floating ${saved ? "saved" : ""}`} onClick={() => onToggleWishlist(product.id)} type="button">
@@ -112,7 +133,7 @@ export default function ProductStorefront({
   ];
 
   const brandList = [...new Set(products.map((product) => product.brand))].slice(0, 8);
-  const featuredProducts = products.slice(0, 6);
+  const featuredProducts = products.slice(0, 4);
   const dealProducts = products
     .filter((product) => product.price <= 20000 || product.rating >= 4.6 || /budget|value|deal|pick|choice/i.test(product.tag))
     .slice(0, 4);
@@ -122,9 +143,9 @@ export default function ProductStorefront({
   const watchCount = products.filter((product) => product.category === "watch").length;
 
   const collections = [
-    { key: "laptop", title: "Laptop collection", subtitle: "Work, study, and gaming machines with more room to compare.", items: products.filter((product) => product.category === "laptop").slice(0, 4) },
-    { key: "tablet", title: "Tablet collection", subtitle: "Portable screens for notes, creativity, reading, and entertainment.", items: products.filter((product) => product.category === "tablet").slice(0, 4) },
-    { key: "watch", title: "Smartwatch collection", subtitle: "Fitness, notifications, and style-focused wearables in one strip.", items: products.filter((product) => product.category === "watch").slice(0, 4) },
+    { key: "laptop", title: "Laptop collection", subtitle: "Work, study, and gaming machines with more room to compare.", items: products.filter((product) => product.category === "laptop").slice(0, 3) },
+    { key: "tablet", title: "Tablet collection", subtitle: "Portable screens for notes, creativity, reading, and entertainment.", items: products.filter((product) => product.category === "tablet").slice(0, 3) },
+    { key: "watch", title: "Smartwatch collection", subtitle: "Fitness, notifications, and style-focused wearables in one strip.", items: products.filter((product) => product.category === "watch").slice(0, 3) },
   ];
 
   return (
@@ -298,3 +319,4 @@ export default function ProductStorefront({
     </section>
   );
 }
+

@@ -132,8 +132,8 @@ export default function AdminPanel({ products, onSave, onDelete, busy }) {
             <input placeholder="Storage" value={form.storage} onChange={(event) => setForm((current) => ({ ...current, storage: event.target.value }))} />
             <input placeholder="Tag" value={form.tag} onChange={(event) => setForm((current) => ({ ...current, tag: event.target.value }))} />
           </div>
-          <input placeholder="Main image URL" value={form.image} onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))} />
-          <textarea placeholder="Gallery URLs, one per line" value={form.gallery} onChange={(event) => setForm((current) => ({ ...current, gallery: event.target.value }))} rows={4} />
+          <input placeholder="Optional image URL override" value={form.image} onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))} />
+          <textarea placeholder="Optional gallery URLs, one per line" value={form.gallery} onChange={(event) => setForm((current) => ({ ...current, gallery: event.target.value }))} rows={4} />
           <textarea placeholder="Short description" value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} rows={3} />
           <textarea placeholder="Long description" value={form.long_description} onChange={(event) => setForm((current) => ({ ...current, long_description: event.target.value }))} rows={4} />
           <textarea placeholder="Features, one per line" value={form.features} onChange={(event) => setForm((current) => ({ ...current, features: event.target.value }))} rows={4} />
@@ -149,3 +149,4 @@ export default function AdminPanel({ products, onSave, onDelete, busy }) {
     </section>
   );
 }
+

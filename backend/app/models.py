@@ -130,6 +130,8 @@ class ChatRequest(BaseModel):
     history: list[dict[str, str]] = Field(default_factory=list)
     mode: Literal["general", "support"] = "general"
     session_id: str | None = None
+    model: Literal["gpt-4o-mini", "gpt-4o"] | None = None
+    custom_prompt: str | None = Field(default=None, max_length=4000)
 
 
 class ChatResponse(BaseModel):

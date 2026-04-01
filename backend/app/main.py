@@ -408,7 +408,13 @@ def chat(request: ChatRequest, current_user: UserPublic = Depends(require_user))
     if session_row["title"] == chatbot.default_session_title(request.mode):
         database.rename_chat_session(session_id, chatbot.suggested_session_title(request.question, request.mode))
 
-    response = chatbot.answer(request.question, history, request.mode)
+    response = chatbot.answer(
+        request.question,
+        history,
+        request.mode,
+        model=request.model,
+        custom_prompt=request.custom_prompt,
+    )
     database.append_chat_message(session_id, "assistant", response.answer)
     response.session_id = session_id
     return response

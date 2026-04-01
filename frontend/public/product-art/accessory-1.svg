@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="130" y1="88" x2="1048" y2="728" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCE7F3"/>
+      <stop offset="1" stop-color="#E0E7FF"/>
+    </linearGradient>
+    <linearGradient id="case" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E2E8F0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" rx="48" fill="url(#bg)"/>
+  <rect x="122" y="104" width="956" height="592" rx="48" fill="#FFFFFF" fill-opacity="0.74"/>
+  <g transform="translate(270 188)">
+    <rect x="178" y="196" width="304" height="168" rx="34" fill="url(#case)" stroke="#CBD5E1" stroke-width="8"/>
+    <rect x="208" y="228" width="244" height="104" rx="24" fill="#F8FAFC"/>
+    <circle cx="258" cy="280" r="26" fill="#F59E0B" fill-opacity="0.26"/>
+    <path d="M344 254H424" stroke="#FB7185" stroke-width="18" stroke-linecap="round"/>
+    <path d="M344 292H398" stroke="#FDA4AF" stroke-width="14" stroke-linecap="round"/>
+    <path d="M230 406C294 336 366 300 446 298C526 296 598 332 662 406" stroke="#C084FC" stroke-width="26" stroke-linecap="round"/>
+  </g>
+  <text x="196" y="224" fill="#BE185D" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="700">Accessory</text>
+  <text x="196" y="278" fill="#7C3AED" font-family="Segoe UI, Arial, sans-serif" font-size="28">Audio and accessory collection art</text>
+</svg>

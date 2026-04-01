@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="124" y1="112" x2="1056" y2="712" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5F3FF"/>
+      <stop offset="1" stop-color="#DBEAFE"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#111827"/>
+      <stop offset="1" stop-color="#475569"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" rx="48" fill="url(#bg)"/>
+  <circle cx="996" cy="160" r="132" fill="#FFFFFF" fill-opacity="0.3"/>
+  <circle cx="180" cy="620" r="160" fill="#FFFFFF" fill-opacity="0.26"/>
+  <rect x="120" y="120" width="960" height="560" rx="44" fill="#FFFFFF" fill-opacity="0.7"/>
+  <g transform="translate(240 210)">
+    <rect x="0" y="0" width="720" height="360" rx="28" fill="#E2E8F0"/>
+    <rect x="24" y="24" width="672" height="312" rx="20" fill="url(#screen)"/>
+    <rect x="334" y="348" width="52" height="14" rx="7" fill="#94A3B8"/>
+    <path d="M230 392H490" stroke="#64748B" stroke-width="18" stroke-linecap="round"/>
+  </g>
+  <rect x="444" y="262" width="232" height="144" rx="24" fill="#8B5CF6" fill-opacity="0.22"/>
+  <path d="M502 334H618" stroke="#C4B5FD" stroke-width="18" stroke-linecap="round"/>
+  <path d="M502 372H594" stroke="#DDD6FE" stroke-width="14" stroke-linecap="round"/>
+  <text x="180" y="214" fill="#5B21B6" font-family="Segoe UI, Arial, sans-serif" font-size="62" font-weight="700">Laptop</text>
+  <text x="180" y="270" fill="#6D28D9" font-family="Segoe UI, Arial, sans-serif" font-size="28">Category icon artwork</text>
+</svg>

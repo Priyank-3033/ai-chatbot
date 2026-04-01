@@ -1,5 +1,15 @@
+﻿import { useEffect, useMemo, useState } from "react";
+import { getLocalProductGallery, getLocalProductImage, getProductPlaceholder } from "../utils/productVisuals";
+
 export default function ProductDetailModal({ product, inWishlist, onClose, onAddToCart, onToggleWishlist, onAsk }) {
   if (!product) return null;
+
+  const localGallery = useMemo(() => getLocalProductGallery(product), [product]);
+  const [selectedImage, setSelectedImage] = useState(() => getLocalProductImage(product));
+
+  useEffect(() => {
+    setSelectedImage(getLocalProductImage(product));
+  }, [product]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -7,16 +17,29 @@ export default function ProductDetailModal({ product, inWishlist, onClose, onAdd
         <button className="modal-close" onClick={onClose} type="button">x</button>
         <div className="product-modal-grid">
           <div className="product-modal-media">
-            <img src={product.image} alt={product.name} className="product-modal-hero" />
+            <img
+              src={selectedImage}
+              alt={product.name}
+              className="product-modal-hero"
+              onError={() => setSelectedImage(getProductPlaceholder(product))}
+            />
             <div className="product-modal-gallery">
-              {product.gallery.map((image) => (
-                <img key={image} src={image} alt={product.name} />
+              {localGallery.map((img, i) => (
+                <img
+                  key={`${product.id}-${i}`}
+                  src={img}
+                  alt={`${product.name} preview ${i + 1}`}
+                  onClick={() => setSelectedImage(img)}
+                  onError={(event) => {
+                    event.currentTarget.src = getProductPlaceholder(product);
+                  }}
+                />
               ))}
             </div>
           </div>
 
           <div className="product-modal-copy">
-            <p className="eyebrow">{product.brand} � {product.category}</p>
+            <p className="eyebrow">{product.brand} • {product.category}</p>
             <h2>{product.name}</h2>
             <div className="product-modal-meta">
               <span className="product-tag">{product.tag}</span>

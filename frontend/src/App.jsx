@@ -8,7 +8,142 @@ import ProductStorefront from "./components/ProductStorefront";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 const TOKEN_KEY = "smart-chat-token-v1";
 const MODE_KEY = "smart-chat-mode-v1";
+const MODEL_KEY = "smart-chat-model-v1";
+const PROMPT_KEY = "smart-chat-custom-prompt-v3";
+const PROMPT_TEMPLATES_KEY = "smart-chat-prompt-templates-v1";
+const ACCURATE_MODE_KEY_PREFIX = "smart-chat-accurate-mode-v1";
 const ORDER_FLOW = ["Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
+const HIDDEN_PRODUCT_NAMES = new Set(["Astra Forge 15", "Volt Tab Max"]);
+const MODEL_OPTIONS = [
+  { value: "gpt-4o-mini", label: "gpt-4o-mini", meta: "cheap + fast" },
+  { value: "gpt-4o", label: "gpt-4o", meta: "powerful" },
+];
+const DEFAULT_GENERAL_PROMPT = `You are an expert AI assistant focused on accuracy, reasoning, and useful problem solving.
+
+Primary Goal:
+- Give correct, clear, and reliable answers
+- Help solve the user's real problem, not just describe it
+- Prefer accuracy over speed
+
+Core Rules:
+- Never provide false information
+- If you are not sure, clearly say "I don't know"
+- Do not guess or hallucinate
+- Think carefully before answering
+- Check your logic internally before replying
+- Break down complex problems step by step when needed
+- Avoid assumptions unless the user clearly states them
+- If the question is unclear, ask one short clarification question instead of inventing details
+
+Answer Style:
+- Keep answers simple and easy to understand
+- Be short when possible, detailed when needed
+- Use bullet points or numbered steps when helpful
+- Avoid unnecessary long explanations
+- Lead with the direct answer when you can
+
+Answer Format:
+1. Short Answer
+2. Why / Explanation
+3. Next Step or Details
+
+Special Instructions:
+- For coding: give complete, working code
+- For facts: be precise and reliable
+- For comparisons: clearly show pros and cons
+- For problem solving: explain the best option and next step
+- For support: answer politely, clearly, and practically
+- If a fact is uncertain, say that clearly instead of sounding confident`;
+const DEFAULT_SUPPORT_PROMPT = `You are a highly reliable support assistant.
+
+Primary Goal:
+- Give accurate, clear, policy-safe support answers
+
+Rules:
+- Give the direct answer first
+- Use simple language
+- Be calm, helpful, and professional
+- If policy applies, explain it clearly
+- If you are not sure, say "I don't know"
+- Suggest the safest next step
+- Do not guess
+- Do not promise refunds, replacements, or outcomes unless confirmed
+- If company policy is unclear, say that the final resolution depends on policy or human review
+
+Answer Format:
+1. Short Answer
+2. Why
+3. Next Step`;
+const PROMPT_PRESETS = {
+  accuracy: {
+    label: "Accuracy",
+    text: DEFAULT_GENERAL_PROMPT,
+  },
+  coding: {
+    label: "Coding",
+    text: "You are a practical coding assistant.\n- Give short, clear answers\n- If coding, give full working code\n- Explain in simple steps\n- Prefer clean beginner-friendly examples\n- If fixing a bug, explain the cause and the fix",
+  },
+  support: {
+    label: "Support",
+    text: "You are a helpful customer support assistant.\n- Be polite and calm\n- Give direct answers first\n- Explain the next step clearly\n- Use simple language\n- If policy applies, explain it naturally",
+  },
+  interview: {
+    label: "Interview",
+    text: "You are an interview preparation assistant.\n- Give confident, structured answers\n- Use simple language\n- If asked questions, give interview-ready answers\n- Include best points to say\n- Keep answers practical and clear",
+  },
+  teacher: {
+    label: "Teacher",
+    text: "You are a friendly teacher.\n- Explain in simple language\n- Break difficult topics into easy steps\n- Use examples\n- Keep the answer clear and beginner-friendly\n- Avoid unnecessary jargon",
+  },
+};
+
+function loadPromptState() {
+  const saved = window.localStorage.getItem(PROMPT_KEY);
+  if (!saved) {
+    return {
+      general: DEFAULT_GENERAL_PROMPT,
+      support: DEFAULT_SUPPORT_PROMPT,
+    };
+  }
+  try {
+    const parsed = JSON.parse(saved);
+    return {
+      general: typeof parsed.general === "string" && parsed.general.trim() ? parsed.general : DEFAULT_GENERAL_PROMPT,
+      support: typeof parsed.support === "string" && parsed.support.trim() ? parsed.support : DEFAULT_SUPPORT_PROMPT,
+    };
+  } catch {
+    return {
+      general: DEFAULT_GENERAL_PROMPT,
+      support: DEFAULT_SUPPORT_PROMPT,
+    };
+  }
+}
+
+function loadPromptTemplates() {
+  const saved = window.localStorage.getItem(PROMPT_TEMPLATES_KEY);
+  if (!saved) return [];
+  try {
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item) => item && typeof item.name === "string" && typeof item.text === "string").slice(0, 12);
+  } catch {
+    return [];
+  }
+}
+
+function getAccurateModeStorageKey(email) {
+  return `${ACCURATE_MODE_KEY_PREFIX}:${String(email || "").toLowerCase()}`;
+}
+
+function loadAccurateMode(email) {
+  if (!email) return false;
+  return window.localStorage.getItem(getAccurateModeStorageKey(email)) === "true";
+}
+
+function saveAccurateMode(email, enabled) {
+  if (!email) return;
+  window.localStorage.setItem(getAccurateModeStorageKey(email), enabled ? "true" : "false");
+}
 
 const MODE_CONFIG = {
   general: {
@@ -35,12 +170,71 @@ const MODE_CONFIG = {
 
 function buildSourceText(sources, mode) {
   if (!sources || sources.length === 0) return "";
+  if (mode !== "support") return "";
   const heading = mode === "support" ? "Sources" : "Suggestions";
   return `\n\n${heading}:\n${sources.map((source) => `- ${source.title}: ${source.snippet}`).join("\n")}`;
 }
 
+function evaluateSimpleMath(question) {
+  const compact = question.replace(/\s+/g, "").replace(/x/gi, "*");
+  if (!/^[\d.+\-*/()]+$/.test(compact)) return null;
+  try {
+    // eslint-disable-next-line no-new-func
+    const result = Function(`"use strict"; return (${compact});`)();
+    if (typeof result !== "number" || !Number.isFinite(result)) return null;
+    return Number.isInteger(result) ? result : Number(result.toFixed(4));
+  } catch {
+    return null;
+  }
+}
+
+function evaluatePercent(question) {
+  const match = question.trim().toLowerCase().match(/^(\d+(?:\.\d+)?)%\s+of\s+(\d+(?:\.\d+)?)$/);
+  if (!match) return null;
+  const result = (Number(match[1]) / 100) * Number(match[2]);
+  return Number.isInteger(result) ? result : Number(result.toFixed(4));
+}
+
+function evaluateSimpleConversion(question) {
+  const lowered = question.trim().toLowerCase();
+  const conversions = {
+    "km:m": 1000,
+    "m:cm": 100,
+    "cm:mm": 10,
+    "kg:g": 1000,
+    "hour:minutes": 60,
+    "hours:minutes": 60,
+    "minute:seconds": 60,
+    "minutes:seconds": 60,
+  };
+  const match = lowered.match(/^(\d+(?:\.\d+)?)\s*([a-z]+)\s+(?:to|in)\s+([a-z]+)$/);
+  if (!match) return null;
+  const factor = conversions[`${match[2]}:${match[3]}`];
+  if (!factor) return null;
+  const result = Number(match[1]) * factor;
+  return {
+    result: Number.isInteger(result) ? result : Number(result.toFixed(4)),
+    unit: match[3],
+    fromUnit: match[2],
+    factor,
+    value: Number(match[1]),
+  };
+}
+
 function buildFallbackReply(question, mode) {
   const normalized = question.toLowerCase().trim();
+  const mathResult = evaluateSimpleMath(question);
+  if (mathResult !== null) {
+    return `Short answer: ${mathResult}\n\nExplanation: I calculated \`${question}\`.\n\nSteps / Details:\n1. Read the numbers and operators\n2. Evaluate the expression\n3. Final result is ${mathResult}`;
+  }
+  const percentResult = evaluatePercent(question);
+  if (percentResult !== null) {
+    return `Short answer: ${percentResult}\n\nExplanation: I calculated \`${question}\` as percentage of a number.\n\nSteps / Details:\n1. Convert the percentage into a decimal\n2. Multiply by the value\n3. Final result is ${percentResult}`;
+  }
+  const conversionResult = evaluateSimpleConversion(question);
+  if (conversionResult !== null) {
+    return `Short answer: ${conversionResult.result} ${conversionResult.unit}\n\nExplanation: 1 ${conversionResult.fromUnit} = ${conversionResult.factor} ${conversionResult.unit}.\n\nSteps / Details:\n1. Start with ${conversionResult.value} ${conversionResult.fromUnit}\n2. Multiply by ${conversionResult.factor}\n3. Final result is ${conversionResult.result} ${conversionResult.unit}`;
+  }
   if (mode === "general") {
     if (normalized.includes("phone") || normalized.includes("mobile") || normalized.includes("laptop") || normalized.includes("tablet")) {
       return "I can help with that. Tell me your budget and what matters most, like camera, gaming, battery, display, study, or work use, and I will suggest better options.";
@@ -79,6 +273,52 @@ function summarizeSession(detail) {
   return { id: detail.id, title: detail.title, mode: detail.mode, updated_at: detail.updated_at, preview };
 }
 
+function buildAttachmentContext(attachments) {
+  if (!attachments?.length) return "";
+  const lines = attachments.map((attachment) => {
+    const intro = `- ${attachment.name} (${attachment.kind || attachment.type || "file"})`;
+    if (attachment.preview) {
+      return `${intro}\nPreview:\n\`\`\`\n${attachment.preview}\n\`\`\``;
+    }
+    return intro;
+  });
+  return `\n\nAttached files:\n${lines.join("\n")}`;
+}
+
+function extractMemoryItems(messages) {
+  const labels = [];
+  const recentUserMessages = messages.filter((message) => message.role === "user").slice(-8);
+  const keywordMap = [
+    ["Shopping", ["phone", "laptop", "tablet", "watch", "product", "buy", "budget"]],
+    ["Support", ["refund", "order", "shipping", "delivery", "password", "otp", "account"]],
+    ["Coding", ["code", "java", "python", "javascript", "html", "css", "dsa", "program"]],
+    ["Study", ["study", "exam", "learn", "explain", "subject"]],
+    ["Career", ["job", "career", "interview", "resume"]],
+    ["Money", ["budget", "money", "save", "expense", "salary"]],
+  ];
+
+  recentUserMessages.forEach((message) => {
+    const text = message.content.toLowerCase();
+    keywordMap.forEach(([label, keywords]) => {
+      if (keywords.some((keyword) => text.includes(keyword)) && !labels.includes(label)) {
+        labels.push(label);
+      }
+    });
+  });
+
+  return labels.slice(0, 5);
+}
+
+function extractConversationMemory(messages) {
+  const recentUserMessages = messages
+    .filter((message) => message.role === "user")
+    .slice(-3)
+    .map((message) => message.content.trim())
+    .filter(Boolean);
+
+  return recentUserMessages.map((message) => (message.length > 40 ? `${message.slice(0, 40)}...` : message));
+}
+
 export default function App() {
   const [token, setToken] = useState(() => window.localStorage.getItem(TOKEN_KEY) || "");
   const [activeMode, setActiveMode] = useState(() => window.localStorage.getItem(MODE_KEY) || "general");
@@ -111,10 +351,20 @@ export default function App() {
   const [pageError, setPageError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [booting, setBooting] = useState(true);
+  const [typingMessageKey, setTypingMessageKey] = useState("");
+  const [selectedModel, setSelectedModel] = useState(() => window.localStorage.getItem(MODEL_KEY) || "gpt-4o");
+  const [promptState, setPromptState] = useState(() => loadPromptState());
+  const [promptTemplates, setPromptTemplates] = useState(() => loadPromptTemplates());
+  const [templateName, setTemplateName] = useState("");
+  const [showAiSettings, setShowAiSettings] = useState(false);
+  const [accurateModeEnabled, setAccurateModeEnabled] = useState(false);
 
   const modeConfig = MODE_CONFIG[activeMode];
   const sessionsForMode = useMemo(() => sessions.filter((session) => session.mode === "general"), [sessions]);
   const wishlistIds = useMemo(() => wishlist.items.map((item) => item.product_id), [wishlist]);
+  const memoryItems = useMemo(() => extractMemoryItems(messages), [messages]);
+  const memoryTrail = useMemo(() => extractConversationMemory(messages), [messages]);
+  const activePrompt = promptState[activeMode] || "";
 
   useEffect(() => {
     if (token) window.localStorage.setItem(TOKEN_KEY, token);
@@ -124,6 +374,24 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem(MODE_KEY, activeMode);
   }, [activeMode]);
+
+  useEffect(() => {
+    window.localStorage.setItem(MODEL_KEY, selectedModel);
+  }, [selectedModel]);
+
+  useEffect(() => {
+    window.localStorage.setItem(PROMPT_KEY, JSON.stringify(promptState));
+  }, [promptState]);
+
+  useEffect(() => {
+    window.localStorage.setItem(PROMPT_TEMPLATES_KEY, JSON.stringify(promptTemplates));
+  }, [promptTemplates]);
+
+  useEffect(() => {
+    if (user?.email) {
+      saveAccurateMode(user.email, accurateModeEnabled);
+    }
+  }, [user, accurateModeEnabled]);
 
   useEffect(() => {
     async function bootstrap() {
@@ -136,7 +404,17 @@ export default function App() {
           apiFetch("/api/auth/me", { token }),
           apiFetch("/api/chat-sessions", { token }),
         ]);
+        const shouldRestoreAccurateMode = loadAccurateMode(meData.email);
         setUser(meData);
+        setAccurateModeEnabled(shouldRestoreAccurateMode);
+        if (shouldRestoreAccurateMode) {
+          setSelectedModel("gpt-4o");
+          setPromptState((current) => ({
+            ...current,
+            general: current.general?.trim() ? current.general : DEFAULT_GENERAL_PROMPT,
+            support: current.support?.trim() ? current.support : DEFAULT_SUPPORT_PROMPT,
+          }));
+        }
         setCheckoutForm((current) => ({ ...current, full_name: meData.name }));
         setSessions(sessionData);
         await Promise.all([fetchProducts(token), fetchWishlist(token), fetchCart(token), fetchOrders(token)]);
@@ -165,6 +443,7 @@ export default function App() {
   async function apiFetch(path, { method = "GET", body, token: tokenOverride } = {}) {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method,
+      cache: "no-store",
       headers: {
         "Content-Type": "application/json",
         ...(tokenOverride || token ? { Authorization: `Bearer ${tokenOverride || token}` } : {}),
@@ -190,8 +469,9 @@ export default function App() {
     if (productSearch.trim()) params.set("search", productSearch.trim());
     const suffix = params.toString() ? `?${params.toString()}` : "";
     const data = await apiFetch(`/api/products${suffix}`, { token: tokenOverride });
-    setProducts(data);
-    return data;
+    const filteredData = data.filter((product) => !HIDDEN_PRODUCT_NAMES.has(product.name));
+    setProducts(filteredData);
+    return filteredData;
   }
 
   async function fetchWishlist(tokenOverride = token) {
@@ -223,6 +503,7 @@ export default function App() {
     setActivePanel("chat");
     setActiveSessionId(detail.id);
     setMessages(detail.messages);
+    setTypingMessageKey("");
     setActiveMode(nextMode || detail.mode);
     setSessions((current) => {
       const summary = summarizeSession(detail);
@@ -239,6 +520,7 @@ export default function App() {
     setActiveMode(mode);
     setActiveSessionId(detail.id);
     setMessages(detail.messages);
+    setTypingMessageKey("");
     return detail;
   }
 
@@ -269,8 +551,13 @@ export default function App() {
       const endpoint = authMode === "register" ? "/api/auth/register" : "/api/auth/login";
       const body = authMode === "register" ? authForm : { email: authForm.email, password: authForm.password };
       const data = await apiFetch(endpoint, { method: "POST", body });
+      const shouldRestoreAccurateMode = loadAccurateMode(data.user.email);
       setToken(data.token);
       setUser(data.user);
+      setAccurateModeEnabled(shouldRestoreAccurateMode);
+      if (shouldRestoreAccurateMode) {
+        setSelectedModel("gpt-4o");
+      }
       setCheckoutForm((current) => ({ ...current, full_name: data.user.name }));
       setAuthForm({ name: "", email: "", password: "" });
       await Promise.all([fetchProducts(data.token), fetchWishlist(data.token), fetchCart(data.token), fetchOrders(data.token)]);
@@ -284,27 +571,117 @@ export default function App() {
   }
 
   async function sendMessage(input) {
-    const question = input.trim();
-    if (!question || isLoading || !activeSessionId) return;
+    const payload = typeof input === "string" ? { text: input, attachments: [] } : input || {};
+    const question = (payload.text || "").trim();
+    const attachments = payload.attachments || [];
+    const attachmentContext = buildAttachmentContext(attachments);
+    const visibleQuestion = question || (attachments.length ? "Please check the attached file and help me with it." : "");
+    const composedQuestion = `${visibleQuestion}${attachmentContext}`.trim();
+    if (!composedQuestion || isLoading || !activeSessionId) return;
     setActivePanel("chat");
-    const optimisticMessages = [...messages, { role: "user", content: question }];
+    setShowAiSettings(false);
+    const optimisticMessages = [...messages, { role: "user", content: composedQuestion }];
     setMessages(optimisticMessages);
     setIsLoading(true);
     setPageError("");
     try {
       const data = await apiFetch("/api/chat", {
         method: "POST",
-        body: { question, history: messages.map((message) => ({ role: message.role, content: message.content })), mode: activeMode, session_id: activeSessionId },
+        body: {
+          question: composedQuestion,
+          history: messages.map((message) => ({ role: message.role, content: message.content })),
+          mode: activeMode,
+          session_id: activeSessionId,
+          model: selectedModel,
+          custom_prompt: activePrompt.trim() || null,
+        },
       });
       const detail = await openSession(data.session_id, token, activeMode);
-      setMessages(detail.messages.map((message, index) => index === detail.messages.length - 1 && message.role === "assistant" ? { ...message, content: `${message.content}${buildSourceText(data.sources, activeMode)}` } : message));
+      const nextMessages = detail.messages.map((message, index) => index === detail.messages.length - 1 && message.role === "assistant" ? { ...message, content: `${message.content}${buildSourceText(data.sources, activeMode)}` } : message);
+      setMessages(nextMessages);
+      const lastAssistant = [...nextMessages].reverse().find((message) => message.role === "assistant");
+      setTypingMessageKey(lastAssistant ? `${detail.id}-${lastAssistant.content.length}-${Date.now()}` : "");
       await refreshSessions();
     } catch (error) {
-      const note = error instanceof Error ? error.message : "The backend request failed.";
-      setMessages([...optimisticMessages, { role: "assistant", content: `${buildFallbackReply(question, activeMode)}\n\nNote: ${note}` }]);
+      const fallbackContent = buildFallbackReply(visibleQuestion, activeMode);
+      setMessages([...optimisticMessages, { role: "assistant", content: fallbackContent }]);
+      setTypingMessageKey(`fallback-${Date.now()}-${fallbackContent.length}`);
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function updatePromptForMode(mode, value) {
+    setAccurateModeEnabled(false);
+    setPromptState((current) => ({
+      ...current,
+      [mode]: value,
+    }));
+  }
+
+  function applyPreset(presetKey) {
+    const preset = PROMPT_PRESETS[presetKey];
+    if (!preset) return;
+    if (presetKey === "accuracy") {
+      applyAccurateSmartAi();
+      return;
+    }
+    updatePromptForMode(activeMode, preset.text);
+  }
+
+  function applyAccurateSmartAi() {
+    setSelectedModel("gpt-4o");
+    setAccurateModeEnabled(true);
+    setPromptState((current) => ({
+      ...current,
+      general: DEFAULT_GENERAL_PROMPT,
+      support: DEFAULT_SUPPORT_PROMPT,
+    }));
+  }
+
+  function saveCurrentPromptTemplate() {
+    const name = templateName.trim();
+    const text = activePrompt.trim();
+    if (!name || !text) return;
+    setPromptTemplates((current) => {
+      const next = [{ name, text }, ...current.filter((item) => item.name.toLowerCase() !== name.toLowerCase())];
+      return next.slice(0, 12);
+    });
+    setTemplateName("");
+  }
+
+  function applyTemplate(text) {
+    setAccurateModeEnabled(false);
+    updatePromptForMode(activeMode, text);
+  }
+
+  function handleModelChange(model) {
+    setSelectedModel(model);
+    if (model !== "gpt-4o") {
+      setAccurateModeEnabled(false);
+    }
+  }
+
+  function openFastApiStatus() {
+    window.open(`${API_BASE_URL}/api/health`, "_blank", "noopener,noreferrer");
+  }
+
+  function openSqliteBackupView() {
+    setActivePanel("chat");
+    setShowAiSettings(false);
+  }
+
+  function openPaymentDemoView() {
+    setActivePanel("store");
+  }
+
+  function openChatView() {
+    setActivePanel("chat");
+    setShowAiSettings(false);
+  }
+
+  function deleteTemplate(name) {
+    setPromptTemplates((current) => current.filter((item) => item.name !== name));
   }
 
   async function handleAddToCart(productId) {
@@ -419,6 +796,7 @@ export default function App() {
     if (isLoading) return;
     setToken("");
     setUser(null);
+    setAccurateModeEnabled(false);
     setSessions([]);
     setMessages([]);
     setProducts([]);
@@ -516,12 +894,94 @@ export default function App() {
                 : "Browse products, open detail pages, save wishlist items, place orders, and track shipments."}
             </p>
             {pageError ? <p className="page-error">{pageError}</p> : null}
+            {activePanel === "chat" ? (
+              <>
+                <div className="ai-settings-toggle-row">
+                  <button type="button" className="accurate-ai-button" onClick={applyAccurateSmartAi}>
+                    Accurate Smart AI
+                  </button>
+                  <button
+                    type="button"
+                    className={`ai-settings-toggle ${showAiSettings ? "active" : ""}`}
+                    onClick={() => setShowAiSettings((current) => !current)}
+                  >
+                    {showAiSettings ? "Hide AI settings" : "Open AI settings"}
+                  </button>
+                  <div className="active-ai-summary">
+                    <span className="summary-chip">{selectedModel}</span>
+                    {accurateModeEnabled ? <span className="summary-chip summary-chip-accent">Accuracy Mode Active</span> : null}
+                    {activePrompt.trim() ? <span className="summary-chip">Custom prompt active</span> : null}
+                  </div>
+                </div>
+                {showAiSettings ? (
+                  <div className="ai-settings-panel">
+                    <div className="ai-model-row">
+                      {MODEL_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className={`model-chip ${selectedModel === option.value ? "active" : ""}`}
+                          onClick={() => handleModelChange(option.value)}
+                        >
+                          <strong>{option.label}</strong>
+                          <span>{option.meta}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="preset-row">
+                      {Object.entries(PROMPT_PRESETS).map(([key, preset]) => (
+                        <button key={key} type="button" className="preset-chip" onClick={() => applyPreset(key)}>
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                    <label className="prompt-editor">
+                      <span>Prompt for {activeMode === "general" ? "general mode" : "support mode"}</span>
+                      <textarea
+                        value={activePrompt}
+                        onChange={(event) => updatePromptForMode(activeMode, event.target.value)}
+                        placeholder={"Example:\n- Give short, clear answers\n- Use simple language\n- If coding, give full working code\n- Be helpful and friendly"}
+                        rows="4"
+                      />
+                    </label>
+                    <div className="template-save-row">
+                      <input
+                        type="text"
+                        value={templateName}
+                        onChange={(event) => setTemplateName(event.target.value)}
+                        placeholder="Template name"
+                      />
+                      <button type="button" className="template-save-button" onClick={saveCurrentPromptTemplate}>
+                        Save template
+                      </button>
+                    </div>
+                    {promptTemplates.length ? (
+                      <div className="template-list">
+                        {promptTemplates.map((template) => (
+                          <article key={template.name} className="template-card">
+                            <button type="button" className="template-apply" onClick={() => applyTemplate(template.text)}>
+                              <strong>{template.name}</strong>
+                              <span>{template.text}</span>
+                            </button>
+                            <button type="button" className="template-delete" onClick={() => deleteTemplate(template.name)}>
+                              Delete
+                            </button>
+                          </article>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </>
+            ) : null}
           </div>
           <div className="topbar-badges">
-            <span className="topbar-badge">FastAPI</span>
-            <span className="topbar-badge">SQLite Backup</span>
-            <span className="topbar-badge">Payment Demo</span>
-            <span className="topbar-badge accent">{activePanel === "chat" ? "Chat View" : "Store View"}</span>
+            <button type="button" className="topbar-badge topbar-badge-button" onClick={openFastApiStatus}>FastAPI</button>
+            <button type="button" className="topbar-badge topbar-badge-button" onClick={openSqliteBackupView}>SQLite Backup</button>
+            <button type="button" className="topbar-badge topbar-badge-button" onClick={openPaymentDemoView}>Payment Demo</button>
+            <button type="button" className="topbar-badge topbar-badge-button accent" onClick={openChatView}>
+              {activePanel === "chat" ? "Chat View" : "Open Chat"}
+            </button>
           </div>
         </header>
 
@@ -534,6 +994,10 @@ export default function App() {
             assistantName="Smart AI"
             placeholder="Ask about products, ecommerce issues, support, life decisions, study, career, or everyday questions..."
             emptyDescription="Use one AI for product recommendations, order help, support guidance, study plans, decisions, and everyday problem solving."
+            memoryItems={memoryItems}
+            memoryTrail={memoryTrail}
+            typingMessageKey={typingMessageKey}
+            focusSignal={`${activePanel}-${activeSessionId}-${messages.length}-${showAiSettings ? "settings" : "chat"}`}
           />
         ) : (
           <div className="commerce-layout">
