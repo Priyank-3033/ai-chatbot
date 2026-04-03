@@ -12,11 +12,11 @@ from app.dependencies import lifespan, settings
 from app.routes import admin_router, auth_router, chat_router, commerce_router, documents_router, products_router, realtime_router, system_router
 
 
-app = FastAPI(title="Smart AI Commerce API", version="5.0.0", lifespan=lifespan)
+app = FastAPI(title=settings.api_title, version="5.0.0", lifespan=lifespan)
 
 logger = logging.getLogger("smartchat.api")
 if not logger.handlers:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO), format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 RATE_LIMIT_WINDOW_SECONDS = 60
 RATE_LIMIT_MAX_REQUESTS = 120

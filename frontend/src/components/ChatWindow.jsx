@@ -1,4 +1,14 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+function formatMessageTime(value) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 function renderInline(text, keyPrefix) {
   const nodes = [];
@@ -340,6 +350,7 @@ export default function ChatWindow({
                 <div className="message-content">
                   <div className="message-author">{assistantName}</div>
                   <AnimatedAssistantMessage content={message.content} active={typingMessageKey && index === messages.length - 1} />
+                  {message.created_at ? <div className="message-timestamp">{formatMessageTime(message.created_at)}</div> : null}
                 </div>
               </>
             ) : (
@@ -347,6 +358,7 @@ export default function ChatWindow({
                 <div className="message-content user-message-content">
                   <div className="message-author">You</div>
                   <div className="message-text markdown-content">{renderMarkdown(message.content)}</div>
+                  {message.created_at ? <div className="message-timestamp user">{formatMessageTime(message.created_at)}</div> : null}
                 </div>
                 <div className="avatar">You</div>
               </>
@@ -432,4 +444,7 @@ export default function ChatWindow({
     </section>
   );
 }
+
+
+
 

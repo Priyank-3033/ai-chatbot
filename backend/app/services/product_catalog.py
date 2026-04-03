@@ -136,6 +136,12 @@ class ProductCatalogService:
 
         return products[:limit]
 
+    def recommend_products_with_reasons(self, question: str, limit: int = 6) -> list[tuple[Product, str]]:
+        normalized = question.lower()
+        priority = self._extract_priority(normalized)
+        matched = self.recommend_products(question, limit=limit)
+        return [(product, self._recommendation_reason(product, priority)) for product in matched]
+
     def upsert_product(self, payload: dict) -> Product:
         product = Product(**payload)
         for index, item in enumerate(self.products):
@@ -154,6 +160,40 @@ class ProductCatalogService:
             return False
         self._save()
         return True
+
+    @staticmethod
+    def _extract_priority(text: str) -> str | None:
+        priorities = [
+            "camera",
+            "gaming",
+            "battery",
+            "display",
+            "study",
+            "coding",
+            "office",
+            "fitness",
+            "music",
+            "travel",
+        ]
+        for priority in priorities:
+            if priority in text:
+                return priority
+        return None
+
+    @staticmethod
+    def _recommendation_reason(product: Product, priority: str | None) -> str:
+        haystack = f"{product.tag} {' '.join(product.features)} {product.description}".lower()
+        if priority == "camera" and ("camera" in haystack or "ois" in haystack):
+            return "Good match for camera-focused shopping because it highlights imaging features and a strong camera tag."
+        if priority == "gaming" and ("gaming" in haystack or "refresh" in haystack or "chipset" in haystack):
+            return "Better fit for gaming because it leans into performance and smoother display features."
+        if priority == "battery" and "battery" in haystack:
+            return "Useful when battery life matters because its feature set emphasizes long-lasting use."
+        if priority == "study" and ("study" in haystack or "portable" in haystack or "student" in haystack):
+            return "Helpful for study use because it looks more practical for reading, classes, or everyday learning."
+        if priority == "fitness" and ("fitness" in haystack or "health" in haystack):
+            return "A better wearable choice for fitness-focused users because it includes health-oriented positioning."
+        return f"Strong overall pick with {product.rating:.1f}/5 rating and a {product.tag.lower()} profile."
 
     @staticmethod
     def _extract_budget(text: str) -> int | None:

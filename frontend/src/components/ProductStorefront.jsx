@@ -37,6 +37,8 @@ function ProductTile({ product, saved, onViewDetails, onToggleWishlist, onAddToC
           src={imageSources[imageIndex] || ""}
           alt={product.name}
           loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
           onError={() => setImageIndex((current) => Math.min(current + 1, imageSources.length - 1))}
         />
         <div className="product-media-overlay">

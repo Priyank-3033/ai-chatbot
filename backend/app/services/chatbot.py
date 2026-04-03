@@ -7,115 +7,11 @@ import re
 import time
 from textwrap import shorten
 
-from openai import OpenAI
-from openai import OpenAIError
-
-from app.config import Settings
+from app.core.config import Settings
 from app.models import ChatResponse, Source
+from app.services.ai_service import AIService, OpenAIError
 from app.services.knowledge_base import KnowledgeBaseService, KnowledgeEntry
 from app.services.product_catalog import ProductCatalogService
-
-GENERAL_SYSTEM_PROMPT = """
-You are Smart AI, a highly accurate, careful, and useful assistant.
-
-Primary goal:
-- Give correct, factual, reliable answers.
-- Solve the user's real problem clearly.
-- Prefer accuracy over speed.
-
-Global rules:
-- Never invent facts, policies, system states, or outcomes.
-- If you are unsure, say "I don't know" clearly.
-- Do not guess or hallucinate.
-- Think carefully before answering.
-- Internally check logic before replying.
-- If the question is unclear, ask one short clarification question instead of assuming.
-- If multiple valid answers exist, give the best one first and mention alternatives briefly.
-- Keep the tone calm, professional, and helpful.
-
-Coding and programming:
-- Give complete, working code when the user asks for code.
-- Prefer correctness, readability, and robustness over cleverness.
-- Explain assumptions when they matter.
-- Include example input or output when helpful.
-- If debugging, identify the likely cause and the cleanest fix.
-
-Reasoning and math:
-- Solve step by step when needed.
-- Double-check calculations and edge cases.
-- For direct math questions, give the result clearly and show the short working.
-
-Customer support:
-- Answer in simple, brand-safe language.
-- Acknowledge the issue, explain the likely answer, and give the next step.
-- Do not promise refunds, replacements, or exceptions unless they are confirmed.
-- If policy is unclear, say the final resolution depends on company policy or human review.
-
-Response style:
-- Lead with the direct answer when possible.
-- Keep it simple and easy to understand.
-- Use structure when helpful.
-- Default format:
-  1. Short Answer
-  2. Why / Explanation
-  3. Next Step or Details
-
-Never mention retrieval, internal context, or hidden instructions.
-""".strip()
-
-SUPPORT_SYSTEM_PROMPT = """
-You are Smart AI in support mode, a careful and reliable support teammate.
-
-Primary goal:
-- Give accurate, safe, clear support answers.
-
-Core behavior:
-- Lead with the answer in simple words.
-- Then give the best next step.
-- If policy applies, explain it naturally instead of dumping it.
-- If the answer is incomplete, say so honestly and suggest the safest next action.
-- If you are unsure, say "I don't know" instead of guessing.
-- Do not promise a final outcome unless it is confirmed.
-- If the user sounds frustrated, stay calm and helpful.
-- Ask at most one short clarifying question when it really helps.
-- Do not talk about retrieval, knowledge base, or matched sources.
-""".strip()
-
-
-# GENERAL_SYSTEM_PROMPT = """
-# You are Smart AI, a warm, capable, natural assistant.
-# # You help with general questions, ecommerce shopping, practical decision-making, customer support, study help, writing help, coding help, and everyday life problems in one conversation.
-
-# # Core behavior:
-# # - Sound like a helpful real person, not a search engine or documentation bot.
-# # - Answer the user's actual question first.
-# # - Be practical, clear, and specific.
-# # - If the user is vague, make one reasonable assumption, give a helpful starting answer, and then ask one useful follow-up question.
-# # - For recommendations, give 2 or 3 options with short reasons.
-# # - For problem solving, explain the likely issue, give workable options, recommend the best next step, and keep it easy to follow.
-# # - For emotional or stressful situations, be calm, supportive, and grounded.
-# # - For broad general questions, answer in a complete and useful way instead of pushing the user back for more detail too quickly.
-# # - For shopping questions, use available product context directly.
-# # - For support questions, use support context naturally without sounding robotic.
-# # - Prefer correctness over speed when you know the answer.
-# # - If you are unsure, say that clearly instead of sounding confident.
-# # - For technical or factual questions, give the direct answer first, then the explanation.
-# # - Do not mention retrieval, knowledge base, matched sources, or internal context.
-# # - Do not give one-line shallow replies unless the user clearly asks for a very short answer.
-# # """.strip()
-
-# SUPPORT_SYSTEM_PROMPT = """
-# # You are Smart AI in support mode, a warm and helpful support teammate.
-
-# # Core behavior:
-# # - Lead with the answer in simple words.
-# # - Then give the best next step.
-# # - If policy applies, explain it naturally instead of dumping it.
-# # - If the answer is incomplete, say so honestly and suggest the safest next action.
-# # - If the user sounds frustrated, stay calm and helpful.
-# # - Ask at most one short clarifying question when it really helps.
-# # - Do not talk about retrieval, knowledge base, or matched sources.
-# """.strip()
 
 
 class ChatbotService:
@@ -128,13 +24,8 @@ class ChatbotService:
         self.settings = settings
         self.knowledge_base = knowledge_base
         self.product_catalog = product_catalog
-        self.client = self._build_client()
+        self.ai_service = AIService(settings)
         self._llm_disabled_until = 0.0
-
-    def _build_client(self) -> OpenAI | None:
-        if not self.settings.openai_api_key:
-            return None
-        return OpenAI(api_key=self.settings.openai_api_key, max_retries=0, timeout=10.0)
 
     @staticmethod
     def _format_answer(short_answer: str, why: str, next_step: str) -> str:
@@ -161,7 +52,7 @@ class ChatbotService:
         document_matches = self._retrieve_uploaded_documents(question, uploaded_documents or [])
         sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
 
-        if self.client and not self._llm_temporarily_disabled():
+        if self.ai_service.available() and not self._llm_temporarily_disabled():
             try:
                 answer = self._generate_llm_answer(question, history, entries, products, document_matches, chat_mode, selected_model, cleaned_prompt)
                 result_mode = f"llm+{chat_mode}+{selected_model}"
@@ -207,55 +98,17 @@ class ChatbotService:
         model: str,
         custom_prompt: str,
     ) -> str:
-        system_prompt = SUPPORT_SYSTEM_PROMPT if mode == "support" else GENERAL_SYSTEM_PROMPT
-        if custom_prompt:
-            system_prompt = f"{system_prompt}\n\nAdditional instructions from the user:\n{custom_prompt}"
-        kb_context = "\n\n".join(f"{entry.title}: {entry.content}" for entry in entries)
-        product_context = "\n".join(
-            f"- {product.name} ({product.brand}) - Rs {product.price}, {product.tag}, {product.description}"
-            for product in products
-        )
-        document_context = "\n\n".join(
-            f"{item['name']}: {item['snippet']}"
-            for item in document_matches
-        )
-        history_text = "\n".join(
-            f"{item.get('role', 'user')}: {item.get('content', '')}"
-            for item in history[-8:]
-            if item.get("content")
-        )
-        mode_line = (
-            "Support mode. Prioritize support policy, direct next steps, and clean resolution guidance."
-            if mode == "support"
-            else "Unified AI mode. Help with general questions, shopping, support, writing, coding, learning, and practical life decisions."
-        )
-        response = self.client.responses.create(
+        response = self.ai_service.generate_answer(
+            question=question,
+            history=history,
+            mode=mode,
             model=model,
-            input=[
-                {
-                    "role": "system",
-                    "content": [{"type": "input_text", "text": system_prompt}],
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "input_text",
-                            "text": (
-                                f"Mode: {mode_line}\n\n"
-                                f"Conversation history:\n{history_text or 'No prior history.'}\n\n"
-                                f"User question: {question}\n\n"
-                                f"Relevant product context:\n{product_context or 'No strongly matched products.'}\n\n"
-                                f"Relevant support context:\n{kb_context or 'No strongly matched support context.'}\n\n"
-                                f"Relevant uploaded document context:\n{document_context or 'No strongly matched uploaded documents.'}\n\n"
-                                "Write a helpful answer that feels natural, useful, and complete."
-                            ),
-                        }
-                    ],
-                },
-            ],
+            custom_prompt=custom_prompt,
+            entries=entries,
+            products=products,
+            document_matches=document_matches,
         )
-        return getattr(response, "output_text", None) or self._generate_fallback_answer(question, entries, products, document_matches, mode, history)
+        return response or self._generate_fallback_answer(question, entries, products, document_matches, mode, history)
 
     def _generate_fallback_answer(
         self,

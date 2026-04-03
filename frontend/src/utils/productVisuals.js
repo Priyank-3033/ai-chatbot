@@ -243,10 +243,14 @@ export function getLocalProductImage(product, offset = 0) {
 }
 
 export function getProductImageSources(product) {
+  const backendSources = Array.isArray(product.image_sources)
+    ? product.image_sources.map((image) => normalizeImagePath(image)).filter(Boolean)
+    : [];
   const localMain = normalizeImagePath(product.image_local);
   const remoteMain = normalizeImagePath(product.image);
+  const staticFallback = "/fallback-product.svg";
   const generated = getProductPlaceholder(product);
-  return [localMain, remoteMain, generated].filter((image, index, all) => image && all.indexOf(image) === index);
+  return [localMain, ...backendSources, remoteMain, staticFallback, generated].filter((image, index, all) => image && all.indexOf(image) === index);
 }
 
 export function getLocalProductGallery(product) {
@@ -260,8 +264,9 @@ export function getLocalProductGallery(product) {
     .filter(Boolean);
 
   const generatedImages = [0, 1, 2, 3].map((offset) => getLocalProductImage(product, offset));
+  const staticFallback = "/fallback-product.svg";
 
-  return [...realImages, ...generatedImages]
+  return [...realImages, staticFallback, ...generatedImages]
     .filter((image, index, all) => all.indexOf(image) === index)
     .slice(0, 4);
 }

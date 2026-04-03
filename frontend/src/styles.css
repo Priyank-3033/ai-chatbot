@@ -820,6 +820,16 @@ button {
   margin-bottom: 10px;
 }
 
+.message-timestamp {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #8b95a7;
+}
+
+.message-timestamp.user {
+  text-align: right;
+}
+
 .message-text {
   white-space: pre-wrap;
   color: #edf2f8;
@@ -5483,10 +5493,20 @@ body {
 
 .minimal-product-card {
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.minimal-product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
 }
 
 .minimal-product-media {
   background: #ffffff;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  min-height: 196px;
+  display: grid;
+  align-items: center;
 }
 
 .minimal-product-body {
@@ -5523,6 +5543,18 @@ body {
   height: 148px;
   object-fit: contain;
   background: #ffffff;
+  transition: transform 180ms ease;
+}
+
+.minimal-product-card:hover .product-card img,
+.minimal-product-card:hover img {
+  transform: scale(1.03);
+}
+
+.minimal-product-media img,
+.product-modal-gallery img,
+.product-modal-hero {
+  image-rendering: auto;
 }
 
 .topbar {
@@ -5666,6 +5698,11 @@ body {
   height: 78px;
   border-radius: 14px;
   object-fit: cover;
+}
+
+.product-modal-gallery img:hover {
+  border-color: rgba(249, 115, 22, 0.35);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
 }
 
 .product-modal-copy h2 {

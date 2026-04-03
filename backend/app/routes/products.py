@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import product_catalog, require_user, to_product_response
-from app.models import ProductListResponse, ProductResponse, UserPublic
+from app.models import ProductListResponse, ProductRecommendationResponse, ProductResponse, UserPublic
 
 
 router = APIRouter()
@@ -46,10 +46,13 @@ def product_autocomplete(
     return product_catalog.autocomplete(q)
 
 
-@router.get("/api/products/recommend", response_model=list[ProductResponse])
+@router.get("/api/products/recommend", response_model=list[ProductRecommendationResponse])
 def recommend_products(
     q: str = Query(..., min_length=2),
     current_user: UserPublic = Depends(require_user),
-) -> list[ProductResponse]:
+) -> list[ProductRecommendationResponse]:
     _ = current_user
-    return [to_product_response(product) for product in product_catalog.recommend_products(q, limit=6)]
+    return [
+        ProductRecommendationResponse(product=to_product_response(product), reason=reason)
+        for product, reason in product_catalog.recommend_products_with_reasons(q, limit=6)
+    ]

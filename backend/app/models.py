@@ -22,6 +22,7 @@ class ProductResponse(BaseModel):
     gallery: list[str]
     image_local: str | None = None
     gallery_local: list[str] = Field(default_factory=list)
+    image_sources: list[str] = Field(default_factory=list)
     description: str
     long_description: str
     features: list[str]
@@ -35,6 +36,11 @@ class ProductListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class ProductRecommendationResponse(BaseModel):
+    product: ProductResponse
+    reason: str
 
 
 class CartItemResponse(BaseModel):

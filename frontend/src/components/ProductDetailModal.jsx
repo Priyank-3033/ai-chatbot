@@ -24,6 +24,9 @@ export default function ProductDetailModal({ product, inWishlist, onClose, onAdd
                 src={selectedImage}
                 alt={product.name}
                 className="product-modal-hero"
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
                 onClick={() => setZoomed((current) => !current)}
                 onError={() => setSelectedImage(getProductPlaceholder(product))}
               />
@@ -35,6 +38,9 @@ export default function ProductDetailModal({ product, inWishlist, onClose, onAdd
                   key={`${product.id}-${i}`}
                   src={img}
                   alt={`${product.name} preview ${i + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
                   onClick={() => {
                     setSelectedImage(img);
                     setZoomed(false);

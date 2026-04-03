@@ -57,6 +57,10 @@ def to_session_summary(row) -> ChatSessionSummary:
 
 
 def to_product_response(product) -> ProductResponse:
+    image_sources = []
+    for value in [product.image_local, product.image, "/fallback-product.svg"]:
+        if value and value not in image_sources:
+            image_sources.append(value)
     return ProductResponse(
         id=product.id,
         name=product.name,
@@ -71,6 +75,7 @@ def to_product_response(product) -> ProductResponse:
         gallery=product.gallery,
         image_local=product.image_local,
         gallery_local=product.gallery_local,
+        image_sources=image_sources,
         description=product.description,
         long_description=product.long_description,
         features=product.features,
