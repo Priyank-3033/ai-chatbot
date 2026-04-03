@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from sqlite3 import IntegrityError
 
 from fastapi import Header, HTTPException, status
@@ -57,8 +58,14 @@ def to_session_summary(row) -> ChatSessionSummary:
 
 
 def to_product_response(product) -> ProductResponse:
+    valid_local_main = product.image_local if product.image_local and (settings.product_photos_path / Path(product.image_local)).exists() else None
+    valid_local_gallery = [
+        image
+        for image in product.gallery_local
+        if image and (settings.product_photos_path / Path(image)).exists()
+    ]
     image_sources = []
-    for value in [product.image_local, product.image, "/fallback-product.svg"]:
+    for value in [valid_local_main, product.image, "/fallback-product.svg"]:
         if value and value not in image_sources:
             image_sources.append(value)
     return ProductResponse(
@@ -73,8 +80,8 @@ def to_product_response(product) -> ProductResponse:
         tag=product.tag,
         image=product.image,
         gallery=product.gallery,
-        image_local=product.image_local,
-        gallery_local=product.gallery_local,
+        image_local=valid_local_main,
+        gallery_local=valid_local_gallery,
         image_sources=image_sources,
         description=product.description,
         long_description=product.long_description,

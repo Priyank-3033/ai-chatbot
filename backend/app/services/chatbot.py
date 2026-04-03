@@ -10,6 +10,7 @@ from textwrap import shorten
 from app.core.config import Settings
 from app.models import ChatResponse, Source
 from app.services.ai_service import AIService, OpenAIError
+from app.services.document_service import DocumentService
 from app.services.knowledge_base import KnowledgeBaseService, KnowledgeEntry
 from app.services.product_catalog import ProductCatalogService
 
@@ -66,6 +67,45 @@ class ChatbotService:
 
         return ChatResponse(answer=answer, sources=sources, mode=result_mode)
 
+    def stream_answer(
+        self,
+        question: str,
+        history: list[dict[str, str]],
+        mode: str = "general",
+        model: str | None = None,
+        custom_prompt: str | None = None,
+        uploaded_documents: list[dict[str, str]] | None = None,
+    ) -> tuple[object, list[Source], str]:
+        chat_mode = mode if mode in {"general", "support"} else "general"
+        selected_model = model if model in {"gpt-4o-mini", "gpt-4o"} else self.settings.openai_model
+        cleaned_prompt = (custom_prompt or "").strip()
+        entries = self.knowledge_base.retrieve(question) if chat_mode == "support" else self.knowledge_base.retrieve(question, limit=4)
+        products = self.product_catalog.recommend_products(question, limit=4) if chat_mode == "general" else []
+        document_matches = self._retrieve_uploaded_documents(question, uploaded_documents or [])
+        sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
+
+        if self.ai_service.available() and not self._llm_temporarily_disabled():
+            try:
+                return (
+                    self.ai_service.generate_answer_stream(
+                        question=question,
+                        history=history,
+                        mode=chat_mode,
+                        model=selected_model,
+                        custom_prompt=cleaned_prompt,
+                        entries=entries,
+                        products=products,
+                        document_matches=document_matches,
+                    ),
+                    sources,
+                    f"llm+{chat_mode}+{selected_model}",
+                )
+            except OpenAIError:
+                self._temporarily_disable_llm()
+
+        fallback_answer = self._generate_fallback_answer(question, entries, products, document_matches, chat_mode, history)
+        return self._stream_text(fallback_answer), sources, f"fallback+{chat_mode}"
+
     def welcome_message(self, mode: str) -> str:
         return (
             "I can help with refunds, billing, login issues, orders, shipping, and account questions. Tell me what happened, and I will guide you step by step."
@@ -86,6 +126,11 @@ class ChatbotService:
 
     def _temporarily_disable_llm(self, seconds: int = 300) -> None:
         self._llm_disabled_until = time.time() + seconds
+
+    @staticmethod
+    def _stream_text(text: str):
+        for token in re.findall(r"\S+\s*|\n", text):
+            yield token
 
     def _generate_llm_answer(
         self,
@@ -1491,11 +1536,15 @@ class ChatbotService:
             return []
         scored: list[tuple[int, dict[str, str]]] = []
         for item in uploaded_documents:
-            content = f"{item.get('name', '')} {item.get('text', '')}".lower()
-            haystack = set(re.findall(r"[a-z0-9']+", content))
-            overlap = len(query_terms & haystack)
-            if overlap > 0:
-                snippet = shorten(item.get("text", "").replace("\n", " "), width=220, placeholder="...")
-                scored.append((overlap, {"name": item.get("name", "document"), "snippet": snippet}))
+            chunks = DocumentService.chunk_text(item.get("text", ""))
+            for chunk in chunks[:24]:
+                content = f"{item.get('name', '')} {chunk}".lower()
+                haystack = set(re.findall(r"[a-z0-9']+", content))
+                overlap = len(query_terms & haystack)
+                phrase_bonus = 2 if question.lower() in content else 0
+                score = overlap + phrase_bonus
+                if score > 0:
+                    snippet = shorten(chunk.replace("\n", " "), width=220, placeholder="...")
+                    scored.append((score, {"name": item.get("name", "document"), "snippet": snippet}))
         scored.sort(key=lambda value: value[0], reverse=True)
         return [item for _, item in scored[:limit]]

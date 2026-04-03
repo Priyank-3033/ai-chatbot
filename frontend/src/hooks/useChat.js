@@ -17,6 +17,91 @@ function buildSourceText(sources, mode) {
   return `\n\nSources:\n${sources.map((source) => `- ${source.title}: ${source.snippet}`).join("\n")}`;
 }
 
+async function sendMessageStream({
+  apiClient,
+  activeMode,
+  activeSessionId,
+  selectedModel,
+  activePrompt,
+  optimisticMessages,
+  question,
+  history,
+  setMessages,
+}) {
+  const response = await apiClient.streamRequest("/api/chat/stream", {
+    method: "POST",
+    body: {
+      question,
+      history,
+      mode: activeMode,
+      session_id: activeSessionId,
+      model: selectedModel,
+      custom_prompt: activePrompt.trim() || null,
+    },
+  });
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("Streaming not available.");
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let streamedContent = "";
+  let responseSessionId = activeSessionId;
+  let receivedStart = false;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split("\n");
+    buffer = parts.pop() || "";
+
+    for (const line of parts) {
+      if (!line.trim()) continue;
+      const data = JSON.parse(line);
+      if (data.type === "start") {
+        receivedStart = true;
+        responseSessionId = data.session_id || responseSessionId;
+        setMessages(optimisticMessages);
+        continue;
+      }
+      if (data.type === "chunk") {
+        streamedContent += data.content || "";
+        setMessages((current) => {
+          const next = [...current];
+          if (!next.length || next[next.length - 1].role !== "assistant") {
+            next.push({ role: "assistant", content: streamedContent });
+          } else {
+            next[next.length - 1] = { ...next[next.length - 1], content: streamedContent };
+          }
+          return next;
+        });
+        continue;
+      }
+      if (data.type === "done") {
+        return {
+          sessionId: responseSessionId,
+          content: `${data.content || streamedContent}${buildSourceText(data.sources, activeMode)}`,
+        };
+      }
+      if (data.type === "error") {
+        throw new Error(data.message || "Streaming chat failed.");
+      }
+    }
+  }
+
+  if (!receivedStart) {
+    throw new Error("Streaming chat unavailable.");
+  }
+
+  return {
+    sessionId: responseSessionId,
+    content: `${streamedContent}`,
+  };
+}
+
 function sendMessageRealtime({
   token,
   activeMode,
@@ -151,6 +236,27 @@ export function useChat({
 
     try {
       try {
+        const streamData = await sendMessageStream({
+          apiClient,
+          activeMode,
+          activeSessionId,
+          selectedModel,
+          activePrompt,
+          optimisticMessages: [...optimisticMessages, { role: "assistant", content: "" }],
+          question: composedQuestion,
+          history: messages.map((message) => ({ role: message.role, content: message.content })),
+          setMessages,
+        });
+        const detail = await openSession(streamData.sessionId, token, activeMode);
+        const nextMessages = detail.messages.map((message, index) =>
+          index === detail.messages.length - 1 && message.role === "assistant"
+            ? { ...message, content: streamData.content }
+            : message,
+        );
+        setMessages(nextMessages);
+        await refreshSessions();
+      } catch {
+        try {
         const wsData = await sendMessageRealtime({
           token,
           activeMode,
@@ -170,28 +276,29 @@ export function useChat({
         );
         setMessages(nextMessages);
         await refreshSessions();
-      } catch {
-        const data = await apiClient.request("/api/chat", {
-          method: "POST",
-          body: {
-            question: composedQuestion,
-            history: messages.map((message) => ({ role: message.role, content: message.content })),
-            mode: activeMode,
-            session_id: activeSessionId,
-            model: selectedModel,
-            custom_prompt: activePrompt.trim() || null,
-          },
-        });
-        const detail = await openSession(data.session_id, token, activeMode);
-        const nextMessages = detail.messages.map((message, index) =>
-          index === detail.messages.length - 1 && message.role === "assistant"
-            ? { ...message, content: `${message.content}${buildSourceText(data.sources, activeMode)}` }
-            : message,
-        );
-        setMessages(nextMessages);
-        const lastAssistant = [...nextMessages].reverse().find((message) => message.role === "assistant");
-        setTypingMessageKey(lastAssistant ? `${detail.id}-${lastAssistant.content.length}-${Date.now()}` : "");
-        await refreshSessions();
+        } catch {
+          const data = await apiClient.request("/api/chat", {
+            method: "POST",
+            body: {
+              question: composedQuestion,
+              history: messages.map((message) => ({ role: message.role, content: message.content })),
+              mode: activeMode,
+              session_id: activeSessionId,
+              model: selectedModel,
+              custom_prompt: activePrompt.trim() || null,
+            },
+          });
+          const detail = await openSession(data.session_id, token, activeMode);
+          const nextMessages = detail.messages.map((message, index) =>
+            index === detail.messages.length - 1 && message.role === "assistant"
+              ? { ...message, content: `${message.content}${buildSourceText(data.sources, activeMode)}` }
+              : message,
+          );
+          setMessages(nextMessages);
+          const lastAssistant = [...nextMessages].reverse().find((message) => message.role === "assistant");
+          setTypingMessageKey(lastAssistant ? `${detail.id}-${lastAssistant.content.length}-${Date.now()}` : "");
+          await refreshSessions();
+        }
       }
     } catch {
       const fallbackContent = buildFallbackReply(visibleQuestion, activeMode);

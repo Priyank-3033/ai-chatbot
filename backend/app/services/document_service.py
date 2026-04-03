@@ -28,6 +28,24 @@ class DocumentService:
         raise ValueError("Unsupported file type. Upload PDF, TXT, MD, JSON, CSV, or code/text files.")
 
     @staticmethod
+    def chunk_text(text: str, chunk_size: int = 900, overlap: int = 160) -> list[str]:
+        cleaned = "\n".join(line.rstrip() for line in text.splitlines()).strip()
+        if not cleaned:
+            return []
+        chunks: list[str] = []
+        start = 0
+        length = len(cleaned)
+        while start < length:
+            end = min(length, start + chunk_size)
+            chunk = cleaned[start:end].strip()
+            if chunk:
+                chunks.append(chunk)
+            if end >= length:
+                break
+            start = max(end - overlap, start + 1)
+        return chunks
+
+    @staticmethod
     def _extract_pdf_text(payload: bytes) -> str:
         reader = PdfReader(BytesIO(payload))
         parts: list[str] = []

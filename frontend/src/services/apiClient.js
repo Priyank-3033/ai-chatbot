@@ -68,8 +68,37 @@ export function createApiClient({ getToken, onUnauthorized } = {}) {
     return response.json();
   }
 
+  async function streamRequest(path, { method = "POST", body, token, headers = {} } = {}) {
+    const authToken = token ?? getToken?.() ?? "";
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method,
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...headers,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        try {
+          window.localStorage.removeItem("smart-chat-token-v1");
+        } catch {
+          // ignore storage failures
+        }
+        onUnauthorized?.();
+      }
+      throw new Error(await parseError(response));
+    }
+
+    return response;
+  }
+
   return {
     request,
     formRequest,
+    streamRequest,
   };
 }

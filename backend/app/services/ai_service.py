@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 from openai import OpenAI, OpenAIError
 
 from app.core.config import Settings
@@ -85,25 +87,15 @@ class AIService:
     def available(self) -> bool:
         return self.client is not None
 
-    def generate_answer(
-        self,
-        *,
-        question: str,
-        history: list[dict[str, str]],
-        mode: str,
-        model: str,
-        custom_prompt: str,
-        entries: list,
-        products: list,
-        document_matches: list[dict[str, str]],
-    ) -> str | None:
-        if not self.client:
-            return None
-
+    @staticmethod
+    def _build_system_prompt(mode: str, custom_prompt: str) -> str:
         system_prompt = SUPPORT_SYSTEM_PROMPT if mode == "support" else GENERAL_SYSTEM_PROMPT
         if custom_prompt:
             system_prompt = f"{system_prompt}\n\nAdditional instructions from the user:\n{custom_prompt}"
+        return system_prompt
 
+    @staticmethod
+    def _build_context_prompt(question: str, history: list[dict[str, str]], mode: str, entries: list, products: list, document_matches: list[dict[str, str]]) -> str:
         kb_context = "\n\n".join(f"{entry.title}: {entry.content}" for entry in entries)
         product_context = "\n".join(
             f"- {product.name} ({product.brand}) - Rs {product.price}, {product.tag}, {product.description}"
@@ -123,34 +115,107 @@ class AIService:
             if mode == "support"
             else "Unified AI mode. Help with general questions, shopping, support, writing, coding, learning, and practical life decisions."
         )
-
-        response = self.client.responses.create(
-            model=model,
-            input=[
-                {
-                    "role": "system",
-                    "content": [{"type": "input_text", "text": system_prompt}],
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "input_text",
-                            "text": (
-                                f"Mode: {mode_line}\n\n"
-                                f"Conversation history:\n{history_text or 'No prior history.'}\n\n"
-                                f"User question: {question}\n\n"
-                                f"Relevant product context:\n{product_context or 'No strongly matched products.'}\n\n"
-                                f"Relevant support context:\n{kb_context or 'No strongly matched support context.'}\n\n"
-                                f"Relevant uploaded document context:\n{document_context or 'No strongly matched uploaded documents.'}\n\n"
-                                "Write a helpful answer that feels natural, useful, complete, and grounded in the available context."
-                            ),
-                        }
-                    ],
-                },
-            ],
+        return (
+            f"Mode: {mode_line}\n\n"
+            f"Conversation history:\n{history_text or 'No prior history.'}\n\n"
+            f"User question: {question}\n\n"
+            f"Relevant product context:\n{product_context or 'No strongly matched products.'}\n\n"
+            f"Relevant support context:\n{kb_context or 'No strongly matched support context.'}\n\n"
+            f"Relevant uploaded document context:\n{document_context or 'No strongly matched uploaded documents.'}\n\n"
+            "Write a helpful answer that feels natural, useful, complete, and grounded in the available context."
         )
-        return getattr(response, "output_text", None)
+
+    def _build_messages(
+        self,
+        *,
+        question: str,
+        history: list[dict[str, str]],
+        mode: str,
+        custom_prompt: str,
+        entries: list,
+        products: list,
+        document_matches: list[dict[str, str]],
+    ) -> list[dict[str, str]]:
+        messages = [
+            {"role": "system", "content": self._build_system_prompt(mode, custom_prompt)},
+        ]
+        for item in history[-10:]:
+            role = str(item.get("role", "user"))
+            content = str(item.get("content", "")).strip()
+            if role in {"user", "assistant", "system"} and content:
+                messages.append({"role": role, "content": content})
+        messages.append(
+            {
+                "role": "user",
+                "content": self._build_context_prompt(question, history, mode, entries, products, document_matches),
+            }
+        )
+        return messages
+
+    def generate_answer(
+        self,
+        *,
+        question: str,
+        history: list[dict[str, str]],
+        mode: str,
+        model: str,
+        custom_prompt: str,
+        entries: list,
+        products: list,
+        document_matches: list[dict[str, str]],
+    ) -> str | None:
+        if not self.client:
+            return None
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=self._build_messages(
+                question=question,
+                history=history,
+                mode=mode,
+                custom_prompt=custom_prompt,
+                entries=entries,
+                products=products,
+                document_matches=document_matches,
+            ),
+        )
+        return response.choices[0].message.content if response.choices else None
+
+    def generate_answer_stream(
+        self,
+        *,
+        question: str,
+        history: list[dict[str, str]],
+        mode: str,
+        model: str,
+        custom_prompt: str,
+        entries: list,
+        products: list,
+        document_matches: list[dict[str, str]],
+    ) -> Iterator[str]:
+        if not self.client:
+            return iter(())
+
+        stream = self.client.chat.completions.create(
+            model=model,
+            messages=self._build_messages(
+                question=question,
+                history=history,
+                mode=mode,
+                custom_prompt=custom_prompt,
+                entries=entries,
+                products=products,
+                document_matches=document_matches,
+            ),
+            stream=True,
+        )
+
+        def iterator() -> Iterator[str]:
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content if chunk.choices else None
+                if delta:
+                    yield delta
+
+        return iterator()
 
 
 __all__ = ["AIService", "GENERAL_SYSTEM_PROMPT", "SUPPORT_SYSTEM_PROMPT", "OpenAIError"]

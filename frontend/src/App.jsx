@@ -308,8 +308,6 @@ export default function App() {
   const [activeMode, setActiveMode] = useState(() => window.localStorage.getItem(MODE_KEY) || "general");
   const [user, setUser] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [sessions, setSessions] = useState([]);
-  const [activeSessionId, setActiveSessionId] = useState(null);
   const [activePanel, setActivePanel] = useState("chat");
   const [products, setProducts] = useState([]);
   const [productTotal, setProductTotal] = useState(0);
@@ -350,6 +348,10 @@ export default function App() {
   const modeConfig = MODE_CONFIG[activeMode];
   const messages = useChatStore((state) => state.messages);
   const setMessages = useChatStore((state) => state.setMessages);
+  const sessions = useChatStore((state) => state.sessions);
+  const setSessions = useChatStore((state) => state.setSessions);
+  const activeSessionId = useChatStore((state) => state.activeSessionId);
+  const setActiveSessionId = useChatStore((state) => state.setActiveSessionId);
   const isLoading = useChatStore((state) => state.isLoading);
   const setIsLoading = useChatStore((state) => state.setIsLoading);
   const typingMessageKey = useChatStore((state) => state.typingMessageKey);
