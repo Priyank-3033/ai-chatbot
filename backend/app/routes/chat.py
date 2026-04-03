@@ -7,6 +7,21 @@ from app.models import ChatRequest, ChatResponse, ChatSessionCreateRequest, Chat
 router = APIRouter()
 
 
+def build_effective_history(existing_messages: list[dict[str, str]], request_history: list[dict[str, str]]) -> list[dict[str, str]]:
+    if len(existing_messages) > 1:
+        return existing_messages
+
+    normalized_request_history = [
+        {
+            "role": str(item.get("role", "user")),
+            "content": str(item.get("content", "")).strip(),
+        }
+        for item in request_history
+        if str(item.get("content", "")).strip()
+    ]
+    return (existing_messages + normalized_request_history)[-12:]
+
+
 @router.get("/api/chat-sessions", response_model=list[ChatSessionSummary])
 def list_chat_sessions(current_user: UserPublic = Depends(require_user)) -> list[ChatSessionSummary]:
     rows = database.list_chat_sessions(current_user.id)
@@ -74,7 +89,10 @@ def chat(request: ChatRequest, current_user: UserPublic = Depends(require_user))
         session_id = session_row["id"]
 
     existing_messages = database.get_chat_messages(session_id)
-    history = [{"role": item["role"], "content": item["content"]} for item in existing_messages]
+    history = build_effective_history(
+        [{"role": item["role"], "content": item["content"]} for item in existing_messages],
+        request.history,
+    )
     uploaded_documents = [
         {
             "name": row["name"],

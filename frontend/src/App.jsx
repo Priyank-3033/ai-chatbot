@@ -4,9 +4,9 @@ import ChatWindow from "./components/ChatWindow";
 import CommerceSidebar from "./components/CommerceSidebar";
 import ProductDetailModal from "./components/ProductDetailModal";
 import ProductStorefront from "./components/ProductStorefront";
+import { useChat } from "./hooks/useChat";
+import { API_BASE_URL, createApiClient } from "./services/apiClient";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
-const WS_BASE_URL = API_BASE_URL.replace(/^http/i, "ws");
 const TOKEN_KEY = "smart-chat-token-v1";
 const MODE_KEY = "smart-chat-mode-v1";
 const MODEL_KEY = "smart-chat-model-v1";
@@ -170,13 +170,6 @@ const MODE_CONFIG = {
   },
 };
 
-function buildSourceText(sources, mode) {
-  if (!sources || sources.length === 0) return "";
-  if (mode !== "support") return "";
-  const heading = mode === "support" ? "Sources" : "Suggestions";
-  return `\n\n${heading}:\n${sources.map((source) => `- ${source.title}: ${source.snippet}`).join("\n")}`;
-}
-
 function evaluateSimpleMath(question) {
   const compact = question.replace(/\s+/g, "").replace(/x/gi, "*");
   if (!/^[\d.+\-*/()]+$/.test(compact)) return null;
@@ -275,18 +268,6 @@ function summarizeSession(detail) {
   return { id: detail.id, title: detail.title, mode: detail.mode, updated_at: detail.updated_at, preview };
 }
 
-function buildAttachmentContext(attachments) {
-  if (!attachments?.length) return "";
-  const lines = attachments.map((attachment) => {
-    const intro = `- ${attachment.name} (${attachment.kind || attachment.type || "file"})`;
-    if (attachment.preview) {
-      return `${intro}\nPreview:\n\`\`\`\n${attachment.preview}\n\`\`\``;
-    }
-    return intro;
-  });
-  return `\n\nAttached files:\n${lines.join("\n")}`;
-}
-
 function extractMemoryItems(messages) {
   const labels = [];
   const recentUserMessages = messages.filter((message) => message.role === "user").slice(-8);
@@ -374,6 +355,17 @@ export default function App() {
   const memoryItems = useMemo(() => extractMemoryItems(messages), [messages]);
   const memoryTrail = useMemo(() => extractConversationMemory(messages), [messages]);
   const activePrompt = promptState[activeMode] || "";
+  const apiClient = useMemo(
+    () =>
+      createApiClient({
+        getToken: () => token,
+        onUnauthorized: () => {
+          setToken("");
+          setUser(null);
+        },
+      }),
+    [token],
+  );
 
   useEffect(() => {
     if (token) window.localStorage.setItem(TOKEN_KEY, token);
@@ -414,8 +406,8 @@ export default function App() {
       }
       try {
         const [meData, sessionData] = await Promise.all([
-          apiFetch("/api/auth/me", { token }),
-          apiFetch("/api/chat-sessions", { token }),
+          apiClient.request("/api/auth/me", { token }),
+          apiClient.request("/api/chat-sessions", { token }),
         ]);
         const shouldRestoreAccurateMode = loadAccurateMode(meData.email);
         setUser(meData);
@@ -466,7 +458,7 @@ export default function App() {
     }
     const timer = window.setTimeout(async () => {
       try {
-        const suggestions = await apiFetch(`/api/products/autocomplete?q=${encodeURIComponent(productSearch.trim())}`);
+        const suggestions = await apiClient.request(`/api/products/autocomplete?q=${encodeURIComponent(productSearch.trim())}`);
         setProductSuggestions(suggestions);
       } catch {
         setProductSuggestions([]);
@@ -475,51 +467,6 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [token, productSearch]);
 
-  async function apiFetch(path, { method = "GET", body, token: tokenOverride } = {}) {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      method,
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-        ...(tokenOverride || token ? { Authorization: `Bearer ${tokenOverride || token}` } : {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    if (!response.ok) {
-      let detail = "Request failed.";
-      try {
-        const errorData = await response.json();
-        if (errorData?.detail) detail = errorData.detail;
-      } catch {
-        // noop
-      }
-      throw new Error(detail);
-    }
-    return response.json();
-  }
-
-  async function apiFormFetch(path, formData, { method = "POST", token: tokenOverride } = {}) {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      method,
-      cache: "no-store",
-      headers: {
-        ...(tokenOverride || token ? { Authorization: `Bearer ${tokenOverride || token}` } : {}),
-      },
-      body: formData,
-    });
-    if (!response.ok) {
-      let detail = "Request failed.";
-      try {
-        const data = await response.json();
-        detail = data.detail || detail;
-      } catch {
-        detail = response.statusText || detail;
-      }
-      throw new Error(detail);
-    }
-    return response.json();
-  }
-
   async function fetchProducts(tokenOverride = token) {
     const params = new URLSearchParams();
     if (category !== "all") params.set("category", category);
@@ -527,7 +474,7 @@ export default function App() {
     params.set("page", String(productPage));
     params.set("page_size", String(PRODUCT_PAGE_SIZE));
     const suffix = params.toString() ? `?${params.toString()}` : "";
-    const data = await apiFetch(`/api/products${suffix}`, { token: tokenOverride });
+    const data = await apiClient.request(`/api/products${suffix}`, { token: tokenOverride });
     const filteredData = data.items.filter((product) => !HIDDEN_PRODUCT_NAMES.has(product.name));
     setProducts(filteredData);
     setProductTotal(Math.max(0, data.total - [...data.items].filter((product) => HIDDEN_PRODUCT_NAMES.has(product.name)).length));
@@ -535,25 +482,25 @@ export default function App() {
   }
 
   async function fetchWishlist(tokenOverride = token) {
-    const data = await apiFetch("/api/wishlist", { token: tokenOverride });
+    const data = await apiClient.request("/api/wishlist", { token: tokenOverride });
     setWishlist(data);
     return data;
   }
 
   async function fetchCart(tokenOverride = token) {
-    const data = await apiFetch("/api/cart", { token: tokenOverride });
+    const data = await apiClient.request("/api/cart", { token: tokenOverride });
     setCart(data);
     return data;
   }
 
   async function fetchOrders(tokenOverride = token) {
-    const data = await apiFetch("/api/orders", { token: tokenOverride });
+    const data = await apiClient.request("/api/orders", { token: tokenOverride });
     setOrders(data);
     return data;
   }
 
   async function fetchDocuments(tokenOverride = token) {
-    const data = await apiFetch("/api/documents", { token: tokenOverride });
+    const data = await apiClient.request("/api/documents", { token: tokenOverride });
     setDocuments(data);
     return data;
   }
@@ -561,21 +508,21 @@ export default function App() {
   async function fetchAdminInsights(tokenOverride = token) {
     if (!user?.is_admin && !tokenOverride) return;
     const [stats, logs] = await Promise.all([
-      apiFetch("/api/admin/stats", { token: tokenOverride }),
-      apiFetch("/api/admin/chat-logs", { token: tokenOverride }),
+      apiClient.request("/api/admin/stats", { token: tokenOverride }),
+      apiClient.request("/api/admin/chat-logs", { token: tokenOverride }),
     ]);
     setAdminStats(stats);
     setAdminChatLogs(logs);
   }
 
   async function refreshSessions(tokenOverride = token) {
-    const sessionData = await apiFetch("/api/chat-sessions", { token: tokenOverride });
+    const sessionData = await apiClient.request("/api/chat-sessions", { token: tokenOverride });
     setSessions(sessionData);
     return sessionData;
   }
 
   async function openSession(sessionId, tokenOverride = token, nextMode = null) {
-    const detail = await apiFetch(`/api/chat-sessions/${sessionId}`, { token: tokenOverride });
+    const detail = await apiClient.request(`/api/chat-sessions/${sessionId}`, { token: tokenOverride });
     setActivePanel("chat");
     setActiveSessionId(detail.id);
     setMessages(detail.messages);
@@ -590,7 +537,7 @@ export default function App() {
   }
 
   async function createSession(mode = activeMode, tokenOverride = token) {
-    const detail = await apiFetch("/api/chat-sessions", { method: "POST", body: { mode }, token: tokenOverride });
+    const detail = await apiClient.request("/api/chat-sessions", { method: "POST", body: { mode }, token: tokenOverride });
     const summary = summarizeSession(detail);
     setSessions((current) => [summary, ...current.filter((session) => session.id !== detail.id)]);
     setActiveMode(mode);
@@ -604,7 +551,7 @@ export default function App() {
     if (isLoading) return;
     setPageError("");
     try {
-      await apiFetch(`/api/chat-sessions/${sessionId}`, { method: "DELETE" });
+      await apiClient.request(`/api/chat-sessions/${sessionId}`, { method: "DELETE" });
       const updatedSessions = await refreshSessions();
       if (activeSessionId === sessionId) {
         const nextSession = updatedSessions.find((session) => session.mode === "general");
@@ -620,13 +567,34 @@ export default function App() {
     }
   }
 
+  const { sendMessage } = useChat({
+    apiClient,
+    token,
+    activeMode,
+    activeSessionId,
+    activePrompt,
+    selectedModel,
+    isLoading,
+    setIsLoading,
+    messages,
+    setMessages,
+    openSession,
+    refreshSessions,
+    fetchDocuments,
+    setActivePanel,
+    setShowAiSettings,
+    setPageError,
+    buildFallbackReply,
+    setTypingMessageKey,
+  });
+
   async function handleAuthSubmit(event) {
     event.preventDefault();
     setAuthError("");
     try {
       const endpoint = authMode === "register" ? "/api/auth/register" : "/api/auth/login";
       const body = authMode === "register" ? authForm : { email: authForm.email, password: authForm.password };
-      const data = await apiFetch(endpoint, { method: "POST", body });
+      const data = await apiClient.request(endpoint, { method: "POST", body });
       const shouldRestoreAccurateMode = loadAccurateMode(data.user.email);
       setToken(data.token);
       setUser(data.user);
@@ -646,141 +614,6 @@ export default function App() {
       setAuthError(error instanceof Error ? error.message : "Authentication failed.");
     } finally {
       setBooting(false);
-    }
-  }
-
-  async function sendMessageRealtime(composedQuestion, visibleQuestion) {
-    return new Promise((resolve, reject) => {
-      const socket = new WebSocket(`${WS_BASE_URL}/ws/chat?token=${encodeURIComponent(token)}`);
-      let receivedStart = false;
-      let streamedContent = "";
-      let responseSessionId = activeSessionId;
-      const optimisticMessages = [...messages, { role: "user", content: composedQuestion }, { role: "assistant", content: "" }];
-
-      socket.onopen = () => {
-        socket.send(
-          JSON.stringify({
-            question: composedQuestion,
-            mode: activeMode,
-            session_id: activeSessionId,
-            model: selectedModel,
-            custom_prompt: activePrompt.trim() || null,
-          }),
-        );
-      };
-
-      socket.onmessage = async (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === "start") {
-          receivedStart = true;
-          responseSessionId = data.session_id || responseSessionId;
-          setMessages(optimisticMessages);
-          return;
-        }
-        if (data.type === "chunk") {
-          streamedContent += data.content || "";
-          setMessages((current) => {
-            const next = [...current];
-            if (!next.length || next[next.length - 1].role !== "assistant") {
-              next.push({ role: "assistant", content: streamedContent });
-            } else {
-              next[next.length - 1] = { ...next[next.length - 1], content: streamedContent };
-            }
-            return next;
-          });
-          return;
-        }
-        if (data.type === "done") {
-          socket.close();
-          const sourceText = buildSourceText(data.sources, activeMode);
-          const finalContent = `${data.content || streamedContent}${sourceText}`;
-          setTypingMessageKey(`ws-${Date.now()}-${finalContent.length}`);
-          resolve({ sessionId: responseSessionId, content: finalContent, visibleQuestion });
-          return;
-        }
-        if (data.type === "error") {
-          socket.close();
-          reject(new Error(data.message || "Realtime chat failed."));
-        }
-      };
-
-      socket.onerror = () => {
-        if (!receivedStart) {
-          reject(new Error("Realtime chat unavailable."));
-        }
-      };
-
-      socket.onclose = () => {
-        if (!receivedStart && streamedContent.length === 0) {
-          reject(new Error("Realtime chat unavailable."));
-        }
-      };
-    });
-  }
-
-  async function sendMessage(input) {
-    const payload = typeof input === "string" ? { text: input, attachments: [] } : input || {};
-    const question = (payload.text || "").trim();
-    const attachments = payload.attachments || [];
-    const uploadableAttachments = attachments.filter((attachment) => attachment.rawFile);
-      if (uploadableAttachments.length) {
-      try {
-        await Promise.all(
-          uploadableAttachments.map((attachment) => {
-            const formData = new FormData();
-            formData.append("file", attachment.rawFile);
-            return apiFormFetch("/api/documents", formData);
-          }),
-        );
-        await fetchDocuments();
-      } catch (error) {
-        setPageError(error instanceof Error ? error.message : "Unable to upload file.");
-      }
-    }
-    const attachmentContext = buildAttachmentContext(attachments);
-    const visibleQuestion = question || (attachments.length ? "Please check the attached file and help me with it." : "");
-    const composedQuestion = `${visibleQuestion}${attachmentContext}`.trim();
-    if (!composedQuestion || isLoading || !activeSessionId) return;
-    setActivePanel("chat");
-    setShowAiSettings(false);
-    const optimisticMessages = [...messages, { role: "user", content: composedQuestion }];
-      setMessages(optimisticMessages);
-      setIsLoading(true);
-      setPageError("");
-      try {
-        try {
-          const wsData = await sendMessageRealtime(composedQuestion, visibleQuestion);
-          const detail = await openSession(wsData.sessionId, token, activeMode);
-          const nextMessages = detail.messages.map((message, index) =>
-            index === detail.messages.length - 1 && message.role === "assistant" ? { ...message, content: wsData.content } : message,
-          );
-          setMessages(nextMessages);
-          await refreshSessions();
-        } catch {
-          const data = await apiFetch("/api/chat", {
-            method: "POST",
-            body: {
-              question: composedQuestion,
-              history: messages.map((message) => ({ role: message.role, content: message.content })),
-              mode: activeMode,
-              session_id: activeSessionId,
-              model: selectedModel,
-              custom_prompt: activePrompt.trim() || null,
-            },
-          });
-          const detail = await openSession(data.session_id, token, activeMode);
-          const nextMessages = detail.messages.map((message, index) => index === detail.messages.length - 1 && message.role === "assistant" ? { ...message, content: `${message.content}${buildSourceText(data.sources, activeMode)}` } : message);
-          setMessages(nextMessages);
-          const lastAssistant = [...nextMessages].reverse().find((message) => message.role === "assistant");
-          setTypingMessageKey(lastAssistant ? `${detail.id}-${lastAssistant.content.length}-${Date.now()}` : "");
-          await refreshSessions();
-        }
-      } catch (error) {
-        const fallbackContent = buildFallbackReply(visibleQuestion, activeMode);
-        setMessages([...optimisticMessages, { role: "assistant", content: fallbackContent }]);
-      setTypingMessageKey(`fallback-${Date.now()}-${fallbackContent.length}`);
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -859,7 +692,7 @@ export default function App() {
 
   async function handleAddToCart(productId) {
     try {
-      await apiFetch("/api/cart/items", { method: "POST", body: { product_id: productId, quantity: 1 } });
+      await apiClient.request("/api/cart/items", { method: "POST", body: { product_id: productId, quantity: 1 } });
       await fetchCart();
     } catch (error) {
       setPageError(error instanceof Error ? error.message : "Unable to add item to cart.");
@@ -868,7 +701,7 @@ export default function App() {
 
   async function handleUpdateQty(productId, quantity) {
     try {
-      await apiFetch(`/api/cart/items/${productId}`, { method: "PUT", body: { product_id: productId, quantity } });
+      await apiClient.request(`/api/cart/items/${productId}`, { method: "PUT", body: { product_id: productId, quantity } });
       await fetchCart();
     } catch (error) {
       setPageError(error instanceof Error ? error.message : "Unable to update cart.");
@@ -879,7 +712,7 @@ export default function App() {
     try {
       const exists = wishlistIds.includes(productId);
       const method = exists ? "DELETE" : "POST";
-      const data = await apiFetch(`/api/wishlist/${productId}`, { method });
+      const data = await apiClient.request(`/api/wishlist/${productId}`, { method });
       setWishlist(data);
     } catch (error) {
       setPageError(error instanceof Error ? error.message : "Unable to update wishlist.");
@@ -891,7 +724,7 @@ export default function App() {
     setIsLoading(true);
     setPageError("");
     try {
-      await apiFetch("/api/orders/checkout", { method: "POST", body: checkoutForm });
+      await apiClient.request("/api/orders/checkout", { method: "POST", body: checkoutForm });
       await Promise.all([fetchCart(), fetchOrders()]);
       setCheckoutForm((current) => ({
         ...current,
@@ -911,7 +744,7 @@ export default function App() {
 
   async function openProductDetail(productId) {
     try {
-      const data = await apiFetch(`/api/products/${productId}`);
+      const data = await apiClient.request(`/api/products/${productId}`);
       setSelectedProduct(data);
     } catch (error) {
       setPageError(error instanceof Error ? error.message : "Unable to load product details.");
@@ -921,13 +754,13 @@ export default function App() {
   async function handleSaveProduct(payload, isEditing) {
     const path = isEditing ? `/api/admin/products/${payload.id}` : "/api/admin/products";
     const method = isEditing ? "PUT" : "POST";
-    await apiFetch(path, { method, body: payload });
+    await apiClient.request(path, { method, body: payload });
     await fetchProducts();
   }
 
   async function handleDeleteProduct(productId) {
     try {
-      await apiFetch(`/api/admin/products/${productId}`, { method: "DELETE" });
+      await apiClient.request(`/api/admin/products/${productId}`, { method: "DELETE" });
       if (selectedProduct?.id === productId) setSelectedProduct(null);
       await fetchProducts();
     } catch (error) {
@@ -939,7 +772,7 @@ export default function App() {
     const index = ORDER_FLOW.indexOf(currentStatus);
     if (index === -1 || index === ORDER_FLOW.length - 1) return;
     try {
-      await apiFetch(`/api/admin/orders/${orderId}/status`, { method: "PUT", body: { status: ORDER_FLOW[index + 1] } });
+      await apiClient.request(`/api/admin/orders/${orderId}/status`, { method: "PUT", body: { status: ORDER_FLOW[index + 1] } });
       await fetchOrders();
     } catch (error) {
       setPageError(error instanceof Error ? error.message : "Unable to update tracking.");

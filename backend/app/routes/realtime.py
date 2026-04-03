@@ -8,6 +8,21 @@ from app.dependencies import auth_service, chatbot, database
 router = APIRouter()
 
 
+def build_effective_history(existing_messages: list[dict[str, str]], request_history: list[dict[str, str]] | None = None) -> list[dict[str, str]]:
+    if len(existing_messages) > 1:
+        return existing_messages
+    request_history = request_history or []
+    normalized_request_history = [
+        {
+            "role": str(item.get("role", "user")),
+            "content": str(item.get("content", "")).strip(),
+        }
+        for item in request_history
+        if str(item.get("content", "")).strip()
+    ]
+    return (existing_messages + normalized_request_history)[-12:]
+
+
 @router.websocket("/ws/chat")
 async def websocket_chat(websocket: WebSocket):
     token = websocket.query_params.get("token", "")
@@ -32,6 +47,7 @@ async def websocket_chat(websocket: WebSocket):
             model = payload.get("model")
             custom_prompt = payload.get("custom_prompt")
             session_id = payload.get("session_id")
+            request_history = payload.get("history") or []
 
             if not question:
                 await websocket.send_json({"type": "error", "message": "Question is required."})
@@ -52,7 +68,10 @@ async def websocket_chat(websocket: WebSocket):
                 session_id = session_row["id"]
 
             existing_messages = database.get_chat_messages(session_id)
-            history = [{"role": item["role"], "content": item["content"]} for item in existing_messages]
+            history = build_effective_history(
+                [{"role": item["role"], "content": item["content"]} for item in existing_messages],
+                request_history,
+            )
             uploaded_documents = [
                 {"name": row["name"], "text": row["extracted_text"]}
                 for row in database.get_uploaded_documents_for_retrieval(user_id)
