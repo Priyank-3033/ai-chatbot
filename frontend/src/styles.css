@@ -5964,3 +5964,21 @@ body {
   background: rgba(148, 163, 184, 0.14);
   color: #f8fafc;
 }
+
+.markdown-code-shell {
+  position: relative;
+}
+
+.markdown-copy-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}

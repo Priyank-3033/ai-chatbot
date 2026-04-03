@@ -35,9 +35,13 @@ class VectorStoreService:
                     document_id TEXT NOT NULL,
                     user_id INTEGER NOT NULL,
                     document_name TEXT NOT NULL,
+                    source_type TEXT NOT NULL,
+                    content_type TEXT NOT NULL,
+                    page_number INTEGER,
                     chunk_index INTEGER NOT NULL,
                     chunk_text TEXT NOT NULL,
                     embedding_json TEXT NOT NULL,
+                    metadata_json TEXT NOT NULL,
                     created_at TEXT NOT NULL
                 )
                 """
@@ -49,6 +53,8 @@ class VectorStoreService:
         document_id: str,
         user_id: int,
         document_name: str,
+        source_type: str,
+        content_type: str,
         chunks: list[str],
         embeddings: list[list[float]],
     ) -> None:
@@ -59,17 +65,27 @@ class VectorStoreService:
                 connection.execute(
                     """
                     INSERT INTO document_vectors (
-                        id, document_id, user_id, document_name, chunk_index, chunk_text, embedding_json, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+                        id, document_id, user_id, document_name, source_type, content_type, page_number, chunk_index, chunk_text, embedding_json, metadata_json, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
                     """,
                     (
                         f"{document_id}:{index}:{uuid4().hex[:8]}",
                         document_id,
                         user_id,
                         document_name,
+                        source_type,
+                        content_type,
+                        None,
                         index,
                         chunk,
                         json.dumps(embedding),
+                        json.dumps(
+                            {
+                                "source": source_type,
+                                "content_type": content_type,
+                                "chunk_index": index,
+                            }
+                        ),
                     ),
                 )
 
@@ -81,7 +97,7 @@ class VectorStoreService:
         with self.connect() as connection:
             rows = connection.execute(
                 """
-                SELECT document_id, document_name, chunk_text, embedding_json
+                SELECT document_id, document_name, source_type, content_type, page_number, chunk_text, embedding_json, metadata_json
                 FROM document_vectors
                 WHERE user_id = ?
                 """,
@@ -100,6 +116,9 @@ class VectorStoreService:
                             "name": row["document_name"],
                             "snippet": row["chunk_text"],
                             "document_id": row["document_id"],
+                            "source_type": row["source_type"],
+                            "content_type": row["content_type"],
+                            "page_number": row["page_number"],
                             "distance": 1 - score,
                         },
                     )

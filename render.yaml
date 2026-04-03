@@ -18,5 +18,9 @@
         value: "72"
       - key: DATABASE_PATH
         value: ./app_data.sqlite3
+      - key: VECTOR_STORE_PATH
+        value: ./rag_store
+      - key: EMBEDDING_MODEL_NAME
+        value: text-embedding-3-small
       - key: ADMIN_EMAILS
         value: admin@smartcommerce.ai

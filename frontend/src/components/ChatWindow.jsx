@@ -18,11 +18,10 @@ export default function ChatWindow({
   focusSignal = "",
 }) {
   const feedRef = useRef(null);
+  const endRef = useRef(null);
 
   useEffect(() => {
-    if (feedRef.current) {
-      feedRef.current.scrollTop = feedRef.current.scrollHeight;
-    }
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, isLoading]);
 
   return (
@@ -72,6 +71,7 @@ export default function ChatWindow({
             </div>
           </div>
         ) : null}
+        <div ref={endRef} />
       </div>
 
       <ChatInput

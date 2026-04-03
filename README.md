@@ -10,6 +10,7 @@ Smart AI Commerce Chatbot is a full-stack AI commerce workspace built with React
 - Saved chat sessions per user
 - Product catalog, wishlist, cart, checkout, and order tracking
 - PDF/text upload with simple retrieval-aware answers
+- Persistent vector-style RAG over uploaded documents
 - Admin stats, chat logs, and uploaded document visibility
 - FastAPI static image serving for product photos
 - Compact chat + store UI built in React
@@ -19,6 +20,8 @@ Smart AI Commerce Chatbot is a full-stack AI commerce workspace built with React
 ### Frontend
 - React
 - Vite
+- Zustand
+- React Markdown
 
 ### Backend
 - FastAPI
@@ -26,6 +29,7 @@ Smart AI Commerce Chatbot is a full-stack AI commerce workspace built with React
 - OpenAI API
 - PyJWT
 - PyPDF
+- Persistent vector retrieval store
 
 ## Features
 
@@ -97,6 +101,8 @@ AUTH_SECRET=change-me-dev-secret
 AUTH_TOKEN_TTL_HOURS=72
 DATABASE_PATH=./app_data.sqlite3
 ADMIN_EMAILS=admin@smartcommerce.ai
+VECTOR_STORE_PATH=./rag_store
+EMBEDDING_MODEL_NAME=text-embedding-3-small
 ```
 
 ### Frontend
@@ -104,7 +110,11 @@ ADMIN_EMAILS=admin@smartcommerce.ai
 Use [D:\codex ai\frontend\.env.example](D:\codex ai\frontend\.env.example)
 
 ```env
-VITE_API_BASE_URL=http://127.0.0.1:8000
+VITE_API_URL=http://127.0.0.1:8000
+# Backward-compatible alias also supported:
+# VITE_API_BASE_URL=http://127.0.0.1:8000
+# Production example:
+# VITE_API_URL=https://your-backend-name.onrender.com
 ```
 
 ## Product Images
@@ -188,7 +198,31 @@ Steps:
    - `OPENAI_API_KEY`
    - `CORS_ORIGINS=https://your-frontend-url.vercel.app`
    - `AUTH_SECRET`
+   - `VECTOR_STORE_PATH=./rag_store`
+   - `EMBEDDING_MODEL_NAME=text-embedding-3-small`
 4. Deploy
+
+## Public Deployment Checklist
+
+Before calling the project public/live:
+
+1. Deploy backend on Render
+2. Deploy frontend on Vercel
+3. Set frontend env:
+   - `VITE_API_URL=https://your-backend-name.onrender.com`
+4. Set backend env:
+   - `OPENAI_API_KEY`
+   - `CORS_ORIGINS=https://your-frontend-name.vercel.app`
+   - `AUTH_SECRET`
+5. Make sure Render keeps persistent storage for:
+   - `DATABASE_PATH`
+   - `VECTOR_STORE_PATH`
+6. Test:
+   - signup/login
+   - streaming chat
+   - product APIs
+   - PDF upload
+   - RAG answers after upload
 
 ## Live Demo
 

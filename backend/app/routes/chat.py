@@ -11,9 +11,13 @@ from app.models import ChatRequest, ChatResponse, ChatSessionCreateRequest, Chat
 router = APIRouter()
 
 
+def trim_history(history: list[dict[str, str]], max_messages: int = 10) -> list[dict[str, str]]:
+    return history[-max_messages:]
+
+
 def build_effective_history(existing_messages: list[dict[str, str]], request_history: list[dict[str, str]]) -> list[dict[str, str]]:
     if len(existing_messages) > 1:
-        return existing_messages
+        return trim_history(existing_messages, max_messages=10)
 
     normalized_request_history = [
         {
@@ -23,7 +27,7 @@ def build_effective_history(existing_messages: list[dict[str, str]], request_his
         for item in request_history
         if str(item.get("content", "")).strip()
     ]
-    return (existing_messages + normalized_request_history)[-12:]
+    return trim_history(existing_messages + normalized_request_history, max_messages=10)
 
 
 def generate_chat_response(request: ChatRequest, current_user: UserPublic) -> ChatResponse:

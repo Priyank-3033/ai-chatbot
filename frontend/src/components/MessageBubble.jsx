@@ -1,5 +1,32 @@
 import ReactMarkdown from "react-markdown";
 
+function CodeBlock({ inline, children }) {
+  const content = String(children || "").replace(/\n$/, "");
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      // ignore clipboard failures
+    }
+  }
+
+  if (inline) {
+    return <code>{children}</code>;
+  }
+
+  return (
+    <div className="markdown-code-shell">
+      <button type="button" className="markdown-copy-button" onClick={handleCopy}>
+        Copy
+      </button>
+      <pre className="markdown-code-block">
+        <code>{children}</code>
+      </pre>
+    </div>
+  );
+}
+
 function formatMessageTime(value) {
   if (!value) return "";
   const parsed = new Date(value);
@@ -31,14 +58,7 @@ const markdownComponents = {
     );
   },
   code({ inline, children }) {
-    if (inline) {
-      return <code>{children}</code>;
-    }
-    return (
-      <pre className="markdown-code-block">
-        <code>{children}</code>
-      </pre>
-    );
+    return <CodeBlock inline={inline}>{children}</CodeBlock>;
   },
 };
 

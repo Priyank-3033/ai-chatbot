@@ -19,6 +19,8 @@ def process_document_upload(document_id: str, user_id: int, filename: str, conte
                     document_id=document_id,
                     user_id=user_id,
                     document_name=filename or "document",
+                    source_type="pdf" if (filename or "").lower().endswith(".pdf") or (content_type or "").lower() == "application/pdf" else "document",
+                    content_type=content_type or "application/octet-stream",
                     chunks=chunks,
                     embeddings=embeddings,
                 )
