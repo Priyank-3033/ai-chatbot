@@ -12,7 +12,7 @@ from app.dependencies import lifespan, settings
 from app.routes import admin_router, auth_router, chat_router, commerce_router, documents_router, products_router, realtime_router, system_router
 
 
-app = FastAPI(title="Smart Chat API", version="5.0.0", lifespan=lifespan)
+app = FastAPI(title="Smart AI Commerce API", version="5.0.0", lifespan=lifespan)
 
 logger = logging.getLogger("smartchat.api")
 if not logger.handlers:
@@ -66,3 +66,4 @@ app.include_router(admin_router)
 app.include_router(chat_router)
 app.include_router(documents_router)
 app.include_router(realtime_router)
+

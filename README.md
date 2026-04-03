@@ -1,72 +1,66 @@
-﻿# Smart AI Commerce Chatbot
+# Smart AI Commerce Chatbot
 
-A full-stack AI commerce app with:
-- real OpenAI-backed chat when an API key is available
-- fallback answer system for offline or quota-limited cases
-- user login with backend auth
-- saved chat sessions
-- product catalog, wishlist, cart, checkout, and order tracking
-- compact chat + store UI
+Smart AI Commerce Chatbot is a full-stack AI commerce workspace built with React, Vite, FastAPI, SQLite, and the OpenAI API. It combines AI chat, product discovery, cart and order flows, saved chat sessions, document-aware answers, and admin tooling in one project.
 
-## Stack
+## Highlights
 
-Frontend:
+- Real AI chat with `gpt-4o` / `gpt-4o-mini`
+- Fallback answer engine when OpenAI is unavailable
+- JWT-based signup, login, and protected APIs
+- Saved chat sessions per user
+- Product catalog, wishlist, cart, checkout, and order tracking
+- PDF/text upload with simple retrieval-aware answers
+- Admin stats, chat logs, and uploaded document visibility
+- FastAPI static image serving for product photos
+- Compact chat + store UI built in React
+
+## Tech Stack
+
+### Frontend
 - React
 - Vite
 
-Backend:
+### Backend
 - FastAPI
 - SQLite
 - OpenAI API
-- Static product photo serving
+- PyJWT
+- PyPDF
 
 ## Features
 
 ### AI
-- `gpt-4o` / `gpt-4o-mini` model selection
-- custom prompt support
-- prompt presets
-- memory across the current session
-- typing animation
-- markdown rendering
-- file upload context
-- backend document upload for PDF/text files
-- document-aware answers using simple RAG-style retrieval
-- realtime WebSocket chat streaming foundation
-- voice input
-- fallback answers for support, study, coding, career, daily life, travel, business, and health topics
+- Model selection: `gpt-4o` and `gpt-4o-mini`
+- Custom system prompt editor
+- Prompt presets and saved templates
+- Realtime chat foundation with WebSocket fallback
+- Typing animation, markdown rendering, voice input
+- Memory across the active conversation
+- Document-aware answers using uploaded PDFs/text files
+- Fallback support for coding, study, career, health, travel, business, and ecommerce questions
 
 ### Commerce
-- product listing
-- debounced search
-- autocomplete suggestions
-- category filtering
-- pagination
-- product detail modal
-- wishlist
-- cart
-- checkout
-- order history
-- order tracking
-- admin product management
+- Product listing with real photo support
+- Search, autocomplete, category filter, and pagination
+- Product detail modal
+- Wishlist
+- Cart
+- Checkout
+- Order history and tracking
+- Product recommendation support from chat and catalog APIs
 
-### Auth and persistence
-- register/login with backend
-- JWT authentication flow
-- saved chat sessions per user
-- cart, wishlist, and orders stored in backend database
+### Auth and Persistence
+- Register and login
+- JWT authentication
+- Protected backend APIs
+- Saved chat sessions per user
+- Backend persistence for cart, wishlist, orders, and uploaded documents
 
 ### Admin
-- product management
-- admin stats
-- recent chat logs
-- uploaded document visibility
-
-### Production-ready backend improvements
-- structured route modules
-- FastAPI static file serving for product photos
-- request logging
-- basic in-memory rate limiting
+- Product management
+- Admin dashboard stats
+- Recent chat log visibility
+- Uploaded document list
 
 ## Project Structure
 
@@ -85,11 +79,13 @@ frontend/
     App.jsx
     components/
     utils/
+render.yaml
+README.md
 ```
 
 ## Environment Variables
 
-### Backend: `backend/.env`
+### Backend
 
 Use [D:\codex ai\backend\.env.example](D:\codex ai\backend\.env.example)
 
@@ -103,7 +99,7 @@ DATABASE_PATH=./app_data.sqlite3
 ADMIN_EMAILS=admin@smartcommerce.ai
 ```
 
-### Frontend: `frontend/.env`
+### Frontend
 
 Use [D:\codex ai\frontend\.env.example](D:\codex ai\frontend\.env.example)
 
@@ -113,37 +109,41 @@ VITE_API_BASE_URL=http://127.0.0.1:8000
 
 ## Product Images
 
-- Product images can come from:
-  1. backend-served local files at `/product-photos/...`
-  2. remote image URLs from the product catalog
-  3. generated fallback art when neither exists
+Product images are resolved in this order:
 
-- Local image root:
-  - [D:\codex ai\frontend\public\product-photos](D:\codex ai\frontend\public\product-photos)
+1. Backend-served local files at `/product-photos/...`
+2. Remote product image URLs from the catalog
+3. Generated fallback art when neither exists
 
-- Backend now serves that folder directly through FastAPI static files, so local images work consistently in development and production.
+Local image root:
+- [D:\codex ai\frontend\public\product-photos](D:\codex ai\frontend\public\product-photos)
+
+The backend serves local product photos through FastAPI static files, so the same image paths work in development and deployment.
 
 ## Screenshots
 
-Recommended screenshots to add before publishing:
+Add screenshots before sharing the project publicly:
+
 - Login page
 - Smart Chat page
 - Store and orders page
 - Product detail modal
-- Cart / checkout flow
+- Cart and checkout flow
+- Admin dashboard
 
 Suggested folder:
 - `docs/screenshots/`
 
-Example filenames:
+Suggested filenames:
 - `docs/screenshots/login.png`
 - `docs/screenshots/chat.png`
 - `docs/screenshots/store.png`
 - `docs/screenshots/product-modal.png`
+- `docs/screenshots/admin.png`
 
 ## Local Setup
 
-### 1. Backend
+### Backend
 
 ```powershell
 cd "D:\codex ai\backend"
@@ -151,7 +151,7 @@ py -3.12 -m pip install -r requirements.txt
 py -3.12 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-### 2. Frontend
+### Frontend
 
 ```powershell
 cd "D:\codex ai\frontend"
@@ -159,118 +159,101 @@ npm install
 npm run dev
 ```
 
-Frontend:
-- [http://localhost:5173](http://localhost:5173)
+Local URLs:
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend health: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
 
-Backend health:
-- [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
+## Deployment
 
-## Live Deployment
+### Frontend on Vercel
 
-## Frontend on Vercel
-
-Files added:
+Config file:
 - [D:\codex ai\frontend\vercel.json](D:\codex ai\frontend\vercel.json)
 
 Steps:
-1. Push the repo to GitHub
+1. Push this repo to GitHub
 2. Import the `frontend` folder into Vercel
-3. Set environment variable:
-   - `VITE_API_BASE_URL=https://your-backend-url.onrender.com`
+3. Set `VITE_API_BASE_URL` to your Render backend URL
 4. Deploy
-5. Copy the live frontend URL and add it under the `Live Demo` section below
 
-## Backend on Render
+### Backend on Render
 
-Files added:
+Config file:
 - [D:\codex ai\render.yaml](D:\codex ai\render.yaml)
 
 Steps:
-1. Push the repo to GitHub
-2. Create a new Render Web Service for the `backend` folder
-3. Or use Blueprint deploy with `render.yaml`
-4. Add environment variables:
+1. Push this repo to GitHub
+2. Create a new Render web service for `backend`, or deploy with `render.yaml`
+3. Add environment variables:
    - `OPENAI_API_KEY`
    - `CORS_ORIGINS=https://your-frontend-url.vercel.app`
-5. Deploy
-6. Copy the live backend URL and update `VITE_API_BASE_URL` in Vercel if needed
+   - `AUTH_SECRET`
+4. Deploy
 
 ## Live Demo
 
-Add your live links here after deployment:
+Add real public links here after deployment:
 
 - Frontend: `https://your-frontend-url.vercel.app`
 - Backend API: `https://your-backend-url.onrender.com`
 - Health check: `https://your-backend-url.onrender.com/api/health`
 
-### Important production note
-- Current app uses SQLite
-- SQLite is fine for local use and small demos
-- For a real public production app, move to PostgreSQL
+## Backend Architecture
 
-## Backend Structure
-
-The backend is now split into clear route and service layers:
+The backend is split into clear route and service layers:
 
 - `app/main.py`
-  - FastAPI app setup
+  - FastAPI setup
   - CORS
-  - static file mounting for product photos
+  - request logging
+  - rate limiting
+  - static photo serving
   - router registration
 - `app/dependencies.py`
-  - shared services
-  - auth helpers
-  - response builders
+  - shared services and helpers
 - `app/routes/`
   - `system.py`
   - `auth.py`
   - `products.py`
   - `commerce.py`
   - `chat.py`
+  - `documents.py`
   - `admin.py`
+  - `realtime.py`
 - `app/services/`
   - auth
   - chatbot
   - database
-  - knowledge base
-  - product catalog
+  - document_service
+  - knowledge_base
+  - product_catalog
 
-## Recommended Production Upgrades
+## Production Notes
 
-- move database from SQLite to PostgreSQL
-- add rate limiting
-- add stronger auth/session management
-- add server-side file storage for uploads
-- add real RAG over uploaded docs or support docs
-- add monitoring and logging
-
-## What is already improved in this repo
-
-- real OpenAI client integration in backend
-- static image serving from FastAPI
-- structured service-based backend organization
-- env-based API key handling
-- JWT auth for login and protected APIs
-- chat history and session persistence
-- loading/error handling in chat flow
-- compact UI with chat/store tabs
-- deployment starter files for Vercel and Render
+- SQLite is fine for local development and demos
+- For a real public production deployment, PostgreSQL is recommended
+- Add a stronger rate limiter and centralized logging for production
+- Replace local file storage with cloud storage if uploads grow
+- Keep `.env` files out of Git
 
 ## Demo Checklist
 
 Before showing the project:
+
 1. Set `OPENAI_API_KEY`
 2. Start backend
 3. Start frontend
 4. Register a user
 5. Test chat
-6. Add products to cart
-7. Place an order
-8. Open order tracking
+6. Upload a PDF or text file
+7. Add products to cart
+8. Place an order
+9. Open order tracking
+10. Review admin dashboard
 
-## Next recommended steps
+## Recommended Next Steps
 
-1. PostgreSQL migration
-2. Real document RAG
-3. Better analytics and admin insights
-4. Live deployed links added here
+1. Move from SQLite to PostgreSQL
+2. Add stronger RAG over uploaded docs and support docs
+3. Add tests for backend APIs and chat flows
+4. Deploy live and replace the placeholder links above
