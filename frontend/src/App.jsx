@@ -925,7 +925,17 @@ export default function App() {
                 ? "Ask one AI for shopping advice, ecommerce problem solving, support help, and everyday real-life questions."
                 : "Browse products, save wishlist items, place orders, and track shipments from one shopping workspace."}
             </p>
-            {pageError ? <p className="page-error">{pageError}</p> : null}
+            {pageError ? (
+              <div className="page-error-toast" role="alert">
+                <div>
+                  <strong>Something went wrong</strong>
+                  <p>{pageError}</p>
+                </div>
+                <button type="button" onClick={() => setPageError("")} aria-label="Dismiss error">
+                  Dismiss
+                </button>
+              </div>
+            ) : null}
             {activePanel === "chat" ? (
               <>
                 <div className="ai-settings-toggle-row">

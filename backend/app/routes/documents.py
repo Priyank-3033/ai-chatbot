@@ -1,16 +1,27 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile, status
 
-from app.dependencies import database, document_service, require_user, to_document_response
+from app.dependencies import database, document_service, embedding_service, require_user, to_document_response, vector_store
 from app.models import DocumentResponse, UserPublic
 
 
 router = APIRouter()
 
 
-def process_document_upload(document_id: str, filename: str, content_type: str | None, payload: bytes) -> None:
+def process_document_upload(document_id: str, user_id: int, filename: str, content_type: str | None, payload: bytes) -> None:
     try:
         extracted_text = document_service.extract_text(filename or "document", content_type, payload)
         if extracted_text.strip():
+            chunks = document_service.chunk_text(extracted_text, chunk_size=300, overlap=60)
+            if chunks:
+                embeddings = embedding_service.embed_many(chunks)
+                vector_store.delete_document(document_id)
+                vector_store.add_document_chunks(
+                    document_id=document_id,
+                    user_id=user_id,
+                    document_name=filename or "document",
+                    chunks=chunks,
+                    embeddings=embeddings,
+                )
             database.update_uploaded_document_text(document_id, extracted_text[:200000], status="ready")
         else:
             database.mark_uploaded_document_failed(document_id)
@@ -38,5 +49,5 @@ async def upload_document(
         content_type=file.content_type or "application/octet-stream",
         size=len(payload),
     )
-    background_tasks.add_task(process_document_upload, row["id"], file.filename or "document", file.content_type, payload)
+    background_tasks.add_task(process_document_upload, row["id"], current_user.id, file.filename or "document", file.content_type, payload)
     return to_document_response(row)

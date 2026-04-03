@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     admin_emails_raw: str = Field(default="admin@smartcommerce.ai", alias="ADMIN_EMAILS")
     api_title: str = Field(default="Smart AI Commerce API", alias="API_TITLE")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
+    vector_store_path_raw: str = Field(default="./rag_store", alias="VECTOR_STORE_PATH")
+    embedding_model_name: str = Field(default="text-embedding-3-small", alias="EMBEDDING_MODEL_NAME")
 
     model_config = SettingsConfigDict(
         env_file=BACKEND_DIR / ".env",
@@ -50,6 +52,11 @@ class Settings(BaseSettings):
     @property
     def product_photos_path(self) -> Path:
         return self.frontend_public_path / "product-photos"
+
+    @property
+    def vector_store_path(self) -> Path:
+        raw = Path(self.vector_store_path_raw)
+        return raw if raw.is_absolute() else self.backend_dir / raw
 
     @property
     def parsed_cors_origins(self) -> list[str]:

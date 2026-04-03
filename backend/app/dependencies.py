@@ -24,8 +24,10 @@ from app.services.auth import AuthService
 from app.services.chatbot import ChatbotService
 from app.services.database import DatabaseService
 from app.services.document_service import DocumentService
+from app.services.embedding_service import EmbeddingService
 from app.services.knowledge_base import KnowledgeBaseService
 from app.services.product_catalog import ProductCatalogService
+from app.services.vector_store import VectorStoreService
 
 
 settings = get_settings()
@@ -33,13 +35,16 @@ database = DatabaseService(settings)
 auth_service = AuthService(settings)
 knowledge_base = KnowledgeBaseService(settings.knowledge_base_path)
 product_catalog = ProductCatalogService(settings.product_catalog_path)
-chatbot = ChatbotService(settings, knowledge_base, product_catalog)
 document_service = DocumentService()
+embedding_service = EmbeddingService(settings)
+vector_store = VectorStoreService(settings)
+chatbot = ChatbotService(settings, knowledge_base, product_catalog, embedding_service, vector_store)
 
 
 @asynccontextmanager
 async def lifespan(_: object):
     database.initialize()
+    vector_store.ensure_storage()
     yield
 
 

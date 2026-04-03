@@ -11,8 +11,10 @@ from app.core.config import Settings
 from app.models import ChatResponse, Source
 from app.services.ai_service import AIService, OpenAIError
 from app.services.document_service import DocumentService
+from app.services.embedding_service import EmbeddingService
 from app.services.knowledge_base import KnowledgeBaseService, KnowledgeEntry
 from app.services.product_catalog import ProductCatalogService
+from app.services.vector_store import VectorStoreService
 
 
 class ChatbotService:
@@ -21,10 +23,14 @@ class ChatbotService:
         settings: Settings,
         knowledge_base: KnowledgeBaseService,
         product_catalog: ProductCatalogService,
+        embedding_service: EmbeddingService,
+        vector_store: VectorStoreService,
     ) -> None:
         self.settings = settings
         self.knowledge_base = knowledge_base
         self.product_catalog = product_catalog
+        self.embedding_service = embedding_service
+        self.vector_store = vector_store
         self.ai_service = AIService(settings)
         self._llm_disabled_until = 0.0
 
@@ -43,6 +49,7 @@ class ChatbotService:
         mode: str = "general",
         model: str | None = None,
         custom_prompt: str | None = None,
+        user_id: int | None = None,
         uploaded_documents: list[dict[str, str]] | None = None,
     ) -> ChatResponse:
         chat_mode = mode if mode in {"general", "support"} else "general"
@@ -50,7 +57,7 @@ class ChatbotService:
         cleaned_prompt = (custom_prompt or "").strip()
         entries = self.knowledge_base.retrieve(question) if chat_mode == "support" else self.knowledge_base.retrieve(question, limit=4)
         products = self.product_catalog.recommend_products(question, limit=4) if chat_mode == "general" else []
-        document_matches = self._retrieve_uploaded_documents(question, uploaded_documents or [])
+        document_matches = self._retrieve_uploaded_documents(question, user_id=user_id, uploaded_documents=uploaded_documents or [])
         sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
 
         if self.ai_service.available() and not self._llm_temporarily_disabled():
@@ -74,6 +81,7 @@ class ChatbotService:
         mode: str = "general",
         model: str | None = None,
         custom_prompt: str | None = None,
+        user_id: int | None = None,
         uploaded_documents: list[dict[str, str]] | None = None,
     ) -> tuple[object, list[Source], str]:
         chat_mode = mode if mode in {"general", "support"} else "general"
@@ -81,7 +89,7 @@ class ChatbotService:
         cleaned_prompt = (custom_prompt or "").strip()
         entries = self.knowledge_base.retrieve(question) if chat_mode == "support" else self.knowledge_base.retrieve(question, limit=4)
         products = self.product_catalog.recommend_products(question, limit=4) if chat_mode == "general" else []
-        document_matches = self._retrieve_uploaded_documents(question, uploaded_documents or [])
+        document_matches = self._retrieve_uploaded_documents(question, user_id=user_id, uploaded_documents=uploaded_documents or [])
         sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
 
         if self.ai_service.available() and not self._llm_temporarily_disabled():
@@ -1529,8 +1537,29 @@ class ChatbotService:
             sources.append(Source(title=f"Document: {item['name']}", snippet=item["snippet"]))
         return sources
 
-    @staticmethod
-    def _retrieve_uploaded_documents(question: str, uploaded_documents: list[dict[str, str]], limit: int = 2) -> list[dict[str, str]]:
+    def _retrieve_uploaded_documents(
+        self,
+        question: str,
+        *,
+        user_id: int | None,
+        uploaded_documents: list[dict[str, str]],
+        limit: int = 3,
+    ) -> list[dict[str, str]]:
+        if user_id is not None:
+            try:
+                query_embedding = self.embedding_service.embed(question)
+                vector_matches = self.vector_store.search(user_id=user_id, query_embedding=query_embedding, limit=limit)
+                if vector_matches:
+                    return [
+                        {
+                            "name": item["name"],
+                            "snippet": shorten(item["snippet"].replace("\n", " "), width=220, placeholder="..."),
+                        }
+                        for item in vector_matches
+                    ]
+            except Exception:
+                pass
+
         query_terms = set(re.findall(r"[a-z0-9']+", question.lower()))
         if not query_terms:
             return []

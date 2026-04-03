@@ -64,6 +64,7 @@ def generate_chat_response(request: ChatRequest, current_user: UserPublic) -> Ch
         request.mode,
         model=request.model,
         custom_prompt=request.custom_prompt,
+        user_id=current_user.id,
         uploaded_documents=uploaded_documents,
     )
     database.append_chat_message(session_id, "assistant", response.answer)
@@ -162,6 +163,7 @@ def chat_stream(request: ChatRequest, current_user: UserPublic = Depends(require
         request.mode,
         model=request.model,
         custom_prompt=request.custom_prompt,
+        user_id=current_user.id,
         uploaded_documents=uploaded_documents,
     )
 

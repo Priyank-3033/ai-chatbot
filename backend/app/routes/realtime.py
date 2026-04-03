@@ -84,6 +84,7 @@ async def websocket_chat(websocket: WebSocket):
                 mode,
                 model=model,
                 custom_prompt=custom_prompt,
+                user_id=user_id,
                 uploaded_documents=uploaded_documents,
             )
             database.append_chat_message(session_id, "assistant", response.answer)
