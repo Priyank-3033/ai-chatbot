@@ -151,24 +151,26 @@ class ChatbotService:
         mode: str = "general",
         model: str | None = None,
         custom_prompt: str | None = None,
+        uploaded_documents: list[dict[str, str]] | None = None,
     ) -> ChatResponse:
         chat_mode = mode if mode in {"general", "support"} else "general"
         selected_model = model if model in {"gpt-4o-mini", "gpt-4o"} else self.settings.openai_model
         cleaned_prompt = (custom_prompt or "").strip()
         entries = self.knowledge_base.retrieve(question) if chat_mode == "support" else self.knowledge_base.retrieve(question, limit=4)
         products = self.product_catalog.recommend_products(question, limit=4) if chat_mode == "general" else []
-        sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products)
+        document_matches = self._retrieve_uploaded_documents(question, uploaded_documents or [])
+        sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
 
         if self.client and not self._llm_temporarily_disabled():
             try:
-                answer = self._generate_llm_answer(question, history, entries, products, chat_mode, selected_model, cleaned_prompt)
+                answer = self._generate_llm_answer(question, history, entries, products, document_matches, chat_mode, selected_model, cleaned_prompt)
                 result_mode = f"llm+{chat_mode}+{selected_model}"
             except OpenAIError:
                 self._temporarily_disable_llm()
-                answer = self._generate_fallback_answer(question, entries, products, chat_mode, history)
+                answer = self._generate_fallback_answer(question, entries, products, document_matches, chat_mode, history)
                 result_mode = f"fallback+{chat_mode}"
         else:
-            answer = self._generate_fallback_answer(question, entries, products, chat_mode, history)
+            answer = self._generate_fallback_answer(question, entries, products, document_matches, chat_mode, history)
             result_mode = f"fallback+{chat_mode}"
 
         return ChatResponse(answer=answer, sources=sources, mode=result_mode)
@@ -200,6 +202,7 @@ class ChatbotService:
         history: list[dict[str, str]],
         entries: list[KnowledgeEntry],
         products,
+        document_matches: list[dict[str, str]],
         mode: str,
         model: str,
         custom_prompt: str,
@@ -211,6 +214,10 @@ class ChatbotService:
         product_context = "\n".join(
             f"- {product.name} ({product.brand}) - Rs {product.price}, {product.tag}, {product.description}"
             for product in products
+        )
+        document_context = "\n\n".join(
+            f"{item['name']}: {item['snippet']}"
+            for item in document_matches
         )
         history_text = "\n".join(
             f"{item.get('role', 'user')}: {item.get('content', '')}"
@@ -240,6 +247,7 @@ class ChatbotService:
                                 f"User question: {question}\n\n"
                                 f"Relevant product context:\n{product_context or 'No strongly matched products.'}\n\n"
                                 f"Relevant support context:\n{kb_context or 'No strongly matched support context.'}\n\n"
+                                f"Relevant uploaded document context:\n{document_context or 'No strongly matched uploaded documents.'}\n\n"
                                 "Write a helpful answer that feels natural, useful, and complete."
                             ),
                         }
@@ -247,13 +255,14 @@ class ChatbotService:
                 },
             ],
         )
-        return getattr(response, "output_text", None) or self._generate_fallback_answer(question, entries, products, mode, history)
+        return getattr(response, "output_text", None) or self._generate_fallback_answer(question, entries, products, document_matches, mode, history)
 
     def _generate_fallback_answer(
         self,
         question: str,
         entries: list[KnowledgeEntry],
         products,
+        document_matches: list[dict[str, str]],
         mode: str,
         history: list[dict[str, str]] | None = None,
     ) -> str:
@@ -261,6 +270,14 @@ class ChatbotService:
         history = history or []
         recent_context = self._recent_user_context(history)
         contextual_normalized = self._merge_with_recent_context(normalized, recent_context)
+
+        if document_matches and any(term in contextual_normalized for term in ["pdf", "document", "file", "notes", "from this file", "from the file", "uploaded"]):
+            top = document_matches[0]
+            return self._format_answer(
+                f"Your uploaded file suggests: {top['snippet'][:160]}",
+                f"I matched your question against the uploaded document `{top['name']}` and used the closest text I found there.",
+                "Ask a more specific question from the file if you want a sharper answer, for example a summary, explanation, or answer from one section."
+            )
 
         math_answer = self._simple_math_answer(question.strip())
         if math_answer is not None:
@@ -1602,10 +1619,30 @@ class ChatbotService:
             for product in products[:3]
         ]
 
-    def _build_combined_sources(self, entries: list[KnowledgeEntry], products) -> list[Source]:
+    def _build_combined_sources(self, entries: list[KnowledgeEntry], products, document_matches: list[dict[str, str]] | None = None) -> list[Source]:
         sources = self._build_product_sources(products)
         for item in self._build_sources(entries):
             if len(sources) >= 4:
                 break
             sources.append(item)
+        for item in document_matches or []:
+            if len(sources) >= 4:
+                break
+            sources.append(Source(title=f"Document: {item['name']}", snippet=item["snippet"]))
         return sources
+
+    @staticmethod
+    def _retrieve_uploaded_documents(question: str, uploaded_documents: list[dict[str, str]], limit: int = 2) -> list[dict[str, str]]:
+        query_terms = set(re.findall(r"[a-z0-9']+", question.lower()))
+        if not query_terms:
+            return []
+        scored: list[tuple[int, dict[str, str]]] = []
+        for item in uploaded_documents:
+            content = f"{item.get('name', '')} {item.get('text', '')}".lower()
+            haystack = set(re.findall(r"[a-z0-9']+", content))
+            overlap = len(query_terms & haystack)
+            if overlap > 0:
+                snippet = shorten(item.get("text", "").replace("\n", " "), width=220, placeholder="...")
+                scored.append((overlap, {"name": item.get("name", "document"), "snippet": snippet}))
+        scored.sort(key=lambda value: value[0], reverse=True)
+        return [item for _, item in scored[:limit]]

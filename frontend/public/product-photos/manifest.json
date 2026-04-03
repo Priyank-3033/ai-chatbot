@@ -1,0 +1,1202 @@
+[
+  {
+    "id": "p1",
+    "name": "NovaTech Mobile 1",
+    "category": "mobiles",
+    "image_local": "mobiles/novatech-mobile-1/main.jpg",
+    "gallery_local": [
+      "mobiles/novatech-mobile-1/main.jpg",
+      "mobiles/novatech-mobile-1/side.jpg",
+      "mobiles/novatech-mobile-1/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p2",
+    "name": "Volt Mobile 2",
+    "category": "mobiles",
+    "image_local": "mobiles/volt-mobile-2/main.jpg",
+    "gallery_local": [
+      "mobiles/volt-mobile-2/main.jpg",
+      "mobiles/volt-mobile-2/side.jpg",
+      "mobiles/volt-mobile-2/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p3",
+    "name": "Astra Mobile 3",
+    "category": "mobiles",
+    "image_local": "mobiles/astra-mobile-3/main.jpg",
+    "gallery_local": [
+      "mobiles/astra-mobile-3/main.jpg",
+      "mobiles/astra-mobile-3/side.jpg",
+      "mobiles/astra-mobile-3/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p4",
+    "name": "Luma Mobile 4",
+    "category": "mobiles",
+    "image_local": "mobiles/luma-mobile-4/main.jpg",
+    "gallery_local": [
+      "mobiles/luma-mobile-4/main.jpg",
+      "mobiles/luma-mobile-4/side.jpg",
+      "mobiles/luma-mobile-4/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1567581935884-3349723552ca?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p5",
+    "name": "NovaTech Mobile 5",
+    "category": "mobiles",
+    "image_local": "mobiles/novatech-mobile-5/main.jpg",
+    "gallery_local": [
+      "mobiles/novatech-mobile-5/main.jpg",
+      "mobiles/novatech-mobile-5/side.jpg",
+      "mobiles/novatech-mobile-5/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p6",
+    "name": "Volt Mobile 6",
+    "category": "mobiles",
+    "image_local": "mobiles/volt-mobile-6/main.jpg",
+    "gallery_local": [
+      "mobiles/volt-mobile-6/main.jpg",
+      "mobiles/volt-mobile-6/side.jpg",
+      "mobiles/volt-mobile-6/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p7",
+    "name": "Astra Mobile 7",
+    "category": "mobiles",
+    "image_local": "mobiles/astra-mobile-7/main.jpg",
+    "gallery_local": [
+      "mobiles/astra-mobile-7/main.jpg",
+      "mobiles/astra-mobile-7/side.jpg",
+      "mobiles/astra-mobile-7/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p8",
+    "name": "Luma Mobile 8",
+    "category": "mobiles",
+    "image_local": "mobiles/luma-mobile-8/main.jpg",
+    "gallery_local": [
+      "mobiles/luma-mobile-8/main.jpg",
+      "mobiles/luma-mobile-8/side.jpg",
+      "mobiles/luma-mobile-8/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p9",
+    "name": "NovaTech Mobile 9",
+    "category": "mobiles",
+    "image_local": "mobiles/novatech-mobile-9/main.jpg",
+    "gallery_local": [
+      "mobiles/novatech-mobile-9/main.jpg",
+      "mobiles/novatech-mobile-9/side.jpg",
+      "mobiles/novatech-mobile-9/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1567581935884-3349723552ca?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p10",
+    "name": "Volt Mobile 10",
+    "category": "mobiles",
+    "image_local": "mobiles/volt-mobile-10/main.jpg",
+    "gallery_local": [
+      "mobiles/volt-mobile-10/main.jpg",
+      "mobiles/volt-mobile-10/side.jpg",
+      "mobiles/volt-mobile-10/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p11",
+    "name": "Astra Mobile 11",
+    "category": "mobiles",
+    "image_local": "mobiles/astra-mobile-11/main.jpg",
+    "gallery_local": [
+      "mobiles/astra-mobile-11/main.jpg",
+      "mobiles/astra-mobile-11/side.jpg",
+      "mobiles/astra-mobile-11/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p12",
+    "name": "Luma Mobile 12",
+    "category": "mobiles",
+    "image_local": "mobiles/luma-mobile-12/main.jpg",
+    "gallery_local": [
+      "mobiles/luma-mobile-12/main.jpg",
+      "mobiles/luma-mobile-12/side.jpg",
+      "mobiles/luma-mobile-12/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p13",
+    "name": "NovaTech Mobile 13",
+    "category": "mobiles",
+    "image_local": "mobiles/novatech-mobile-13/main.jpg",
+    "gallery_local": [
+      "mobiles/novatech-mobile-13/main.jpg",
+      "mobiles/novatech-mobile-13/side.jpg",
+      "mobiles/novatech-mobile-13/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p14",
+    "name": "Volt Mobile 14",
+    "category": "mobiles",
+    "image_local": "mobiles/volt-mobile-14/main.jpg",
+    "gallery_local": [
+      "mobiles/volt-mobile-14/main.jpg",
+      "mobiles/volt-mobile-14/side.jpg",
+      "mobiles/volt-mobile-14/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1567581935884-3349723552ca?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p15",
+    "name": "Astra Mobile 15",
+    "category": "mobiles",
+    "image_local": "mobiles/astra-mobile-15/main.jpg",
+    "gallery_local": [
+      "mobiles/astra-mobile-15/main.jpg",
+      "mobiles/astra-mobile-15/side.jpg",
+      "mobiles/astra-mobile-15/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p16",
+    "name": "Luma Mobile 16",
+    "category": "mobiles",
+    "image_local": "mobiles/luma-mobile-16/main.jpg",
+    "gallery_local": [
+      "mobiles/luma-mobile-16/main.jpg",
+      "mobiles/luma-mobile-16/side.jpg",
+      "mobiles/luma-mobile-16/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p17",
+    "name": "NovaTech Mobile 17",
+    "category": "mobiles",
+    "image_local": "mobiles/novatech-mobile-17/main.jpg",
+    "gallery_local": [
+      "mobiles/novatech-mobile-17/main.jpg",
+      "mobiles/novatech-mobile-17/side.jpg",
+      "mobiles/novatech-mobile-17/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p18",
+    "name": "Volt Mobile 18",
+    "category": "mobiles",
+    "image_local": "mobiles/volt-mobile-18/main.jpg",
+    "gallery_local": [
+      "mobiles/volt-mobile-18/main.jpg",
+      "mobiles/volt-mobile-18/side.jpg",
+      "mobiles/volt-mobile-18/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p19",
+    "name": "Astra Mobile 19",
+    "category": "mobiles",
+    "image_local": "mobiles/astra-mobile-19/main.jpg",
+    "gallery_local": [
+      "mobiles/astra-mobile-19/main.jpg",
+      "mobiles/astra-mobile-19/side.jpg",
+      "mobiles/astra-mobile-19/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1567581935884-3349723552ca?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p20",
+    "name": "Luma Mobile 20",
+    "category": "mobiles",
+    "image_local": "mobiles/luma-mobile-20/main.jpg",
+    "gallery_local": [
+      "mobiles/luma-mobile-20/main.jpg",
+      "mobiles/luma-mobile-20/side.jpg",
+      "mobiles/luma-mobile-20/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p21",
+    "name": "Orion ElectroBook 1",
+    "category": "electronics",
+    "image_local": "electronics/orion-electrobook-1/main.jpg",
+    "gallery_local": [
+      "electronics/orion-electrobook-1/main.jpg",
+      "electronics/orion-electrobook-1/side.jpg",
+      "electronics/orion-electrobook-1/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p22",
+    "name": "PixelNest ElectroBook 2",
+    "category": "electronics",
+    "image_local": "electronics/pixelnest-electrobook-2/main.jpg",
+    "gallery_local": [
+      "electronics/pixelnest-electrobook-2/main.jpg",
+      "electronics/pixelnest-electrobook-2/side.jpg",
+      "electronics/pixelnest-electrobook-2/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p23",
+    "name": "Helio ElectroBook 3",
+    "category": "electronics",
+    "image_local": "electronics/helio-electrobook-3/main.jpg",
+    "gallery_local": [
+      "electronics/helio-electrobook-3/main.jpg",
+      "electronics/helio-electrobook-3/side.jpg",
+      "electronics/helio-electrobook-3/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p24",
+    "name": "Zenor ElectroBook 4",
+    "category": "electronics",
+    "image_local": "electronics/zenor-electrobook-4/main.jpg",
+    "gallery_local": [
+      "electronics/zenor-electrobook-4/main.jpg",
+      "electronics/zenor-electrobook-4/side.jpg",
+      "electronics/zenor-electrobook-4/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p25",
+    "name": "Orion ElectroBook 5",
+    "category": "electronics",
+    "image_local": "electronics/orion-electrobook-5/main.jpg",
+    "gallery_local": [
+      "electronics/orion-electrobook-5/main.jpg",
+      "electronics/orion-electrobook-5/side.jpg",
+      "electronics/orion-electrobook-5/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1504707748692-419802cf939d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p26",
+    "name": "PixelNest ElectroBook 6",
+    "category": "electronics",
+    "image_local": "electronics/pixelnest-electrobook-6/main.jpg",
+    "gallery_local": [
+      "electronics/pixelnest-electrobook-6/main.jpg",
+      "electronics/pixelnest-electrobook-6/side.jpg",
+      "electronics/pixelnest-electrobook-6/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p27",
+    "name": "Helio ElectroBook 7",
+    "category": "electronics",
+    "image_local": "electronics/helio-electrobook-7/main.jpg",
+    "gallery_local": [
+      "electronics/helio-electrobook-7/main.jpg",
+      "electronics/helio-electrobook-7/side.jpg",
+      "electronics/helio-electrobook-7/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p28",
+    "name": "Zenor ElectroBook 8",
+    "category": "electronics",
+    "image_local": "electronics/zenor-electrobook-8/main.jpg",
+    "gallery_local": [
+      "electronics/zenor-electrobook-8/main.jpg",
+      "electronics/zenor-electrobook-8/side.jpg",
+      "electronics/zenor-electrobook-8/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p29",
+    "name": "Orion ElectroBook 9",
+    "category": "electronics",
+    "image_local": "electronics/orion-electrobook-9/main.jpg",
+    "gallery_local": [
+      "electronics/orion-electrobook-9/main.jpg",
+      "electronics/orion-electrobook-9/side.jpg",
+      "electronics/orion-electrobook-9/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p30",
+    "name": "PixelNest ElectroBook 10",
+    "category": "electronics",
+    "image_local": "electronics/pixelnest-electrobook-10/main.jpg",
+    "gallery_local": [
+      "electronics/pixelnest-electrobook-10/main.jpg",
+      "electronics/pixelnest-electrobook-10/side.jpg",
+      "electronics/pixelnest-electrobook-10/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1504707748692-419802cf939d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p31",
+    "name": "Helio ElectroBook 11",
+    "category": "electronics",
+    "image_local": "electronics/helio-electrobook-11/main.jpg",
+    "gallery_local": [
+      "electronics/helio-electrobook-11/main.jpg",
+      "electronics/helio-electrobook-11/side.jpg",
+      "electronics/helio-electrobook-11/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p32",
+    "name": "Zenor ElectroBook 12",
+    "category": "electronics",
+    "image_local": "electronics/zenor-electrobook-12/main.jpg",
+    "gallery_local": [
+      "electronics/zenor-electrobook-12/main.jpg",
+      "electronics/zenor-electrobook-12/side.jpg",
+      "electronics/zenor-electrobook-12/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p33",
+    "name": "Orion ElectroBook 13",
+    "category": "electronics",
+    "image_local": "electronics/orion-electrobook-13/main.jpg",
+    "gallery_local": [
+      "electronics/orion-electrobook-13/main.jpg",
+      "electronics/orion-electrobook-13/side.jpg",
+      "electronics/orion-electrobook-13/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p34",
+    "name": "PixelNest ElectroBook 14",
+    "category": "electronics",
+    "image_local": "electronics/pixelnest-electrobook-14/main.jpg",
+    "gallery_local": [
+      "electronics/pixelnest-electrobook-14/main.jpg",
+      "electronics/pixelnest-electrobook-14/side.jpg",
+      "electronics/pixelnest-electrobook-14/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p35",
+    "name": "Helio ElectroBook 15",
+    "category": "electronics",
+    "image_local": "electronics/helio-electrobook-15/main.jpg",
+    "gallery_local": [
+      "electronics/helio-electrobook-15/main.jpg",
+      "electronics/helio-electrobook-15/side.jpg",
+      "electronics/helio-electrobook-15/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1504707748692-419802cf939d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p36",
+    "name": "Zenor ElectroBook 16",
+    "category": "electronics",
+    "image_local": "electronics/zenor-electrobook-16/main.jpg",
+    "gallery_local": [
+      "electronics/zenor-electrobook-16/main.jpg",
+      "electronics/zenor-electrobook-16/side.jpg",
+      "electronics/zenor-electrobook-16/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p37",
+    "name": "Orion ElectroBook 17",
+    "category": "electronics",
+    "image_local": "electronics/orion-electrobook-17/main.jpg",
+    "gallery_local": [
+      "electronics/orion-electrobook-17/main.jpg",
+      "electronics/orion-electrobook-17/side.jpg",
+      "electronics/orion-electrobook-17/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p38",
+    "name": "PixelNest ElectroBook 18",
+    "category": "electronics",
+    "image_local": "electronics/pixelnest-electrobook-18/main.jpg",
+    "gallery_local": [
+      "electronics/pixelnest-electrobook-18/main.jpg",
+      "electronics/pixelnest-electrobook-18/side.jpg",
+      "electronics/pixelnest-electrobook-18/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p39",
+    "name": "Helio ElectroBook 19",
+    "category": "electronics",
+    "image_local": "electronics/helio-electrobook-19/main.jpg",
+    "gallery_local": [
+      "electronics/helio-electrobook-19/main.jpg",
+      "electronics/helio-electrobook-19/side.jpg",
+      "electronics/helio-electrobook-19/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p40",
+    "name": "Zenor ElectroBook 20",
+    "category": "electronics",
+    "image_local": "electronics/zenor-electrobook-20/main.jpg",
+    "gallery_local": [
+      "electronics/zenor-electrobook-20/main.jpg",
+      "electronics/zenor-electrobook-20/side.jpg",
+      "electronics/zenor-electrobook-20/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1504707748692-419802cf939d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p41",
+    "name": "StudyOne StudyTab 1",
+    "category": "study-tech",
+    "image_local": "study-tech/studyone-studytab-1/main.jpg",
+    "gallery_local": [
+      "study-tech/studyone-studytab-1/main.jpg",
+      "study-tech/studyone-studytab-1/side.jpg",
+      "study-tech/studyone-studytab-1/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p42",
+    "name": "NoteGrid StudyTab 2",
+    "category": "study-tech",
+    "image_local": "study-tech/notegrid-studytab-2/main.jpg",
+    "gallery_local": [
+      "study-tech/notegrid-studytab-2/main.jpg",
+      "study-tech/notegrid-studytab-2/side.jpg",
+      "study-tech/notegrid-studytab-2/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p43",
+    "name": "PixelNest StudyTab 3",
+    "category": "study-tech",
+    "image_local": "study-tech/pixelnest-studytab-3/main.jpg",
+    "gallery_local": [
+      "study-tech/pixelnest-studytab-3/main.jpg",
+      "study-tech/pixelnest-studytab-3/side.jpg",
+      "study-tech/pixelnest-studytab-3/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p44",
+    "name": "Luma StudyTab 4",
+    "category": "study-tech",
+    "image_local": "study-tech/luma-studytab-4/main.jpg",
+    "gallery_local": [
+      "study-tech/luma-studytab-4/main.jpg",
+      "study-tech/luma-studytab-4/side.jpg",
+      "study-tech/luma-studytab-4/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p45",
+    "name": "StudyOne StudyTab 5",
+    "category": "study-tech",
+    "image_local": "study-tech/studyone-studytab-5/main.jpg",
+    "gallery_local": [
+      "study-tech/studyone-studytab-5/main.jpg",
+      "study-tech/studyone-studytab-5/side.jpg",
+      "study-tech/studyone-studytab-5/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p46",
+    "name": "NoteGrid StudyTab 6",
+    "category": "study-tech",
+    "image_local": "study-tech/notegrid-studytab-6/main.jpg",
+    "gallery_local": [
+      "study-tech/notegrid-studytab-6/main.jpg",
+      "study-tech/notegrid-studytab-6/side.jpg",
+      "study-tech/notegrid-studytab-6/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p47",
+    "name": "PixelNest StudyTab 7",
+    "category": "study-tech",
+    "image_local": "study-tech/pixelnest-studytab-7/main.jpg",
+    "gallery_local": [
+      "study-tech/pixelnest-studytab-7/main.jpg",
+      "study-tech/pixelnest-studytab-7/side.jpg",
+      "study-tech/pixelnest-studytab-7/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p48",
+    "name": "Luma StudyTab 8",
+    "category": "study-tech",
+    "image_local": "study-tech/luma-studytab-8/main.jpg",
+    "gallery_local": [
+      "study-tech/luma-studytab-8/main.jpg",
+      "study-tech/luma-studytab-8/side.jpg",
+      "study-tech/luma-studytab-8/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p49",
+    "name": "StudyOne StudyTab 9",
+    "category": "study-tech",
+    "image_local": "study-tech/studyone-studytab-9/main.jpg",
+    "gallery_local": [
+      "study-tech/studyone-studytab-9/main.jpg",
+      "study-tech/studyone-studytab-9/side.jpg",
+      "study-tech/studyone-studytab-9/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p50",
+    "name": "NoteGrid StudyTab 10",
+    "category": "study-tech",
+    "image_local": "study-tech/notegrid-studytab-10/main.jpg",
+    "gallery_local": [
+      "study-tech/notegrid-studytab-10/main.jpg",
+      "study-tech/notegrid-studytab-10/side.jpg",
+      "study-tech/notegrid-studytab-10/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p51",
+    "name": "PixelNest StudyTab 11",
+    "category": "study-tech",
+    "image_local": "study-tech/pixelnest-studytab-11/main.jpg",
+    "gallery_local": [
+      "study-tech/pixelnest-studytab-11/main.jpg",
+      "study-tech/pixelnest-studytab-11/side.jpg",
+      "study-tech/pixelnest-studytab-11/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p52",
+    "name": "Luma StudyTab 12",
+    "category": "study-tech",
+    "image_local": "study-tech/luma-studytab-12/main.jpg",
+    "gallery_local": [
+      "study-tech/luma-studytab-12/main.jpg",
+      "study-tech/luma-studytab-12/side.jpg",
+      "study-tech/luma-studytab-12/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p53",
+    "name": "StudyOne StudyTab 13",
+    "category": "study-tech",
+    "image_local": "study-tech/studyone-studytab-13/main.jpg",
+    "gallery_local": [
+      "study-tech/studyone-studytab-13/main.jpg",
+      "study-tech/studyone-studytab-13/side.jpg",
+      "study-tech/studyone-studytab-13/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p54",
+    "name": "NoteGrid StudyTab 14",
+    "category": "study-tech",
+    "image_local": "study-tech/notegrid-studytab-14/main.jpg",
+    "gallery_local": [
+      "study-tech/notegrid-studytab-14/main.jpg",
+      "study-tech/notegrid-studytab-14/side.jpg",
+      "study-tech/notegrid-studytab-14/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p55",
+    "name": "PixelNest StudyTab 15",
+    "category": "study-tech",
+    "image_local": "study-tech/pixelnest-studytab-15/main.jpg",
+    "gallery_local": [
+      "study-tech/pixelnest-studytab-15/main.jpg",
+      "study-tech/pixelnest-studytab-15/side.jpg",
+      "study-tech/pixelnest-studytab-15/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p56",
+    "name": "Luma StudyTab 16",
+    "category": "study-tech",
+    "image_local": "study-tech/luma-studytab-16/main.jpg",
+    "gallery_local": [
+      "study-tech/luma-studytab-16/main.jpg",
+      "study-tech/luma-studytab-16/side.jpg",
+      "study-tech/luma-studytab-16/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p57",
+    "name": "StudyOne StudyTab 17",
+    "category": "study-tech",
+    "image_local": "study-tech/studyone-studytab-17/main.jpg",
+    "gallery_local": [
+      "study-tech/studyone-studytab-17/main.jpg",
+      "study-tech/studyone-studytab-17/side.jpg",
+      "study-tech/studyone-studytab-17/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p58",
+    "name": "NoteGrid StudyTab 18",
+    "category": "study-tech",
+    "image_local": "study-tech/notegrid-studytab-18/main.jpg",
+    "gallery_local": [
+      "study-tech/notegrid-studytab-18/main.jpg",
+      "study-tech/notegrid-studytab-18/side.jpg",
+      "study-tech/notegrid-studytab-18/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p59",
+    "name": "PixelNest StudyTab 19",
+    "category": "study-tech",
+    "image_local": "study-tech/pixelnest-studytab-19/main.jpg",
+    "gallery_local": [
+      "study-tech/pixelnest-studytab-19/main.jpg",
+      "study-tech/pixelnest-studytab-19/side.jpg",
+      "study-tech/pixelnest-studytab-19/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1561154464-82e9adf32764?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p60",
+    "name": "Luma StudyTab 20",
+    "category": "study-tech",
+    "image_local": "study-tech/luma-studytab-20/main.jpg",
+    "gallery_local": [
+      "study-tech/luma-studytab-20/main.jpg",
+      "study-tech/luma-studytab-20/side.jpg",
+      "study-tech/luma-studytab-20/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p61",
+    "name": "PulseFit WearFit 1",
+    "category": "wearables",
+    "image_local": "wearables/pulsefit-wearfit-1/main.jpg",
+    "gallery_local": [
+      "wearables/pulsefit-wearfit-1/main.jpg",
+      "wearables/pulsefit-wearfit-1/side.jpg",
+      "wearables/pulsefit-wearfit-1/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p62",
+    "name": "Astra WearFit 2",
+    "category": "wearables",
+    "image_local": "wearables/astra-wearfit-2/main.jpg",
+    "gallery_local": [
+      "wearables/astra-wearfit-2/main.jpg",
+      "wearables/astra-wearfit-2/side.jpg",
+      "wearables/astra-wearfit-2/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p63",
+    "name": "Zenor WearFit 3",
+    "category": "wearables",
+    "image_local": "wearables/zenor-wearfit-3/main.jpg",
+    "gallery_local": [
+      "wearables/zenor-wearfit-3/main.jpg",
+      "wearables/zenor-wearfit-3/side.jpg",
+      "wearables/zenor-wearfit-3/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p64",
+    "name": "Helio WearFit 4",
+    "category": "wearables",
+    "image_local": "wearables/helio-wearfit-4/main.jpg",
+    "gallery_local": [
+      "wearables/helio-wearfit-4/main.jpg",
+      "wearables/helio-wearfit-4/side.jpg",
+      "wearables/helio-wearfit-4/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p65",
+    "name": "PulseFit WearFit 5",
+    "category": "wearables",
+    "image_local": "wearables/pulsefit-wearfit-5/main.jpg",
+    "gallery_local": [
+      "wearables/pulsefit-wearfit-5/main.jpg",
+      "wearables/pulsefit-wearfit-5/side.jpg",
+      "wearables/pulsefit-wearfit-5/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p66",
+    "name": "Astra WearFit 6",
+    "category": "wearables",
+    "image_local": "wearables/astra-wearfit-6/main.jpg",
+    "gallery_local": [
+      "wearables/astra-wearfit-6/main.jpg",
+      "wearables/astra-wearfit-6/side.jpg",
+      "wearables/astra-wearfit-6/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p67",
+    "name": "Zenor WearFit 7",
+    "category": "wearables",
+    "image_local": "wearables/zenor-wearfit-7/main.jpg",
+    "gallery_local": [
+      "wearables/zenor-wearfit-7/main.jpg",
+      "wearables/zenor-wearfit-7/side.jpg",
+      "wearables/zenor-wearfit-7/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p68",
+    "name": "Helio WearFit 8",
+    "category": "wearables",
+    "image_local": "wearables/helio-wearfit-8/main.jpg",
+    "gallery_local": [
+      "wearables/helio-wearfit-8/main.jpg",
+      "wearables/helio-wearfit-8/side.jpg",
+      "wearables/helio-wearfit-8/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p69",
+    "name": "PulseFit WearFit 9",
+    "category": "wearables",
+    "image_local": "wearables/pulsefit-wearfit-9/main.jpg",
+    "gallery_local": [
+      "wearables/pulsefit-wearfit-9/main.jpg",
+      "wearables/pulsefit-wearfit-9/side.jpg",
+      "wearables/pulsefit-wearfit-9/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p70",
+    "name": "Astra WearFit 10",
+    "category": "wearables",
+    "image_local": "wearables/astra-wearfit-10/main.jpg",
+    "gallery_local": [
+      "wearables/astra-wearfit-10/main.jpg",
+      "wearables/astra-wearfit-10/side.jpg",
+      "wearables/astra-wearfit-10/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p71",
+    "name": "Zenor WearFit 11",
+    "category": "wearables",
+    "image_local": "wearables/zenor-wearfit-11/main.jpg",
+    "gallery_local": [
+      "wearables/zenor-wearfit-11/main.jpg",
+      "wearables/zenor-wearfit-11/side.jpg",
+      "wearables/zenor-wearfit-11/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p72",
+    "name": "Helio WearFit 12",
+    "category": "wearables",
+    "image_local": "wearables/helio-wearfit-12/main.jpg",
+    "gallery_local": [
+      "wearables/helio-wearfit-12/main.jpg",
+      "wearables/helio-wearfit-12/side.jpg",
+      "wearables/helio-wearfit-12/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p73",
+    "name": "PulseFit WearFit 13",
+    "category": "wearables",
+    "image_local": "wearables/pulsefit-wearfit-13/main.jpg",
+    "gallery_local": [
+      "wearables/pulsefit-wearfit-13/main.jpg",
+      "wearables/pulsefit-wearfit-13/side.jpg",
+      "wearables/pulsefit-wearfit-13/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p74",
+    "name": "Astra WearFit 14",
+    "category": "wearables",
+    "image_local": "wearables/astra-wearfit-14/main.jpg",
+    "gallery_local": [
+      "wearables/astra-wearfit-14/main.jpg",
+      "wearables/astra-wearfit-14/side.jpg",
+      "wearables/astra-wearfit-14/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p75",
+    "name": "Zenor WearFit 15",
+    "category": "wearables",
+    "image_local": "wearables/zenor-wearfit-15/main.jpg",
+    "gallery_local": [
+      "wearables/zenor-wearfit-15/main.jpg",
+      "wearables/zenor-wearfit-15/side.jpg",
+      "wearables/zenor-wearfit-15/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p76",
+    "name": "Helio WearFit 16",
+    "category": "wearables",
+    "image_local": "wearables/helio-wearfit-16/main.jpg",
+    "gallery_local": [
+      "wearables/helio-wearfit-16/main.jpg",
+      "wearables/helio-wearfit-16/side.jpg",
+      "wearables/helio-wearfit-16/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p77",
+    "name": "PulseFit WearFit 17",
+    "category": "wearables",
+    "image_local": "wearables/pulsefit-wearfit-17/main.jpg",
+    "gallery_local": [
+      "wearables/pulsefit-wearfit-17/main.jpg",
+      "wearables/pulsefit-wearfit-17/side.jpg",
+      "wearables/pulsefit-wearfit-17/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p78",
+    "name": "Astra WearFit 18",
+    "category": "wearables",
+    "image_local": "wearables/astra-wearfit-18/main.jpg",
+    "gallery_local": [
+      "wearables/astra-wearfit-18/main.jpg",
+      "wearables/astra-wearfit-18/side.jpg",
+      "wearables/astra-wearfit-18/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p79",
+    "name": "Zenor WearFit 19",
+    "category": "wearables",
+    "image_local": "wearables/zenor-wearfit-19/main.jpg",
+    "gallery_local": [
+      "wearables/zenor-wearfit-19/main.jpg",
+      "wearables/zenor-wearfit-19/side.jpg",
+      "wearables/zenor-wearfit-19/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p80",
+    "name": "Helio WearFit 20",
+    "category": "wearables",
+    "image_local": "wearables/helio-wearfit-20/main.jpg",
+    "gallery_local": [
+      "wearables/helio-wearfit-20/main.jpg",
+      "wearables/helio-wearfit-20/side.jpg",
+      "wearables/helio-wearfit-20/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p81",
+    "name": "SoundArc Accessory 1",
+    "category": "accessories",
+    "image_local": "accessories/soundarc-accessory-1/main.jpg",
+    "gallery_local": [
+      "accessories/soundarc-accessory-1/main.jpg",
+      "accessories/soundarc-accessory-1/side.jpg",
+      "accessories/soundarc-accessory-1/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p82",
+    "name": "GearHive Accessory 2",
+    "category": "accessories",
+    "image_local": "accessories/gearhive-accessory-2/main.jpg",
+    "gallery_local": [
+      "accessories/gearhive-accessory-2/main.jpg",
+      "accessories/gearhive-accessory-2/side.jpg",
+      "accessories/gearhive-accessory-2/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p83",
+    "name": "NovaTech Accessory 3",
+    "category": "accessories",
+    "image_local": "accessories/novatech-accessory-3/main.jpg",
+    "gallery_local": [
+      "accessories/novatech-accessory-3/main.jpg",
+      "accessories/novatech-accessory-3/side.jpg",
+      "accessories/novatech-accessory-3/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1585386959984-a4155223168e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p84",
+    "name": "Volt Accessory 4",
+    "category": "accessories",
+    "image_local": "accessories/volt-accessory-4/main.jpg",
+    "gallery_local": [
+      "accessories/volt-accessory-4/main.jpg",
+      "accessories/volt-accessory-4/side.jpg",
+      "accessories/volt-accessory-4/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p85",
+    "name": "SoundArc Accessory 5",
+    "category": "accessories",
+    "image_local": "accessories/soundarc-accessory-5/main.jpg",
+    "gallery_local": [
+      "accessories/soundarc-accessory-5/main.jpg",
+      "accessories/soundarc-accessory-5/side.jpg",
+      "accessories/soundarc-accessory-5/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p86",
+    "name": "GearHive Accessory 6",
+    "category": "accessories",
+    "image_local": "accessories/gearhive-accessory-6/main.jpg",
+    "gallery_local": [
+      "accessories/gearhive-accessory-6/main.jpg",
+      "accessories/gearhive-accessory-6/side.jpg",
+      "accessories/gearhive-accessory-6/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p87",
+    "name": "NovaTech Accessory 7",
+    "category": "accessories",
+    "image_local": "accessories/novatech-accessory-7/main.jpg",
+    "gallery_local": [
+      "accessories/novatech-accessory-7/main.jpg",
+      "accessories/novatech-accessory-7/side.jpg",
+      "accessories/novatech-accessory-7/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p88",
+    "name": "Volt Accessory 8",
+    "category": "accessories",
+    "image_local": "accessories/volt-accessory-8/main.jpg",
+    "gallery_local": [
+      "accessories/volt-accessory-8/main.jpg",
+      "accessories/volt-accessory-8/side.jpg",
+      "accessories/volt-accessory-8/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1585386959984-a4155223168e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p89",
+    "name": "SoundArc Accessory 9",
+    "category": "accessories",
+    "image_local": "accessories/soundarc-accessory-9/main.jpg",
+    "gallery_local": [
+      "accessories/soundarc-accessory-9/main.jpg",
+      "accessories/soundarc-accessory-9/side.jpg",
+      "accessories/soundarc-accessory-9/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p90",
+    "name": "GearHive Accessory 10",
+    "category": "accessories",
+    "image_local": "accessories/gearhive-accessory-10/main.jpg",
+    "gallery_local": [
+      "accessories/gearhive-accessory-10/main.jpg",
+      "accessories/gearhive-accessory-10/side.jpg",
+      "accessories/gearhive-accessory-10/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p91",
+    "name": "NovaTech Accessory 11",
+    "category": "accessories",
+    "image_local": "accessories/novatech-accessory-11/main.jpg",
+    "gallery_local": [
+      "accessories/novatech-accessory-11/main.jpg",
+      "accessories/novatech-accessory-11/side.jpg",
+      "accessories/novatech-accessory-11/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p92",
+    "name": "Volt Accessory 12",
+    "category": "accessories",
+    "image_local": "accessories/volt-accessory-12/main.jpg",
+    "gallery_local": [
+      "accessories/volt-accessory-12/main.jpg",
+      "accessories/volt-accessory-12/side.jpg",
+      "accessories/volt-accessory-12/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p93",
+    "name": "SoundArc Accessory 13",
+    "category": "accessories",
+    "image_local": "accessories/soundarc-accessory-13/main.jpg",
+    "gallery_local": [
+      "accessories/soundarc-accessory-13/main.jpg",
+      "accessories/soundarc-accessory-13/side.jpg",
+      "accessories/soundarc-accessory-13/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1585386959984-a4155223168e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p94",
+    "name": "GearHive Accessory 14",
+    "category": "accessories",
+    "image_local": "accessories/gearhive-accessory-14/main.jpg",
+    "gallery_local": [
+      "accessories/gearhive-accessory-14/main.jpg",
+      "accessories/gearhive-accessory-14/side.jpg",
+      "accessories/gearhive-accessory-14/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p95",
+    "name": "NovaTech Accessory 15",
+    "category": "accessories",
+    "image_local": "accessories/novatech-accessory-15/main.jpg",
+    "gallery_local": [
+      "accessories/novatech-accessory-15/main.jpg",
+      "accessories/novatech-accessory-15/side.jpg",
+      "accessories/novatech-accessory-15/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p96",
+    "name": "Volt Accessory 16",
+    "category": "accessories",
+    "image_local": "accessories/volt-accessory-16/main.jpg",
+    "gallery_local": [
+      "accessories/volt-accessory-16/main.jpg",
+      "accessories/volt-accessory-16/side.jpg",
+      "accessories/volt-accessory-16/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p97",
+    "name": "SoundArc Accessory 17",
+    "category": "accessories",
+    "image_local": "accessories/soundarc-accessory-17/main.jpg",
+    "gallery_local": [
+      "accessories/soundarc-accessory-17/main.jpg",
+      "accessories/soundarc-accessory-17/side.jpg",
+      "accessories/soundarc-accessory-17/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1518444065439-e933c06ce9cd?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p98",
+    "name": "GearHive Accessory 18",
+    "category": "accessories",
+    "image_local": "accessories/gearhive-accessory-18/main.jpg",
+    "gallery_local": [
+      "accessories/gearhive-accessory-18/main.jpg",
+      "accessories/gearhive-accessory-18/side.jpg",
+      "accessories/gearhive-accessory-18/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1585386959984-a4155223168e?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p99",
+    "name": "NovaTech Accessory 19",
+    "category": "accessories",
+    "image_local": "accessories/novatech-accessory-19/main.jpg",
+    "gallery_local": [
+      "accessories/novatech-accessory-19/main.jpg",
+      "accessories/novatech-accessory-19/side.jpg",
+      "accessories/novatech-accessory-19/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": "p100",
+    "name": "Volt Accessory 20",
+    "category": "accessories",
+    "image_local": "accessories/volt-accessory-20/main.jpg",
+    "gallery_local": [
+      "accessories/volt-accessory-20/main.jpg",
+      "accessories/volt-accessory-20/side.jpg",
+      "accessories/volt-accessory-20/detail.jpg"
+    ],
+    "remote_image": "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=1200&q=80"
+  }
+]

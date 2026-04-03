@@ -1,17 +1,9 @@
-﻿Add real product images here.
+Vmart local product photo structure for 100 products.
 
-How to use:
-- Put your product photos in this folder.
-- In backend/app/data/products.json, set:
-  "image": "your-file-name.jpg"
-  "gallery": ["your-file-name-2.jpg", "your-file-name-3.jpg"]
+Each product folder is ready for real ecommerce photos.
+Recommended files inside each product folder:
+- main.jpg
+- side.jpg
+- detail.jpg
 
-Examples:
-- "image": "nova-x5-pro-front.jpg"
-- "gallery": ["nova-x5-pro-back.jpg", "nova-x5-pro-side.jpg"]
-
-You can also use nested paths like:
-- "image": "phones/nova-x5-pro/front.jpg"
-
-The frontend will automatically read them from:
-- /product-photos/...
+The app now uses image_local/gallery_local first, and falls back to current remote image URLs if these files are missing.

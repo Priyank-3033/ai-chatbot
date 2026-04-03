@@ -20,12 +20,21 @@ class ProductResponse(BaseModel):
     tag: str
     image: str
     gallery: list[str]
+    image_local: str | None = None
+    gallery_local: list[str] = Field(default_factory=list)
     description: str
     long_description: str
     features: list[str]
     specs: dict[str, str]
     stock: int
     delivery_note: str
+
+
+class ProductListResponse(BaseModel):
+    items: list[ProductResponse]
+    total: int
+    page: int
+    page_size: int
 
 
 class CartItemResponse(BaseModel):
@@ -175,6 +184,8 @@ class ProductUpsertRequest(BaseModel):
     tag: str = Field(default="Featured", max_length=60)
     image: str = Field(..., min_length=5, max_length=500)
     gallery: list[str] = Field(default_factory=list)
+    image_local: str | None = Field(default=None, max_length=500)
+    gallery_local: list[str] = Field(default_factory=list)
     description: str = Field(..., min_length=10, max_length=220)
     long_description: str = Field(..., min_length=20, max_length=1500)
     features: list[str] = Field(default_factory=list)
@@ -190,3 +201,28 @@ class OrderStatusUpdateRequest(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     knowledge_base_loaded: bool
+
+
+class DocumentResponse(BaseModel):
+    id: str
+    name: str
+    content_type: str
+    size: int
+    created_at: str
+
+
+class AdminStatsResponse(BaseModel):
+    user_count: int
+    order_count: int
+    chat_session_count: int
+    uploaded_document_count: int
+
+
+class AdminChatLogResponse(BaseModel):
+    session_id: str
+    user_name: str
+    user_email: EmailStr
+    title: str
+    mode: str
+    updated_at: str
+    preview: str

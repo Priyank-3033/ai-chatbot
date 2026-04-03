@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import AdminPanel from "./components/AdminPanel";
 import ChatWindow from "./components/ChatWindow";
 import CommerceSidebar from "./components/CommerceSidebar";
@@ -6,6 +6,7 @@ import ProductDetailModal from "./components/ProductDetailModal";
 import ProductStorefront from "./components/ProductStorefront";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+const WS_BASE_URL = API_BASE_URL.replace(/^http/i, "ws");
 const TOKEN_KEY = "smart-chat-token-v1";
 const MODE_KEY = "smart-chat-mode-v1";
 const MODEL_KEY = "smart-chat-model-v1";
@@ -14,6 +15,7 @@ const PROMPT_TEMPLATES_KEY = "smart-chat-prompt-templates-v1";
 const ACCURATE_MODE_KEY_PREFIX = "smart-chat-accurate-mode-v1";
 const ORDER_FLOW = ["Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
 const HIDDEN_PRODUCT_NAMES = new Set(["Astra Forge 15", "Volt Tab Max"]);
+const PRODUCT_PAGE_SIZE = 12;
 const MODEL_OPTIONS = [
   { value: "gpt-4o-mini", label: "gpt-4o-mini", meta: "cheap + fast" },
   { value: "gpt-4o", label: "gpt-4o", meta: "powerful" },
@@ -323,16 +325,23 @@ export default function App() {
   const [token, setToken] = useState(() => window.localStorage.getItem(TOKEN_KEY) || "");
   const [activeMode, setActiveMode] = useState(() => window.localStorage.getItem(MODE_KEY) || "general");
   const [user, setUser] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [activePanel, setActivePanel] = useState("chat");
   const [products, setProducts] = useState([]);
+  const [productTotal, setProductTotal] = useState(0);
+  const [productPage, setProductPage] = useState(1);
   const [wishlist, setWishlist] = useState({ items: [] });
   const [cart, setCart] = useState({ items: [], total_amount: 0 });
   const [orders, setOrders] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [adminStats, setAdminStats] = useState(null);
+  const [adminChatLogs, setAdminChatLogs] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productSearch, setProductSearch] = useState("");
+  const [productSuggestions, setProductSuggestions] = useState([]);
   const [category, setCategory] = useState("all");
   const [checkoutForm, setCheckoutForm] = useState({
     full_name: "",
@@ -388,6 +397,10 @@ export default function App() {
   }, [promptTemplates]);
 
   useEffect(() => {
+    setProductPage(1);
+  }, [category, productSearch]);
+
+  useEffect(() => {
     if (user?.email) {
       saveAccurateMode(user.email, accurateModeEnabled);
     }
@@ -417,7 +430,10 @@ export default function App() {
         }
         setCheckoutForm((current) => ({ ...current, full_name: meData.name }));
         setSessions(sessionData);
-        await Promise.all([fetchProducts(token), fetchWishlist(token), fetchCart(token), fetchOrders(token)]);
+        await Promise.all([fetchProducts(token), fetchWishlist(token), fetchCart(token), fetchOrders(token), fetchDocuments(token)]);
+        if (meData.is_admin) {
+          await fetchAdminInsights(token);
+        }
         const preferred = sessionData.find((session) => session.mode === "general") || sessionData[0];
         if (preferred) {
           setActiveMode("general");
@@ -437,8 +453,27 @@ export default function App() {
 
   useEffect(() => {
     if (!token) return;
-    fetchProducts().catch(() => {});
-  }, [token, category, productSearch]);
+    const timer = window.setTimeout(() => {
+      fetchProducts().catch(() => {});
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [token, category, productSearch, productPage]);
+
+  useEffect(() => {
+    if (!token || !productSearch.trim()) {
+      setProductSuggestions([]);
+      return;
+    }
+    const timer = window.setTimeout(async () => {
+      try {
+        const suggestions = await apiFetch(`/api/products/autocomplete?q=${encodeURIComponent(productSearch.trim())}`);
+        setProductSuggestions(suggestions);
+      } catch {
+        setProductSuggestions([]);
+      }
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [token, productSearch]);
 
   async function apiFetch(path, { method = "GET", body, token: tokenOverride } = {}) {
     const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -463,14 +498,39 @@ export default function App() {
     return response.json();
   }
 
+  async function apiFormFetch(path, formData, { method = "POST", token: tokenOverride } = {}) {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      method,
+      cache: "no-store",
+      headers: {
+        ...(tokenOverride || token ? { Authorization: `Bearer ${tokenOverride || token}` } : {}),
+      },
+      body: formData,
+    });
+    if (!response.ok) {
+      let detail = "Request failed.";
+      try {
+        const data = await response.json();
+        detail = data.detail || detail;
+      } catch {
+        detail = response.statusText || detail;
+      }
+      throw new Error(detail);
+    }
+    return response.json();
+  }
+
   async function fetchProducts(tokenOverride = token) {
     const params = new URLSearchParams();
     if (category !== "all") params.set("category", category);
     if (productSearch.trim()) params.set("search", productSearch.trim());
+    params.set("page", String(productPage));
+    params.set("page_size", String(PRODUCT_PAGE_SIZE));
     const suffix = params.toString() ? `?${params.toString()}` : "";
     const data = await apiFetch(`/api/products${suffix}`, { token: tokenOverride });
-    const filteredData = data.filter((product) => !HIDDEN_PRODUCT_NAMES.has(product.name));
+    const filteredData = data.items.filter((product) => !HIDDEN_PRODUCT_NAMES.has(product.name));
     setProducts(filteredData);
+    setProductTotal(Math.max(0, data.total - [...data.items].filter((product) => HIDDEN_PRODUCT_NAMES.has(product.name)).length));
     return filteredData;
   }
 
@@ -490,6 +550,22 @@ export default function App() {
     const data = await apiFetch("/api/orders", { token: tokenOverride });
     setOrders(data);
     return data;
+  }
+
+  async function fetchDocuments(tokenOverride = token) {
+    const data = await apiFetch("/api/documents", { token: tokenOverride });
+    setDocuments(data);
+    return data;
+  }
+
+  async function fetchAdminInsights(tokenOverride = token) {
+    if (!user?.is_admin && !tokenOverride) return;
+    const [stats, logs] = await Promise.all([
+      apiFetch("/api/admin/stats", { token: tokenOverride }),
+      apiFetch("/api/admin/chat-logs", { token: tokenOverride }),
+    ]);
+    setAdminStats(stats);
+    setAdminChatLogs(logs);
   }
 
   async function refreshSessions(tokenOverride = token) {
@@ -560,7 +636,10 @@ export default function App() {
       }
       setCheckoutForm((current) => ({ ...current, full_name: data.user.name }));
       setAuthForm({ name: "", email: "", password: "" });
-      await Promise.all([fetchProducts(data.token), fetchWishlist(data.token), fetchCart(data.token), fetchOrders(data.token)]);
+        await Promise.all([fetchProducts(data.token), fetchWishlist(data.token), fetchCart(data.token), fetchOrders(data.token), fetchDocuments(data.token)]);
+        if (data.user.is_admin) {
+          await fetchAdminInsights(data.token);
+        }
       await createSession("general", data.token);
       await refreshSessions(data.token);
     } catch (error) {
@@ -570,10 +649,94 @@ export default function App() {
     }
   }
 
+  async function sendMessageRealtime(composedQuestion, visibleQuestion) {
+    return new Promise((resolve, reject) => {
+      const socket = new WebSocket(`${WS_BASE_URL}/ws/chat?token=${encodeURIComponent(token)}`);
+      let receivedStart = false;
+      let streamedContent = "";
+      let responseSessionId = activeSessionId;
+      const optimisticMessages = [...messages, { role: "user", content: composedQuestion }, { role: "assistant", content: "" }];
+
+      socket.onopen = () => {
+        socket.send(
+          JSON.stringify({
+            question: composedQuestion,
+            mode: activeMode,
+            session_id: activeSessionId,
+            model: selectedModel,
+            custom_prompt: activePrompt.trim() || null,
+          }),
+        );
+      };
+
+      socket.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "start") {
+          receivedStart = true;
+          responseSessionId = data.session_id || responseSessionId;
+          setMessages(optimisticMessages);
+          return;
+        }
+        if (data.type === "chunk") {
+          streamedContent += data.content || "";
+          setMessages((current) => {
+            const next = [...current];
+            if (!next.length || next[next.length - 1].role !== "assistant") {
+              next.push({ role: "assistant", content: streamedContent });
+            } else {
+              next[next.length - 1] = { ...next[next.length - 1], content: streamedContent };
+            }
+            return next;
+          });
+          return;
+        }
+        if (data.type === "done") {
+          socket.close();
+          const sourceText = buildSourceText(data.sources, activeMode);
+          const finalContent = `${data.content || streamedContent}${sourceText}`;
+          setTypingMessageKey(`ws-${Date.now()}-${finalContent.length}`);
+          resolve({ sessionId: responseSessionId, content: finalContent, visibleQuestion });
+          return;
+        }
+        if (data.type === "error") {
+          socket.close();
+          reject(new Error(data.message || "Realtime chat failed."));
+        }
+      };
+
+      socket.onerror = () => {
+        if (!receivedStart) {
+          reject(new Error("Realtime chat unavailable."));
+        }
+      };
+
+      socket.onclose = () => {
+        if (!receivedStart && streamedContent.length === 0) {
+          reject(new Error("Realtime chat unavailable."));
+        }
+      };
+    });
+  }
+
   async function sendMessage(input) {
     const payload = typeof input === "string" ? { text: input, attachments: [] } : input || {};
     const question = (payload.text || "").trim();
     const attachments = payload.attachments || [];
+    const uploadableAttachments = attachments.filter((attachment) => attachment.rawFile);
+      if (uploadableAttachments.length) {
+      try {
+        await Promise.all(
+          uploadableAttachments.map((attachment) => {
+            const formData = new FormData();
+            formData.append("file", attachment.rawFile);
+            return apiFormFetch("/api/documents", formData);
+          }),
+        );
+        await fetchDocuments();
+      } catch (error) {
+        setPageError(error instanceof Error ? error.message : "Unable to upload file.");
+      }
+    }
     const attachmentContext = buildAttachmentContext(attachments);
     const visibleQuestion = question || (attachments.length ? "Please check the attached file and help me with it." : "");
     const composedQuestion = `${visibleQuestion}${attachmentContext}`.trim();
@@ -581,30 +744,40 @@ export default function App() {
     setActivePanel("chat");
     setShowAiSettings(false);
     const optimisticMessages = [...messages, { role: "user", content: composedQuestion }];
-    setMessages(optimisticMessages);
-    setIsLoading(true);
-    setPageError("");
-    try {
-      const data = await apiFetch("/api/chat", {
-        method: "POST",
-        body: {
-          question: composedQuestion,
-          history: messages.map((message) => ({ role: message.role, content: message.content })),
-          mode: activeMode,
-          session_id: activeSessionId,
-          model: selectedModel,
-          custom_prompt: activePrompt.trim() || null,
-        },
-      });
-      const detail = await openSession(data.session_id, token, activeMode);
-      const nextMessages = detail.messages.map((message, index) => index === detail.messages.length - 1 && message.role === "assistant" ? { ...message, content: `${message.content}${buildSourceText(data.sources, activeMode)}` } : message);
-      setMessages(nextMessages);
-      const lastAssistant = [...nextMessages].reverse().find((message) => message.role === "assistant");
-      setTypingMessageKey(lastAssistant ? `${detail.id}-${lastAssistant.content.length}-${Date.now()}` : "");
-      await refreshSessions();
-    } catch (error) {
-      const fallbackContent = buildFallbackReply(visibleQuestion, activeMode);
-      setMessages([...optimisticMessages, { role: "assistant", content: fallbackContent }]);
+      setMessages(optimisticMessages);
+      setIsLoading(true);
+      setPageError("");
+      try {
+        try {
+          const wsData = await sendMessageRealtime(composedQuestion, visibleQuestion);
+          const detail = await openSession(wsData.sessionId, token, activeMode);
+          const nextMessages = detail.messages.map((message, index) =>
+            index === detail.messages.length - 1 && message.role === "assistant" ? { ...message, content: wsData.content } : message,
+          );
+          setMessages(nextMessages);
+          await refreshSessions();
+        } catch {
+          const data = await apiFetch("/api/chat", {
+            method: "POST",
+            body: {
+              question: composedQuestion,
+              history: messages.map((message) => ({ role: message.role, content: message.content })),
+              mode: activeMode,
+              session_id: activeSessionId,
+              model: selectedModel,
+              custom_prompt: activePrompt.trim() || null,
+            },
+          });
+          const detail = await openSession(data.session_id, token, activeMode);
+          const nextMessages = detail.messages.map((message, index) => index === detail.messages.length - 1 && message.role === "assistant" ? { ...message, content: `${message.content}${buildSourceText(data.sources, activeMode)}` } : message);
+          setMessages(nextMessages);
+          const lastAssistant = [...nextMessages].reverse().find((message) => message.role === "assistant");
+          setTypingMessageKey(lastAssistant ? `${detail.id}-${lastAssistant.content.length}-${Date.now()}` : "");
+          await refreshSessions();
+        }
+      } catch (error) {
+        const fallbackContent = buildFallbackReply(visibleQuestion, activeMode);
+        setMessages([...optimisticMessages, { role: "assistant", content: fallbackContent }]);
       setTypingMessageKey(`fallback-${Date.now()}-${fallbackContent.length}`);
     } finally {
       setIsLoading(false);
@@ -850,48 +1023,67 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell commerce-shell">
-      <aside className="sidebar">
-        <button className="new-chat-button" onClick={() => startNewChat()}>New chat</button>
+    <div className={`app-shell commerce-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <button
+          type="button"
+          className="sidebar-collapse-button"
+          onClick={() => setSidebarCollapsed((current) => !current)}
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {sidebarCollapsed ? "»" : "«"}
+        </button>
+        <button className="new-chat-button" onClick={() => startNewChat()} title="New chat">
+          {sidebarCollapsed ? "+" : "New chat"}
+        </button>
         <div className="sidebar-section">
-          <p className="sidebar-label">Workspace</p>
-          <button className={`history-item ${activePanel === "chat" ? "active" : ""}`} onClick={() => setActivePanel("chat")}>Smart Chat</button>
-          <button className={`history-item ${activePanel === "store" ? "active" : ""}`} onClick={() => setActivePanel("store")}>Store & Orders</button>
+          {sidebarCollapsed ? null : <p className="sidebar-label">Workspace</p>}
+          <button className={`history-item ${activePanel === "chat" ? "active" : ""}`} onClick={() => setActivePanel("chat")} title="Smart Chat">
+            {sidebarCollapsed ? "Chat" : "Smart Chat"}
+          </button>
+          <button className={`history-item ${activePanel === "store" ? "active" : ""}`} onClick={() => setActivePanel("store")} title="Store & Orders">
+            {sidebarCollapsed ? "Store" : "Store & Orders"}
+          </button>
         </div>
-        <div className="sidebar-section profile-card">
-          <p className="sidebar-label">Signed In</p>
-          <strong>{user.name}</strong>
-          <p className="profile-email">{user.email}</p>
-          {user.is_admin ? <p className="admin-chip">Admin access enabled</p> : null}
-          <button className="logout-button" onClick={logout}>Log out</button>
-        </div>
-        <div className="sidebar-section">
-          <p className="sidebar-label">Saved AI Chats</p>
-          <div className="session-list">
-            {sessionsForMode.map((session) => (
-              <article key={session.id} className={`session-card ${session.id === activeSessionId ? "active" : ""}`}>
-                <button className="session-item" onClick={() => openSession(session.id, token, "general")}>
-                  <strong>{session.title}</strong><span>{session.preview}</span>
-                </button>
-                <button className="session-delete-button" type="button" onClick={() => handleDeleteSession(session.id)}>
-                  Delete
-                </button>
-              </article>
-            ))}
+        {sidebarCollapsed ? null : (
+          <div className="sidebar-section profile-card">
+            <p className="sidebar-label">Signed In</p>
+            <strong>{user.name}</strong>
+            <p className="profile-email">{user.email}</p>
+            {user.is_admin ? <p className="admin-chip">Admin access enabled</p> : null}
+            <button className="logout-button" onClick={logout}>Log out</button>
           </div>
-        </div>
-        <div className="sidebar-footer"><div className="product-badge">AI</div><div><strong>Smart AI</strong><p>One assistant for shopping, support, and real-life help</p></div></div>
+        )}
+        {sidebarCollapsed ? null : (
+          <div className="sidebar-section">
+            <p className="sidebar-label">Saved AI Chats</p>
+            <div className="session-list">
+              {sessionsForMode.map((session) => (
+                <article key={session.id} className={`session-card ${session.id === activeSessionId ? "active" : ""}`}>
+                  <button className="session-item" onClick={() => openSession(session.id, token, "general")}>
+                    <strong>{session.title}</strong><span>{session.preview}</span>
+                  </button>
+                  <button className="session-delete-button" type="button" onClick={() => handleDeleteSession(session.id)}>
+                    Delete
+                  </button>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+        {sidebarCollapsed ? null : <div className="sidebar-footer"><div className="product-badge">AI</div><div><strong>Smart AI</strong><p>One assistant for shopping, support, and real-life help</p></div></div>}
       </aside>
 
-      <main className="main-panel">
-        <header className="topbar">
-          <div className="topbar-copy">
-            <p className="eyebrow">Single AI Workspace</p>
-            <h1>{activePanel === "chat" ? "Smart AI assistant" : "Store and orders"}</h1>
+        <main className="main-panel">
+          <header className="topbar">
+            <div className="topbar-copy">
+              <p className="eyebrow">Single AI Workspace</p>
+              <h1>{activePanel === "chat" ? "Smart AI assistant" : "Store and orders"}</h1>
             <p className="topbar-subtitle">
               {activePanel === "chat"
                 ? "Ask one AI for shopping advice, ecommerce problem solving, support help, and everyday real-life questions."
-                : "Browse products, open detail pages, save wishlist items, place orders, and track shipments."}
+                : "Browse products, save wishlist items, place orders, and track shipments from one shopping workspace."}
             </p>
             {pageError ? <p className="page-error">{pageError}</p> : null}
             {activePanel === "chat" ? (
@@ -975,12 +1167,20 @@ export default function App() {
               </>
             ) : null}
           </div>
-          <div className="topbar-badges">
-            <button type="button" className="topbar-badge topbar-badge-button" onClick={openFastApiStatus}>FastAPI</button>
-            <button type="button" className="topbar-badge topbar-badge-button" onClick={openSqliteBackupView}>SQLite Backup</button>
-            <button type="button" className="topbar-badge topbar-badge-button" onClick={openPaymentDemoView}>Payment Demo</button>
-            <button type="button" className="topbar-badge topbar-badge-button accent" onClick={openChatView}>
-              {activePanel === "chat" ? "Chat View" : "Open Chat"}
+          <div className="topbar-view-tabs">
+            <button
+              type="button"
+              className={`topbar-view-tab ${activePanel === "chat" ? "active" : ""}`}
+              onClick={() => setActivePanel("chat")}
+            >
+              Chat
+            </button>
+            <button
+              type="button"
+              className={`topbar-view-tab ${activePanel === "store" ? "active" : ""}`}
+              onClick={() => setActivePanel("store")}
+            >
+              Store
             </button>
           </div>
         </header>
@@ -1005,8 +1205,13 @@ export default function App() {
               <>
                 <ProductStorefront
                   products={products}
+                  productTotal={productTotal}
+                  productPage={productPage}
+                  onPageChange={setProductPage}
+                  pageSize={PRODUCT_PAGE_SIZE}
                   productSearch={productSearch}
                   setProductSearch={setProductSearch}
+                  productSuggestions={productSuggestions}
                   category={category}
                   setCategory={setCategory}
                   onAsk={sendMessage}
@@ -1018,6 +1223,9 @@ export default function App() {
                 {user.is_admin ? (
                   <AdminPanel
                     products={products}
+                    stats={adminStats}
+                    chatLogs={adminChatLogs}
+                    documents={documents}
                     onSave={handleSaveProduct}
                     onDelete={handleDeleteProduct}
                     busy={isLoading}

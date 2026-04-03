@@ -1,0 +1,22 @@
+﻿services:
+  - type: web
+    name: smart-ai-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: CORS_ORIGINS
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: AUTH_TOKEN_TTL_HOURS
+        value: "72"
+      - key: DATABASE_PATH
+        value: ./app_data.sqlite3
+      - key: ADMIN_EMAILS
+        value: admin@smartcommerce.ai

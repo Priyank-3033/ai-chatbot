@@ -38,6 +38,14 @@ class Settings(BaseSettings):
         return raw if raw.is_absolute() else BASE_DIR / raw
 
     @property
+    def frontend_public_path(self) -> Path:
+        return BASE_DIR.parent / "frontend" / "public"
+
+    @property
+    def product_photos_path(self) -> Path:
+        return self.frontend_public_path / "product-photos"
+
+    @property
     def parsed_cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 

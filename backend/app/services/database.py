@@ -111,6 +111,17 @@ class DatabaseService:
                     unit_price INTEGER NOT NULL,
                     FOREIGN KEY(order_id) REFERENCES orders(id)
                 );
+
+                CREATE TABLE IF NOT EXISTS uploaded_documents (
+                    id TEXT PRIMARY KEY,
+                    user_id INTEGER NOT NULL,
+                    name TEXT NOT NULL,
+                    content_type TEXT NOT NULL,
+                    size INTEGER NOT NULL,
+                    extracted_text TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(user_id) REFERENCES users(id)
+                );
                 """
             )
             self._ensure_column(connection, "orders", "payment_provider", "TEXT NOT NULL DEFAULT 'SmartPay Demo'")
@@ -382,3 +393,65 @@ class DatabaseService:
                 }
             )
         return events
+
+    def save_uploaded_document(self, user_id: int, name: str, content_type: str, size: int, extracted_text: str) -> sqlite3.Row:
+        document_id = uuid4().hex
+        created_at = utc_now_iso()
+        with self.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO uploaded_documents (id, user_id, name, content_type, size, extracted_text, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (document_id, user_id, name, content_type, size, extracted_text, created_at),
+            )
+            return connection.execute("SELECT * FROM uploaded_documents WHERE id = ?", (document_id,)).fetchone()
+
+    def list_uploaded_documents(self, user_id: int) -> list[sqlite3.Row]:
+        with self.connect() as connection:
+            return connection.execute(
+                "SELECT id, name, content_type, size, created_at FROM uploaded_documents WHERE user_id = ? ORDER BY created_at DESC",
+                (user_id,),
+            ).fetchall()
+
+    def get_uploaded_documents_for_retrieval(self, user_id: int) -> list[sqlite3.Row]:
+        with self.connect() as connection:
+            return connection.execute(
+                "SELECT id, name, content_type, size, extracted_text, created_at FROM uploaded_documents WHERE user_id = ? ORDER BY created_at DESC",
+                (user_id,),
+            ).fetchall()
+
+    def admin_stats(self) -> sqlite3.Row:
+        with self.connect() as connection:
+            return connection.execute(
+                """
+                SELECT
+                    (SELECT COUNT(*) FROM users) AS user_count,
+                    (SELECT COUNT(*) FROM orders) AS order_count,
+                    (SELECT COUNT(*) FROM chat_sessions) AS chat_session_count,
+                    (SELECT COUNT(*) FROM uploaded_documents) AS uploaded_document_count
+                """
+            ).fetchone()
+
+    def admin_chat_logs(self, limit: int = 50) -> list[sqlite3.Row]:
+        with self.connect() as connection:
+            return connection.execute(
+                """
+                SELECT
+                    s.id AS session_id,
+                    s.title,
+                    s.mode,
+                    s.updated_at,
+                    u.name AS user_name,
+                    u.email AS user_email,
+                    COALESCE(
+                        (SELECT content FROM chat_messages m WHERE m.session_id = s.id ORDER BY m.id DESC LIMIT 1),
+                        ''
+                    ) AS preview
+                FROM chat_sessions s
+                JOIN users u ON u.id = s.user_id
+                ORDER BY s.updated_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()

@@ -49,6 +49,14 @@ function normalizeImagePath(value) {
   return `/product-photos/${trimmed.replace(/^\/+/, "")}`;
 }
 
+function firstAvailableImage(...values) {
+  for (const value of values) {
+    const normalized = normalizeImagePath(value);
+    if (normalized) return normalized;
+  }
+  return "";
+}
+
 function hashString(value) {
   return value.split("").reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
 }
@@ -228,14 +236,26 @@ function toDataUri(svg) {
 }
 
 export function getLocalProductImage(product, offset = 0) {
-  const realImage = normalizeImagePath(product.image);
+  const realImage = firstAvailableImage(product.image_local, product.image);
   if (offset === 0 && realImage) return realImage;
   const seed = hashString(`${product.id}-${product.name}-${product.brand}`) + offset * 13;
   return toDataUri(buildArtSvg(product, seed));
 }
 
+export function getProductImageSources(product) {
+  const localMain = normalizeImagePath(product.image_local);
+  const remoteMain = normalizeImagePath(product.image);
+  const generated = getProductPlaceholder(product);
+  return [localMain, remoteMain, generated].filter((image, index, all) => image && all.indexOf(image) === index);
+}
+
 export function getLocalProductGallery(product) {
-  const realImages = [product.image, ...(product.gallery || [])]
+  const realImages = [
+    product.image,
+    ...(product.gallery || []),
+    product.image_local,
+    ...(product.gallery_local || []),
+  ]
     .map((image) => normalizeImagePath(image))
     .filter(Boolean);
 

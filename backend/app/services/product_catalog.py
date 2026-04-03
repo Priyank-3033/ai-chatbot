@@ -18,6 +18,8 @@ class Product:
     tag: str
     image: str
     gallery: list[str]
+    image_local: str | None
+    gallery_local: list[str]
     description: str
     long_description: str
     features: list[str]
@@ -47,6 +49,8 @@ class ProductCatalogService:
                 "tag": item.get("tag", "Featured"),
                 "image": item["image"],
                 "gallery": item.get("gallery") or [item["image"]],
+                "image_local": item.get("image_local"),
+                "gallery_local": item.get("gallery_local") or ([] if not item.get("image_local") else [item["image_local"]]),
                 "description": item["description"],
                 "long_description": item.get("long_description", item["description"]),
                 "features": item.get("features", []),
@@ -87,6 +91,20 @@ class ProductCatalogService:
             if product.id == product_id:
                 return product
         return None
+
+    def autocomplete(self, search: str, limit: int = 6) -> list[str]:
+        needle = search.lower().strip()
+        if not needle:
+            return []
+        seen: list[str] = []
+        for product in self.products:
+            candidates = [product.name, product.brand, product.tag]
+            for value in candidates:
+                if needle in value.lower() and value not in seen:
+                    seen.append(value)
+                if len(seen) >= limit:
+                    return seen
+        return seen
 
     def recommend_products(self, question: str, limit: int = 3) -> list[Product]:
         normalized = question.lower()

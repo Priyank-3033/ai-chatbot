@@ -225,6 +225,7 @@ export default function ChatWindow({
                 kind: file.type.startsWith("image/") ? "image" : "file",
                 size: file.size,
                 preview: "",
+                rawFile: file,
               });
               return;
             }
@@ -237,6 +238,7 @@ export default function ChatWindow({
                 kind: "text",
                 size: file.size,
                 preview: String(reader.result || "").slice(0, 1400),
+                rawFile: file,
               });
             };
             reader.onerror = () => {
@@ -246,6 +248,7 @@ export default function ChatWindow({
                 kind: "file",
                 size: file.size,
                 preview: "",
+                rawFile: file,
               });
             };
             reader.readAsText(file);

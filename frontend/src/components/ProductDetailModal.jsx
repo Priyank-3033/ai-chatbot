@@ -1,14 +1,16 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import { getLocalProductGallery, getLocalProductImage, getProductPlaceholder } from "../utils/productVisuals";
+import { getLocalProductGallery, getProductImageSources, getProductPlaceholder } from "../utils/productVisuals";
 
 export default function ProductDetailModal({ product, inWishlist, onClose, onAddToCart, onToggleWishlist, onAsk }) {
   if (!product) return null;
 
   const localGallery = useMemo(() => getLocalProductGallery(product), [product]);
-  const [selectedImage, setSelectedImage] = useState(() => getLocalProductImage(product));
+  const [selectedImage, setSelectedImage] = useState(() => getProductImageSources(product)[0] || getProductPlaceholder(product));
+  const [zoomed, setZoomed] = useState(false);
 
   useEffect(() => {
-    setSelectedImage(getLocalProductImage(product));
+    setSelectedImage(getProductImageSources(product)[0] || getProductPlaceholder(product));
+    setZoomed(false);
   }, [product]);
 
   return (
@@ -17,19 +19,26 @@ export default function ProductDetailModal({ product, inWishlist, onClose, onAdd
         <button className="modal-close" onClick={onClose} type="button">x</button>
         <div className="product-modal-grid">
           <div className="product-modal-media">
-            <img
-              src={selectedImage}
-              alt={product.name}
-              className="product-modal-hero"
-              onError={() => setSelectedImage(getProductPlaceholder(product))}
-            />
+            <div className={`product-modal-hero-wrap ${zoomed ? "zoomed" : ""}`}>
+              <img
+                src={selectedImage}
+                alt={product.name}
+                className="product-modal-hero"
+                onClick={() => setZoomed((current) => !current)}
+                onError={() => setSelectedImage(getProductPlaceholder(product))}
+              />
+              <span className="zoom-hint">{zoomed ? "Click image to zoom out" : "Click image to zoom"}</span>
+            </div>
             <div className="product-modal-gallery">
               {localGallery.map((img, i) => (
                 <img
                   key={`${product.id}-${i}`}
                   src={img}
                   alt={`${product.name} preview ${i + 1}`}
-                  onClick={() => setSelectedImage(img)}
+                  onClick={() => {
+                    setSelectedImage(img);
+                    setZoomed(false);
+                  }}
                   onError={(event) => {
                     event.currentTarget.src = getProductPlaceholder(product);
                   }}

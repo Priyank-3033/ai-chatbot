@@ -38,7 +38,7 @@ function productToForm(product) {
   };
 }
 
-export default function AdminPanel({ products, onSave, onDelete, busy }) {
+export default function AdminPanel({ products, stats, chatLogs = [], documents = [], onSave, onDelete, busy }) {
   const [form, setForm] = useState(EMPTY_PRODUCT);
   const [editingId, setEditingId] = useState("");
   const [message, setMessage] = useState("");
@@ -95,6 +95,15 @@ export default function AdminPanel({ products, onSave, onDelete, busy }) {
         <button className="secondary-button" type="button" onClick={resetForm}>New product</button>
       </div>
 
+      {stats ? (
+        <div className="admin-stats-grid">
+          <article className="admin-stat-card"><strong>{stats.user_count}</strong><span>Users</span></article>
+          <article className="admin-stat-card"><strong>{stats.order_count}</strong><span>Orders</span></article>
+          <article className="admin-stat-card"><strong>{stats.chat_session_count}</strong><span>Chat sessions</span></article>
+          <article className="admin-stat-card"><strong>{stats.uploaded_document_count}</strong><span>Uploaded docs</span></article>
+        </div>
+      ) : null}
+
       <div className="admin-layout">
         <div className="admin-product-list">
           {products.map((product) => (
@@ -145,6 +154,50 @@ export default function AdminPanel({ products, onSave, onDelete, busy }) {
           {message ? <p className="admin-message">{message}</p> : null}
           <button className="checkout-button" type="submit" disabled={busy}>{editingId ? "Update product" : "Create product"}</button>
         </form>
+      </div>
+
+      <div className="admin-layout admin-insights-layout">
+        <section className="admin-insight-panel">
+          <div className="commerce-head">
+            <div>
+              <p className="eyebrow">Document uploads</p>
+              <h3>Recent knowledge files</h3>
+            </div>
+          </div>
+          <div className="admin-product-list">
+            {documents.length === 0 ? <p className="empty-mini">No uploaded documents yet.</p> : null}
+            {documents.slice(0, 8).map((doc) => (
+              <article key={doc.id} className="admin-product-card">
+                <div>
+                  <strong>{doc.name}</strong>
+                  <p>{doc.content_type}</p>
+                  <span>{Math.max(1, Math.round(doc.size / 1024))} KB</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="admin-insight-panel">
+          <div className="commerce-head">
+            <div>
+              <p className="eyebrow">Chat logs</p>
+              <h3>Recent conversations</h3>
+            </div>
+          </div>
+          <div className="admin-product-list">
+            {chatLogs.length === 0 ? <p className="empty-mini">No chat logs available.</p> : null}
+            {chatLogs.slice(0, 8).map((log) => (
+              <article key={log.session_id} className="admin-product-card">
+                <div>
+                  <strong>{log.title}</strong>
+                  <p>{log.user_name} • {log.mode}</p>
+                  <span>{log.preview}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
     </section>
   );
