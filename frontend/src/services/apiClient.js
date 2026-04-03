@@ -28,6 +28,11 @@ export function createApiClient({ getToken, onUnauthorized } = {}) {
 
     if (!response.ok) {
       if (response.status === 401) {
+        try {
+          window.localStorage.removeItem("smart-chat-token-v1");
+        } catch {
+          // ignore storage failures
+        }
         onUnauthorized?.();
       }
       throw new Error(await parseError(response));
@@ -50,6 +55,11 @@ export function createApiClient({ getToken, onUnauthorized } = {}) {
 
     if (!response.ok) {
       if (response.status === 401) {
+        try {
+          window.localStorage.removeItem("smart-chat-token-v1");
+        } catch {
+          // ignore storage failures
+        }
         onUnauthorized?.();
       }
       throw new Error(await parseError(response));

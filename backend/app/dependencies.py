@@ -155,6 +155,7 @@ def to_document_response(row) -> DocumentResponse:
         name=row["name"],
         content_type=row["content_type"],
         size=row["size"],
+        status=row["status"],
         created_at=row["created_at"],
     )
 

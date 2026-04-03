@@ -118,6 +118,7 @@ class DatabaseService:
                     name TEXT NOT NULL,
                     content_type TEXT NOT NULL,
                     size INTEGER NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'ready',
                     extracted_text TEXT NOT NULL,
                     created_at TEXT NOT NULL,
                     FOREIGN KEY(user_id) REFERENCES users(id)
@@ -129,6 +130,7 @@ class DatabaseService:
             self._ensure_column(connection, "orders", "transaction_reference", "TEXT NOT NULL DEFAULT ''")
             self._ensure_column(connection, "orders", "tracking_code", "TEXT NOT NULL DEFAULT ''")
             self._ensure_column(connection, "orders", "tracking_updated_at", "TEXT NOT NULL DEFAULT ''")
+            self._ensure_column(connection, "uploaded_documents", "status", "TEXT NOT NULL DEFAULT 'ready'")
             self._ensure_tracking_rows(connection)
 
     @staticmethod
@@ -407,17 +409,44 @@ class DatabaseService:
             )
             return connection.execute("SELECT * FROM uploaded_documents WHERE id = ?", (document_id,)).fetchone()
 
+    def create_uploaded_document_placeholder(self, user_id: int, name: str, content_type: str, size: int) -> sqlite3.Row:
+        document_id = uuid4().hex
+        created_at = utc_now_iso()
+        with self.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO uploaded_documents (id, user_id, name, content_type, size, status, extracted_text, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (document_id, user_id, name, content_type, size, "processing", "", created_at),
+            )
+            return connection.execute("SELECT * FROM uploaded_documents WHERE id = ?", (document_id,)).fetchone()
+
+    def update_uploaded_document_text(self, document_id: str, extracted_text: str, status: str = "ready") -> None:
+        with self.connect() as connection:
+            connection.execute(
+                "UPDATE uploaded_documents SET extracted_text = ?, status = ? WHERE id = ?",
+                (extracted_text, status, document_id),
+            )
+
+    def mark_uploaded_document_failed(self, document_id: str) -> None:
+        with self.connect() as connection:
+            connection.execute(
+                "UPDATE uploaded_documents SET status = ? WHERE id = ?",
+                ("failed", document_id),
+            )
+
     def list_uploaded_documents(self, user_id: int) -> list[sqlite3.Row]:
         with self.connect() as connection:
             return connection.execute(
-                "SELECT id, name, content_type, size, created_at FROM uploaded_documents WHERE user_id = ? ORDER BY created_at DESC",
+                "SELECT id, name, content_type, size, status, created_at FROM uploaded_documents WHERE user_id = ? ORDER BY created_at DESC",
                 (user_id,),
             ).fetchall()
 
     def get_uploaded_documents_for_retrieval(self, user_id: int) -> list[sqlite3.Row]:
         with self.connect() as connection:
             return connection.execute(
-                "SELECT id, name, content_type, size, extracted_text, created_at FROM uploaded_documents WHERE user_id = ? ORDER BY created_at DESC",
+                "SELECT id, name, content_type, size, status, extracted_text, created_at FROM uploaded_documents WHERE user_id = ? AND status = 'ready' ORDER BY created_at DESC",
                 (user_id,),
             ).fetchall()
 

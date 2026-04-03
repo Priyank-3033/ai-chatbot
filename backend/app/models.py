@@ -214,6 +214,7 @@ class DocumentResponse(BaseModel):
     name: str
     content_type: str
     size: int
+    status: str
     created_at: str
 
 

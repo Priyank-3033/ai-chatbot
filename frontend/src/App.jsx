@@ -6,6 +6,7 @@ import ProductDetailModal from "./components/ProductDetailModal";
 import ProductStorefront from "./components/ProductStorefront";
 import { useChat } from "./hooks/useChat";
 import { API_BASE_URL, createApiClient } from "./services/apiClient";
+import { useChatStore } from "./store/chatStore";
 
 const TOKEN_KEY = "smart-chat-token-v1";
 const MODE_KEY = "smart-chat-mode-v1";
@@ -309,7 +310,6 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
-  const [messages, setMessages] = useState([]);
   const [activePanel, setActivePanel] = useState("chat");
   const [products, setProducts] = useState([]);
   const [productTotal, setProductTotal] = useState(0);
@@ -339,9 +339,7 @@ export default function App() {
   const [authForm, setAuthForm] = useState({ name: "", email: "", password: "" });
   const [authError, setAuthError] = useState("");
   const [pageError, setPageError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [booting, setBooting] = useState(true);
-  const [typingMessageKey, setTypingMessageKey] = useState("");
   const [selectedModel, setSelectedModel] = useState(() => window.localStorage.getItem(MODEL_KEY) || "gpt-4o");
   const [promptState, setPromptState] = useState(() => loadPromptState());
   const [promptTemplates, setPromptTemplates] = useState(() => loadPromptTemplates());
@@ -350,6 +348,13 @@ export default function App() {
   const [accurateModeEnabled, setAccurateModeEnabled] = useState(false);
 
   const modeConfig = MODE_CONFIG[activeMode];
+  const messages = useChatStore((state) => state.messages);
+  const setMessages = useChatStore((state) => state.setMessages);
+  const isLoading = useChatStore((state) => state.isLoading);
+  const setIsLoading = useChatStore((state) => state.setIsLoading);
+  const typingMessageKey = useChatStore((state) => state.typingMessageKey);
+  const setTypingMessageKey = useChatStore((state) => state.setTypingMessageKey);
+  const clearChat = useChatStore((state) => state.clearChat);
   const sessionsForMode = useMemo(() => sessions.filter((session) => session.mode === "general"), [sessions]);
   const wishlistIds = useMemo(() => wishlist.items.map((item) => item.product_id), [wishlist]);
   const memoryItems = useMemo(() => extractMemoryItems(messages), [messages]);
@@ -804,7 +809,7 @@ export default function App() {
     setUser(null);
     setAccurateModeEnabled(false);
     setSessions([]);
-    setMessages([]);
+    clearChat();
     setProducts([]);
     setWishlist({ items: [] });
     setCart({ items: [], total_amount: 0 });
