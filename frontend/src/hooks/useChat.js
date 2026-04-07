@@ -198,6 +198,7 @@ export function useChat({
   setActivePanel,
   setShowAiSettings,
   setPageError,
+  setRetryAction,
   buildFallbackReply,
   setTypingMessageKey,
 }) {
@@ -218,6 +219,7 @@ export function useChat({
         );
         await fetchDocuments();
       } catch (error) {
+        setRetryAction(() => () => sendMessage(input));
         setPageError(error instanceof Error ? error.message : "Unable to upload file.");
       }
     }
@@ -232,6 +234,7 @@ export function useChat({
     const optimisticMessages = [...messages, { role: "user", content: composedQuestion }];
     setMessages(optimisticMessages);
     setIsLoading(true);
+    setRetryAction(null);
     setPageError("");
 
     try {
@@ -304,6 +307,8 @@ export function useChat({
       const fallbackContent = buildFallbackReply(visibleQuestion, activeMode);
       setMessages([...optimisticMessages, { role: "assistant", content: fallbackContent }]);
       setTypingMessageKey(`fallback-${Date.now()}-${fallbackContent.length}`);
+      setRetryAction(() => () => sendMessage(input));
+      setPageError("Live AI response failed, so a local fallback reply was shown. You can retry.");
     } finally {
       setIsLoading(false);
     }

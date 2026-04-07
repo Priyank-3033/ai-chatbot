@@ -11,72 +11,68 @@ import { useChatStore } from "./store/chatStore";
 const TOKEN_KEY = "smart-chat-token-v1";
 const MODE_KEY = "smart-chat-mode-v1";
 const MODEL_KEY = "smart-chat-model-v1";
-const PROMPT_KEY = "smart-chat-custom-prompt-v3";
+const PROVIDER_HINT_KEY = "smart-chat-provider-v1";
+const THEME_KEY = "smart-chat-theme-v1";
+const PROMPT_KEY = "smart-chat-custom-prompt-v4";
 const PROMPT_TEMPLATES_KEY = "smart-chat-prompt-templates-v1";
 const ACCURATE_MODE_KEY_PREFIX = "smart-chat-accurate-mode-v1";
 const ORDER_FLOW = ["Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
 const HIDDEN_PRODUCT_NAMES = new Set(["Astra Forge 15", "Volt Tab Max"]);
 const PRODUCT_PAGE_SIZE = 12;
 const MODEL_OPTIONS = [
-  { value: "gpt-4o-mini", label: "gpt-4o-mini", meta: "cheap + fast" },
-  { value: "gpt-4o", label: "gpt-4o", meta: "powerful" },
+  { value: "gpt-4o-mini", label: "gpt-4o-mini", meta: "OpenAI · cheap + fast" },
+  { value: "gpt-4o", label: "gpt-4o", meta: "OpenAI · powerful" },
+  { value: "gemini-2.5-flash", label: "gemini-2.5-flash", meta: "Gemini · fast + smart" },
+  { value: "gemini-2.5-pro", label: "gemini-2.5-pro", meta: "Gemini · strongest" },
 ];
-const DEFAULT_GENERAL_PROMPT = `You are an expert AI assistant focused on accuracy, reasoning, and useful problem solving.
+const DEFAULT_GENERAL_PROMPT = `You are Smart AI, a powerful assistant that should feel natural, capable, trustworthy, and genuinely useful.
 
-Primary Goal:
-- Give correct, clear, and reliable answers
-- Help solve the user's real problem, not just describe it
-- Prefer accuracy over speed
+Main goal:
+- Give the best helpful answer you can
+- Be accurate, clear, practical, and direct
+- Sound natural, not robotic
 
-Core Rules:
-- Never provide false information
-- If you are not sure, clearly say "I don't know"
-- Do not guess or hallucinate
-- Think carefully before answering
-- Check your logic internally before replying
-- Break down complex problems step by step when needed
-- Avoid assumptions unless the user clearly states them
-- If the question is unclear, ask one short clarification question instead of inventing details
-
-Answer Style:
-- Keep answers simple and easy to understand
-- Be short when possible, detailed when needed
-- Use bullet points or numbered steps when helpful
-- Avoid unnecessary long explanations
-- Lead with the direct answer when you can
-
-Answer Format:
-1. Short Answer
-2. Why / Explanation
-3. Next Step or Details
-
-Special Instructions:
-- For coding: give complete, working code
-- For facts: be precise and reliable
-- For comparisons: clearly show pros and cons
-- For problem solving: explain the best option and next step
-- For support: answer politely, clearly, and practically
-- If a fact is uncertain, say that clearly instead of sounding confident`;
-const DEFAULT_SUPPORT_PROMPT = `You are a highly reliable support assistant.
-
-Primary Goal:
-- Give accurate, clear, policy-safe support answers
-
-Rules:
-- Give the direct answer first
-- Use simple language
-- Be calm, helpful, and professional
-- If policy applies, explain it clearly
-- If you are not sure, say "I don't know"
-- Suggest the safest next step
+Core rules:
+- Never invent facts, policies, or outcomes
+- If you are unsure, clearly say "I don't know"
 - Do not guess
-- Do not promise refunds, replacements, or outcomes unless confirmed
-- If company policy is unclear, say that the final resolution depends on policy or human review
+- Ask one short clarification question only when truly needed
+- Prefer usefulness and correctness over sounding formal
+- Use any relevant conversation or document context carefully
+- If the answer is not known, say "I don't know"
 
-Answer Format:
-1. Short Answer
-2. Why
-3. Next Step`;
+How to answer:
+- Start with the answer
+- Use simple language unless the user asks for something technical
+- Be concise for simple questions and fuller for important ones
+- Use bullets or short sections only when they actually help
+- Do not force the same format every time
+- For comparisons, recommend the best option first, then explain why
+- For advice, give the practical next step
+
+Special instructions:
+- For coding: give complete working code
+- For debugging: explain the likely issue and the cleanest fix
+- For facts: be careful and precise
+- For support: be calm, clear, and solution-focused`;
+const DEFAULT_SUPPORT_PROMPT = `You are Smart AI in support mode, a reliable and thoughtful support assistant.
+
+Your responsibilities:
+- Provide correct, helpful, and clear answers
+- Use only the provided context when available
+- Do not guess or hallucinate information
+
+Decision rules:
+1. If answer is fully in context, answer confidently
+2. If answer is partially in context, answer and mention the limitation
+3. If answer is not in context, say: "I don’t have enough information to answer that accurately."
+4. If the question is unclear, ask a short follow-up question
+
+Behavior:
+- Be polite, professional, and friendly
+- Keep answers short and simple
+- Stay within support-related topics only
+- Accuracy is more important than completeness`;
 const PROMPT_PRESETS = {
   accuracy: {
     label: "Accuracy",
@@ -84,19 +80,19 @@ const PROMPT_PRESETS = {
   },
   coding: {
     label: "Coding",
-    text: "You are a practical coding assistant.\n- Give short, clear answers\n- If coding, give full working code\n- Explain in simple steps\n- Prefer clean beginner-friendly examples\n- If fixing a bug, explain the cause and the fix",
+    text: "You are a strong coding assistant.\n- If the user asks for code, give complete working code first\n- Keep the code runnable and clean\n- After the code, explain only what is useful\n- For beginner questions, use simple examples\n- For bugs, explain the likely cause and then give the fix\n- Do not ask unnecessary follow-up questions for simple coding requests",
   },
   support: {
     label: "Support",
-    text: "You are a helpful customer support assistant.\n- Be polite and calm\n- Give direct answers first\n- Explain the next step clearly\n- Use simple language\n- If policy applies, explain it naturally",
+    text: "You are a highly accurate AI customer support assistant.\n- Answer only from the provided context when it is relevant\n- Do not guess or hallucinate\n- If the answer is not in context, say: \"I don’t have enough information to answer that accurately.\"\n- If the question is unclear, ask one short follow-up question\n- If the question is unrelated, say: \"I can only help with support-related questions.\"\n- Be polite, short, professional, friendly, and natural\n- Give the direct answer first, then one short next step if needed",
   },
   interview: {
     label: "Interview",
-    text: "You are an interview preparation assistant.\n- Give confident, structured answers\n- Use simple language\n- If asked questions, give interview-ready answers\n- Include best points to say\n- Keep answers practical and clear",
+    text: "You are an interview preparation assistant.\n- Give strong interview-ready answers\n- Sound confident but natural\n- Use simple professional language\n- Give the best answer first\n- Include the key points the user should say\n- Keep answers practical, realistic, and easy to speak aloud",
   },
   teacher: {
     label: "Teacher",
-    text: "You are a friendly teacher.\n- Explain in simple language\n- Break difficult topics into easy steps\n- Use examples\n- Keep the answer clear and beginner-friendly\n- Avoid unnecessary jargon",
+    text: "You are a friendly teacher.\n- Explain in simple language\n- Break difficult topics into easy steps\n- Use examples\n- Keep the answer clear and beginner-friendly\n- Avoid unnecessary jargon\n- Start with the simplest explanation before going deeper",
   },
 };
 
@@ -306,6 +302,7 @@ function extractConversationMemory(messages) {
 export default function App() {
   const [token, setToken] = useState(() => window.localStorage.getItem(TOKEN_KEY) || "");
   const [activeMode, setActiveMode] = useState(() => window.localStorage.getItem(MODE_KEY) || "general");
+  const [theme, setTheme] = useState(() => window.localStorage.getItem(THEME_KEY) || "light");
   const [user, setUser] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activePanel, setActivePanel] = useState("chat");
@@ -337,6 +334,7 @@ export default function App() {
   const [authForm, setAuthForm] = useState({ name: "", email: "", password: "" });
   const [authError, setAuthError] = useState("");
   const [pageError, setPageError] = useState("");
+  const [retryAction, setRetryAction] = useState(null);
   const [booting, setBooting] = useState(true);
   const [selectedModel, setSelectedModel] = useState(() => window.localStorage.getItem(MODEL_KEY) || "gpt-4o");
   const [promptState, setPromptState] = useState(() => loadPromptState());
@@ -369,6 +367,7 @@ export default function App() {
         onUnauthorized: () => {
           setToken("");
           setUser(null);
+          setRetryAction(null);
         },
       }),
     [token],
@@ -385,7 +384,13 @@ export default function App() {
 
   useEffect(() => {
     window.localStorage.setItem(MODEL_KEY, selectedModel);
+    window.localStorage.setItem(PROVIDER_HINT_KEY, selectedModel.startsWith("gemini") ? "gemini" : "openai");
   }, [selectedModel]);
+
+  useEffect(() => {
+    window.localStorage.setItem(THEME_KEY, theme);
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     window.localStorage.setItem(PROMPT_KEY, JSON.stringify(promptState));
@@ -557,6 +562,7 @@ export default function App() {
   async function handleDeleteSession(sessionId) {
     if (isLoading) return;
     setPageError("");
+    setRetryAction(null);
     try {
       await apiClient.request(`/api/chat-sessions/${sessionId}`, { method: "DELETE" });
       const updatedSessions = await refreshSessions();
@@ -591,6 +597,7 @@ export default function App() {
     setActivePanel,
     setShowAiSettings,
     setPageError,
+    setRetryAction,
     buildFallbackReply,
     setTypingMessageKey,
   });
@@ -699,29 +706,35 @@ export default function App() {
 
   async function handleAddToCart(productId) {
     try {
+      setRetryAction(null);
       await apiClient.request("/api/cart/items", { method: "POST", body: { product_id: productId, quantity: 1 } });
       await fetchCart();
     } catch (error) {
+      setRetryAction(() => () => handleAddToCart(productId));
       setPageError(error instanceof Error ? error.message : "Unable to add item to cart.");
     }
   }
 
   async function handleUpdateQty(productId, quantity) {
     try {
+      setRetryAction(null);
       await apiClient.request(`/api/cart/items/${productId}`, { method: "PUT", body: { product_id: productId, quantity } });
       await fetchCart();
     } catch (error) {
+      setRetryAction(() => () => handleUpdateQty(productId, quantity));
       setPageError(error instanceof Error ? error.message : "Unable to update cart.");
     }
   }
 
   async function handleToggleWishlist(productId) {
     try {
+      setRetryAction(null);
       const exists = wishlistIds.includes(productId);
       const method = exists ? "DELETE" : "POST";
       const data = await apiClient.request(`/api/wishlist/${productId}`, { method });
       setWishlist(data);
     } catch (error) {
+      setRetryAction(() => () => handleToggleWishlist(productId));
       setPageError(error instanceof Error ? error.message : "Unable to update wishlist.");
     }
   }
@@ -730,6 +743,7 @@ export default function App() {
     if (isLoading || cart.items.length === 0) return;
     setIsLoading(true);
     setPageError("");
+    setRetryAction(null);
     try {
       await apiClient.request("/api/orders/checkout", { method: "POST", body: checkoutForm });
       await Promise.all([fetchCart(), fetchOrders()]);
@@ -743,6 +757,7 @@ export default function App() {
         payment_reference: "",
       }));
     } catch (error) {
+      setRetryAction(() => () => handleCheckout());
       setPageError(error instanceof Error ? error.message : "Checkout failed.");
     } finally {
       setIsLoading(false);
@@ -751,9 +766,11 @@ export default function App() {
 
   async function openProductDetail(productId) {
     try {
+      setRetryAction(null);
       const data = await apiClient.request(`/api/products/${productId}`);
       setSelectedProduct(data);
     } catch (error) {
+      setRetryAction(() => () => openProductDetail(productId));
       setPageError(error instanceof Error ? error.message : "Unable to load product details.");
     }
   }
@@ -767,10 +784,12 @@ export default function App() {
 
   async function handleDeleteProduct(productId) {
     try {
+      setRetryAction(null);
       await apiClient.request(`/api/admin/products/${productId}`, { method: "DELETE" });
       if (selectedProduct?.id === productId) setSelectedProduct(null);
       await fetchProducts();
     } catch (error) {
+      setRetryAction(() => () => handleDeleteProduct(productId));
       setPageError(error instanceof Error ? error.message : "Unable to delete product.");
     }
   }
@@ -779,9 +798,11 @@ export default function App() {
     const index = ORDER_FLOW.indexOf(currentStatus);
     if (index === -1 || index === ORDER_FLOW.length - 1) return;
     try {
+      setRetryAction(null);
       await apiClient.request(`/api/admin/orders/${orderId}/status`, { method: "PUT", body: { status: ORDER_FLOW[index + 1] } });
       await fetchOrders();
     } catch (error) {
+      setRetryAction(() => () => handleAdvanceOrder(orderId, currentStatus));
       setPageError(error instanceof Error ? error.message : "Unable to update tracking.");
     }
   }
@@ -809,6 +830,7 @@ export default function App() {
     if (isLoading) return;
     setToken("");
     setUser(null);
+    setRetryAction(null);
     setAccurateModeEnabled(false);
     setSessions([]);
     clearChat();
@@ -828,13 +850,24 @@ export default function App() {
 
   if (!user) {
     return (
-      <main className="login-shell">
+      <main className={`login-shell ${theme === "dark" ? "theme-dark" : ""}`}>
         <section className="login-layout">
           <div className="login-showcase">
-            <div className="login-badge">AI</div>
+            <div className="login-showcase-top">
+              <div className="login-badge">AI</div>
+              <button type="button" className="theme-toggle" onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}>
+                {theme === "dark" ? "Light" : "Dark"}
+              </button>
+            </div>
             <p className="eyebrow">Welcome Back</p>
             <h1>Open your AI ecommerce workspace with backend backup built in.</h1>
-          <p className="login-copy">Sign in with email and password, browse products, manage wishlist, cart and orders, keep chats saved in the backend database, and use one AI for ecommerce help plus everyday problem solving.</p>
+            <p className="login-copy">Sign in with email and password, browse products, manage wishlist, cart and orders, keep chats saved in the backend database, and use one AI for ecommerce help plus everyday problem solving.</p>
+            <div className="login-showcase-rail">
+              <span className="login-showcase-chip">AI chat + memory</span>
+              <span className="login-showcase-chip">Store + orders</span>
+              <span className="login-showcase-chip">PDF-aware answers</span>
+              <span className="login-showcase-chip">Live backend sync</span>
+            </div>
             <div className="login-feature-grid">
               <article className="login-feature-card"><strong>Storefront</strong><p>Browse products, open full detail views, add to wishlist, and place orders.</p></article>
               <article className="login-feature-card"><strong>Server Backup</strong><p>Chats, wishlist, cart, and orders are backed by the FastAPI app and SQLite database.</p></article>
@@ -863,7 +896,7 @@ export default function App() {
   }
 
   return (
-    <div className={`app-shell commerce-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+    <div className={`app-shell commerce-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""} ${theme === "dark" ? "theme-dark" : ""}`}>
       <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <button
           type="button"
@@ -931,29 +964,49 @@ export default function App() {
                   <strong>Something went wrong</strong>
                   <p>{pageError}</p>
                 </div>
-                <button type="button" onClick={() => setPageError("")} aria-label="Dismiss error">
-                  Dismiss
-                </button>
+                <div className="page-error-actions">
+                  {retryAction ? (
+                    <button
+                      type="button"
+                      className="page-error-retry"
+                      onClick={() => {
+                        setPageError("");
+                        const action = retryAction;
+                        setRetryAction(null);
+                        action?.();
+                      }}
+                    >
+                      Retry
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPageError("");
+                      setRetryAction(null);
+                    }}
+                    aria-label="Dismiss error"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             ) : null}
             {activePanel === "chat" ? (
               <>
                 <div className="ai-settings-toggle-row">
-                  <button type="button" className="accurate-ai-button" onClick={applyAccurateSmartAi}>
-                    Accurate Smart AI
-                  </button>
+                  <span className="summary-chip">{selectedModel}</span>
                   <button
                     type="button"
                     className={`ai-settings-toggle ${showAiSettings ? "active" : ""}`}
                     onClick={() => setShowAiSettings((current) => !current)}
                   >
-                    {showAiSettings ? "Hide AI settings" : "Open AI settings"}
+                    {showAiSettings ? "Hide settings" : "AI settings"}
                   </button>
-                  <div className="active-ai-summary">
-                    <span className="summary-chip">{selectedModel}</span>
-                    {accurateModeEnabled ? <span className="summary-chip summary-chip-accent">Accuracy Mode Active</span> : null}
-                    {activePrompt.trim() ? <span className="summary-chip">Custom prompt active</span> : null}
-                  </div>
+                  {accurateModeEnabled ? <span className="summary-chip summary-chip-accent">Accuracy mode</span> : null}
+                  <button type="button" className="accurate-ai-button compact" onClick={applyAccurateSmartAi}>
+                    Accurate mode
+                  </button>
                 </div>
                 {showAiSettings ? (
                   <div className="ai-settings-panel">
@@ -1020,6 +1073,13 @@ export default function App() {
           <div className="topbar-view-tabs">
             <button
               type="button"
+              className="topbar-view-tab theme-toggle-tab"
+              onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? "Light" : "Dark"}
+            </button>
+            <button
+              type="button"
               className={`topbar-view-tab ${activePanel === "chat" ? "active" : ""}`}
               onClick={() => setActivePanel("chat")}
             >
@@ -1042,6 +1102,7 @@ export default function App() {
             isLoading={isLoading}
             starterPrompts={modeConfig.starterPrompts}
             assistantName="Smart AI"
+            activeMode={activeMode}
             placeholder="Ask about products, ecommerce issues, support, life decisions, study, career, or everyday questions..."
             emptyDescription="Use one AI for product recommendations, order help, support guidance, study plans, decisions, and everyday problem solving."
             memoryItems={memoryItems}

@@ -11,6 +11,8 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 class Settings(BaseSettings):
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o-mini", alias="OPENAI_MODEL")
+    gemini_api_key: str | None = Field(default=None, alias="GEMINI_API_KEY")
+    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
     cors_origins: str = Field(default="http://localhost:5173", alias="CORS_ORIGINS")
     auth_secret: str = Field(default="change-me-dev-secret", alias="AUTH_SECRET")
     auth_token_ttl_hours: int = Field(default=72, alias="AUTH_TOKEN_TTL_HOURS")

@@ -93,7 +93,14 @@ class VectorStoreService:
         with self.connect() as connection:
             connection.execute("DELETE FROM document_vectors WHERE document_id = ?", (document_id,))
 
-    def search(self, *, user_id: int, query_embedding: list[float], limit: int = 4) -> list[dict[str, str]]:
+    def search(
+        self,
+        *,
+        user_id: int,
+        query_embedding: list[float],
+        limit: int = 5,
+        min_score: float = 0.18,
+    ) -> list[dict[str, str]]:
         with self.connect() as connection:
             rows = connection.execute(
                 """
@@ -108,7 +115,7 @@ class VectorStoreService:
         for row in rows:
             embedding = json.loads(row["embedding_json"])
             score = self._cosine_similarity(query_embedding, embedding)
-            if score > 0:
+            if score >= min_score:
                 scored.append(
                     (
                         score,
@@ -119,6 +126,8 @@ class VectorStoreService:
                             "source_type": row["source_type"],
                             "content_type": row["content_type"],
                             "page_number": row["page_number"],
+                            "score": score,
+                            "metadata": json.loads(row["metadata_json"] or "{}"),
                             "distance": 1 - score,
                         },
                     )

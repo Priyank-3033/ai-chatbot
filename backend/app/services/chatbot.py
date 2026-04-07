@@ -9,7 +9,7 @@ from textwrap import shorten
 
 from app.core.config import Settings
 from app.models import ChatResponse, Source
-from app.services.ai_service import AIService, OpenAIError
+from app.services.ai_service import AIProviderError, AIService
 from app.services.document_service import DocumentService
 from app.services.embedding_service import EmbeddingService
 from app.services.knowledge_base import KnowledgeBaseService, KnowledgeEntry
@@ -35,12 +35,35 @@ class ChatbotService:
         self._llm_disabled_until = 0.0
 
     @staticmethod
+    def _normalize_model(requested_model: str | None, default_model: str) -> str:
+        if not requested_model:
+            return default_model
+        allowed_models = {
+            "gpt-4o-mini",
+            "gpt-4o",
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+        }
+        return requested_model if requested_model in allowed_models else default_model
+
+    @staticmethod
     def _format_answer(short_answer: str, why: str, next_step: str) -> str:
         return (
             f"Short Answer: {short_answer}\n\n"
             f"Why: {why}\n\n"
             f"Next Step: {next_step}"
         )
+
+    @staticmethod
+    def _polish_answer(answer: str, mode: str) -> str:
+        cleaned = (answer or "").replace("â€¢", "•").strip()
+        if not cleaned:
+            return cleaned
+        cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+        if mode == "support" and len(cleaned) > 900:
+            paragraphs = [part.strip() for part in cleaned.split("\n\n") if part.strip()]
+            cleaned = "\n\n".join(paragraphs[:3])
+        return cleaned
 
     def answer(
         self,
@@ -53,18 +76,18 @@ class ChatbotService:
         uploaded_documents: list[dict[str, str]] | None = None,
     ) -> ChatResponse:
         chat_mode = mode if mode in {"general", "support"} else "general"
-        selected_model = model if model in {"gpt-4o-mini", "gpt-4o"} else self.settings.openai_model
+        selected_model = self.ai_service.resolve_model(self._normalize_model(model, self.ai_service.default_model()))
         cleaned_prompt = (custom_prompt or "").strip()
         entries = self.knowledge_base.retrieve(question) if chat_mode == "support" else self.knowledge_base.retrieve(question, limit=4)
         products = self.product_catalog.recommend_products(question, limit=4) if chat_mode == "general" else []
         document_matches = self._retrieve_uploaded_documents(question, user_id=user_id, uploaded_documents=uploaded_documents or [])
         sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
 
-        if self.ai_service.available() and not self._llm_temporarily_disabled():
+        if self.ai_service.available(selected_model) and not self._llm_temporarily_disabled():
             try:
                 answer = self._generate_llm_answer(question, history, entries, products, document_matches, chat_mode, selected_model, cleaned_prompt)
                 result_mode = f"llm+{chat_mode}+{selected_model}"
-            except OpenAIError:
+            except AIProviderError:
                 self._temporarily_disable_llm()
                 answer = self._generate_fallback_answer(question, entries, products, document_matches, chat_mode, history)
                 result_mode = f"fallback+{chat_mode}"
@@ -85,14 +108,14 @@ class ChatbotService:
         uploaded_documents: list[dict[str, str]] | None = None,
     ) -> tuple[object, list[Source], str]:
         chat_mode = mode if mode in {"general", "support"} else "general"
-        selected_model = model if model in {"gpt-4o-mini", "gpt-4o"} else self.settings.openai_model
+        selected_model = self.ai_service.resolve_model(self._normalize_model(model, self.ai_service.default_model()))
         cleaned_prompt = (custom_prompt or "").strip()
         entries = self.knowledge_base.retrieve(question) if chat_mode == "support" else self.knowledge_base.retrieve(question, limit=4)
         products = self.product_catalog.recommend_products(question, limit=4) if chat_mode == "general" else []
         document_matches = self._retrieve_uploaded_documents(question, user_id=user_id, uploaded_documents=uploaded_documents or [])
         sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
 
-        if self.ai_service.available() and not self._llm_temporarily_disabled():
+        if self.ai_service.available(selected_model) and not self._llm_temporarily_disabled():
             try:
                 return (
                     self.ai_service.generate_answer_stream(
@@ -108,7 +131,7 @@ class ChatbotService:
                     sources,
                     f"llm+{chat_mode}+{selected_model}",
                 )
-            except OpenAIError:
+            except AIProviderError:
                 self._temporarily_disable_llm()
 
         fallback_answer = self._generate_fallback_answer(question, entries, products, document_matches, chat_mode, history)
@@ -161,7 +184,8 @@ class ChatbotService:
             products=products,
             document_matches=document_matches,
         )
-        return response or self._generate_fallback_answer(question, entries, products, document_matches, mode, history)
+        final_answer = response or self._generate_fallback_answer(question, entries, products, document_matches, mode, history)
+        return self._polish_answer(final_answer, mode)
 
     def _generate_fallback_answer(
         self,
@@ -200,10 +224,9 @@ class ChatbotService:
                     "- I need to update my order"
                 )
             if not entries:
-                return (
-                    "I want to help, but I do not have a clear support answer for that yet.\n\n"
-                    "This support mode works best for password reset, refunds, billing, shipping, order updates, and login problems. If you describe the issue in one clear sentence, I will try again."
-                )
+                if self._is_support_question(contextual_normalized):
+                    return "I don’t have enough information to answer that accurately."
+                return "I can only help with support-related questions."
             return self._build_support_fallback(entries, contextual_normalized)
 
         if self._looks_like_comparison_request(contextual_normalized):
@@ -1534,7 +1557,13 @@ class ChatbotService:
         for item in document_matches or []:
             if len(sources) >= 4:
                 break
-            sources.append(Source(title=f"Document: {item['name']}", snippet=item["snippet"]))
+            score_label = f"Match {int(round(float(item.get('score', 0.0)) * 100))}%"
+            sources.append(
+                Source(
+                    title=f"Document: {item['name']}",
+                    snippet=f"{score_label} • {item['snippet']}",
+                )
+            )
         return sources
 
     def _retrieve_uploaded_documents(
@@ -1543,7 +1572,7 @@ class ChatbotService:
         *,
         user_id: int | None,
         uploaded_documents: list[dict[str, str]],
-        limit: int = 3,
+        limit: int = 5,
     ) -> list[dict[str, str]]:
         if user_id is not None:
             try:
@@ -1554,6 +1583,9 @@ class ChatbotService:
                         {
                             "name": item["name"],
                             "snippet": shorten(item["snippet"].replace("\n", " "), width=220, placeholder="..."),
+                            "content_type": item.get("content_type", "document"),
+                            "score": round(float(item.get("score", 0.0)), 3),
+                            "source_type": item.get("source_type", "upload"),
                         }
                         for item in vector_matches
                     ]

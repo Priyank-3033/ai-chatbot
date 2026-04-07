@@ -32,7 +32,7 @@ export const customerProfiles = {
   1: {
     name: "Ava Thompson",
     initials: "AT",
-    plan: "Scale Plan • Customer since 2023",
+    plan: "Scale Plan ï¿½ Customer since 2023",
     health: "At Risk",
     mrr: "$480",
     region: "US-East",
@@ -41,7 +41,7 @@ export const customerProfiles = {
   2: {
     name: "Noah Patel",
     initials: "NP",
-    plan: "Growth Plan • Customer since 2024",
+    plan: "Growth Plan ï¿½ Customer since 2024",
     health: "Healthy",
     mrr: "$190",
     region: "EU-West",
@@ -50,7 +50,7 @@ export const customerProfiles = {
   3: {
     name: "Mia Chen",
     initials: "MC",
-    plan: "Enterprise • Customer since 2022",
+    plan: "Enterprise ï¿½ Customer since 2022",
     health: "VIP",
     mrr: "$2,200",
     region: "APAC",

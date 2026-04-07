@@ -11,13 +11,25 @@ from app.models import ChatRequest, ChatResponse, ChatSessionCreateRequest, Chat
 router = APIRouter()
 
 
-def trim_history(history: list[dict[str, str]], max_messages: int = 10) -> list[dict[str, str]]:
-    return history[-max_messages:]
+def trim_history(history: list[dict[str, str]], max_messages: int = 8, max_chars: int = 4000) -> list[dict[str, str]]:
+    trimmed = history[-max_messages:]
+    total_chars = 0
+    kept: list[dict[str, str]] = []
+    for item in reversed(trimmed):
+        content = str(item.get("content", "")).strip()
+        if not content:
+            continue
+        projected = total_chars + len(content)
+        if kept and projected > max_chars:
+            break
+        kept.append({"role": str(item.get("role", "user")), "content": content})
+        total_chars = projected
+    return list(reversed(kept))
 
 
 def build_effective_history(existing_messages: list[dict[str, str]], request_history: list[dict[str, str]]) -> list[dict[str, str]]:
     if len(existing_messages) > 1:
-        return trim_history(existing_messages, max_messages=10)
+        return trim_history(existing_messages, max_messages=8, max_chars=4000)
 
     normalized_request_history = [
         {
@@ -27,7 +39,7 @@ def build_effective_history(existing_messages: list[dict[str, str]], request_his
         for item in request_history
         if str(item.get("content", "")).strip()
     ]
-    return trim_history(existing_messages + normalized_request_history, max_messages=10)
+    return trim_history(existing_messages + normalized_request_history, max_messages=8, max_chars=4000)
 
 
 def generate_chat_response(request: ChatRequest, current_user: UserPublic) -> ChatResponse:

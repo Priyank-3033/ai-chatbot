@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Priyank Rampariya Resume</title>
+  <style>
+    :root {
+      --ink: #1d1b19;
+      --muted: #5f5a54;
+      --rule: #d8d1c7;
+      --accent: #6d3d20;
+      --paper: #fffdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, #f6ede2 0, transparent 32%),
+        linear-gradient(180deg, #f4efe7 0%, #ece5db 100%);
+      color: var(--ink);
+      font-family: "Georgia", "Times New Roman", serif;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 14mm 16mm 13mm;
+      background: var(--paper);
+    }
+
+    .header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .contact,
+    .profiles {
+      margin-top: 8px;
+      font-size: 12.5px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+    }
+
+    .contact span::after,
+    .profiles span::after {
+      content: "•";
+      margin-left: 14px;
+      color: #b5aa9b;
+    }
+
+    .contact span:last-child::after,
+    .profiles span:last-child::after {
+      content: "";
+      margin: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 16px;
+    }
+
+    section {
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 4px;
+    }
+
+    p,
+    li,
+    .meta,
+    .skill-line {
+      font-size: 12.3px;
+      line-height: 1.45;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .entry {
+      margin-bottom: 10px;
+    }
+
+    .entry-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 2px;
+    }
+
+    .entry-head strong {
+      font-size: 13px;
+    }
+
+    .meta {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .role {
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    ul {
+      margin: 5px 0 0 17px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 3px;
+    }
+
+    .skill-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .skill-line strong {
+      color: var(--ink);
+    }
+
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--rule);
+      padding: 2px 8px;
+      margin: 3px 6px 0 0;
+      border-radius: 999px;
+      font-size: 11.5px;
+      color: var(--muted);
+      background: #fbf8f2;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .page {
+        margin: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <h1>Priyank Rampariya</h1>
+      <div class="subtitle">Cybersecurity &amp; Full-Stack Development Enthusiast</div>
+      <div class="contact">
+        <span>priyankrampriya@gmail.com</span>
+        <span>07486950477</span>
+        <span>Ahmedabad</span>
+      </div>
+      <div class="profiles">
+        <span>LinkedIn: rampariya-priyank-2968b0323</span>
+        <span>GitHub</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div>
+        <section>
+          <h2>Summary</h2>
+          <p>Passionate Cybersecurity and Full-Stack Development enthusiast with a solid foundation in web development, network security, and ethical hacking concepts. Knowledgeable about cybersecurity principles including encryption, vulnerability testing, and secure coding, with a strong interest in building secure, scalable, and easy-to-use web applications.</p>
+        </section>
+
+        <section>
+          <h2>Project</h2>
+          <div class="entry">
+            <div class="entry-head">
+              <strong>AI-Powered Chatbot for Customer Support</strong>
+            </div>
+            <div class="role">React.js, LangChain, FastAPI</div>
+            <ul>
+              <li>Developed an AI-powered customer support chatbot as part of an MSc IT academic project using Large Language Models to automate and enhance customer interactions.</li>
+              <li>Implemented Retrieval-Augmented Generation using LangChain and a vector database to deliver context-aware and accurate responses.</li>
+              <li>Built scalable backend APIs with FastAPI to manage conversation flow and query processing, while designing a responsive real-time chat interface using React.js.</li>
+              <li>Integrated semantic search and embedding-based retrieval to improve information accuracy and automate FAQ resolution and troubleshooting support.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2>Education</h2>
+          <div class="entry">
+            <div class="entry-head">
+              <strong>Silver Oak University</strong>
+              <span class="meta">Ahmedabad • 2022-2025</span>
+            </div>
+            <div class="role">Bachelor of Computer Application • 7.8 CGPA</div>
+          </div>
+          <div class="entry">
+            <div class="entry-head">
+              <strong>Skips University</strong>
+              <span class="meta">Ahmedabad • Present</span>
+            </div>
+            <div class="role">Master of Science in Information Technology</div>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section>
+          <h2>Technical Skills</h2>
+          <div class="skill-list">
+            <div class="skill-line"><strong>Frontend:</strong> HTML, CSS, JavaScript, React.js</div>
+            <div class="skill-line"><strong>Backend:</strong> Python, FastAPI</div>
+            <div class="skill-line"><strong>Database:</strong> SQL</div>
+            <div class="skill-line"><strong>Concepts:</strong> OOP, Networking, Cybersecurity</div>
+            <div class="skill-line"><strong>Tools:</strong> Git, GitHub</div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Certifications</h2>
+          <div class="entry">
+            <div class="entry-head">
+              <strong>Hackathon</strong>
+              <span class="meta">2025</span>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Languages</h2>
+          <span class="tag">English</span>
+          <span class="tag">Hindi</span>
+          <span class="tag">Gujarati</span>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

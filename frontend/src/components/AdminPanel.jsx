@@ -38,6 +38,14 @@ function productToForm(product) {
   };
 }
 
+function getDocumentStatusLabel(status) {
+  const normalized = String(status || "").toLowerCase();
+  if (normalized === "ready") return "Ready";
+  if (normalized === "failed") return "Failed";
+  if (normalized === "processing") return "Processing";
+  return "Queued";
+}
+
 export default function AdminPanel({ products, stats, chatLogs = [], documents = [], onSave, onDelete, busy }) {
   const [form, setForm] = useState(EMPTY_PRODUCT);
   const [editingId, setEditingId] = useState("");
@@ -47,6 +55,14 @@ export default function AdminPanel({ products, stats, chatLogs = [], documents =
     setEditingId(product.id);
     setForm(productToForm(product));
     setMessage("");
+  }
+
+  function getDocumentStatusLabel(status) {
+    const normalized = String(status || "").toLowerCase();
+    if (normalized === "ready") return "Ready";
+    if (normalized === "failed") return "Failed";
+    if (normalized === "processing") return "Processing";
+    return "Queued";
   }
 
   function resetForm() {
@@ -169,7 +185,12 @@ export default function AdminPanel({ products, stats, chatLogs = [], documents =
             {documents.slice(0, 8).map((doc) => (
               <article key={doc.id} className="admin-product-card">
                 <div>
-                  <strong>{doc.name}</strong>
+                  <div className="admin-doc-head">
+                    <strong>{doc.name}</strong>
+                    <span className={`document-status-chip ${String(doc.status || "").toLowerCase()}`}>
+                      {getDocumentStatusLabel(doc.status)}
+                    </span>
+                  </div>
                   <p>{doc.content_type}</p>
                   <span>{Math.max(1, Math.round(doc.size / 1024))} KB</span>
                 </div>

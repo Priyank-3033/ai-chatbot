@@ -111,6 +111,11 @@ export default function ProductStorefront({
           <p className="eyebrow">Store and orders</p>
           <h2>Browse products</h2>
         </div>
+        <div className="storefront-marketplace-badges">
+          <span>Fast delivery</span>
+          <span>Secure checkout</span>
+          <span>Real product cards</span>
+        </div>
       </div>
 
       <div className="simple-category-strip icon-category-strip">

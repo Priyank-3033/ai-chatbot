@@ -132,24 +132,22 @@ The backend serves local product photos through FastAPI static files, so the sam
 
 ## Screenshots
 
-Add screenshots before sharing the project publicly:
-
-- Login page
-- Smart Chat page
-- Store and orders page
-- Product detail modal
-- Cart and checkout flow
-- Admin dashboard
-
-Suggested folder:
+Keep screenshots in:
 - `docs/screenshots/`
 
-Suggested filenames:
+Recommended files:
 - `docs/screenshots/login.png`
 - `docs/screenshots/chat.png`
 - `docs/screenshots/store.png`
 - `docs/screenshots/product-modal.png`
 - `docs/screenshots/admin.png`
+
+Use these screenshots before sharing with recruiters:
+- login page
+- main chat UI
+- store and orders workspace
+- product detail modal
+- admin dashboard
 
 ## Local Setup
 
@@ -183,7 +181,7 @@ Config file:
 Steps:
 1. Push this repo to GitHub
 2. Import the `frontend` folder into Vercel
-3. Set `VITE_API_BASE_URL` to your Render backend URL
+3. Set `VITE_API_URL` to your Render backend URL
 4. Deploy
 
 ### Backend on Render
@@ -201,6 +199,15 @@ Steps:
    - `VECTOR_STORE_PATH=./rag_store`
    - `EMBEDDING_MODEL_NAME=text-embedding-3-small`
 4. Deploy
+
+### Quick Deploy Order
+
+1. Deploy backend on Render first
+2. Copy the Render URL
+3. Add that URL to `VITE_API_URL` in Vercel
+4. Deploy frontend on Vercel
+5. Update Render `CORS_ORIGINS` to your final Vercel URL
+6. Re-deploy backend if needed
 
 ## Public Deployment Checklist
 

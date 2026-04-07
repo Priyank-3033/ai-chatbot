@@ -28,7 +28,7 @@ class DocumentService:
         raise ValueError("Unsupported file type. Upload PDF, TXT, MD, JSON, CSV, or code/text files.")
 
     @staticmethod
-    def chunk_text(text: str, chunk_size: int = 300, overlap: int = 60) -> list[str]:
+    def chunk_text(text: str, chunk_size: int = 800, overlap: int = 100) -> list[str]:
         cleaned = " ".join(text.split()).strip()
         if not cleaned:
             return []
