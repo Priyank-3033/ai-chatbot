@@ -28,25 +28,13 @@ export default function ChatWindow({
     <section className="chat-layout">
       <div className="message-feed" ref={feedRef}>
         {messages.length === 1 ? (
-          <div className="empty-state">
-            <div className="hero-orb">AI</div>
+          <div className="empty-state chatgpt-empty-state">
             <h2>How can I help you today?</h2>
             <p>{emptyDescription}</p>
-            {memoryItems.length ? (
-              <div className="memory-strip">
-                <span className="memory-label">Memory</span>
-                {memoryItems.map((item) => (
-                  <span key={item} className="memory-chip">
-                    {item}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-            <div className="prompt-grid">
+            <div className="prompt-grid compact-prompt-grid">
               {starterPrompts.map((prompt) => (
                 <button key={prompt} className="prompt-card" onClick={() => onSend(prompt)}>
                   <span className="prompt-title">{prompt}</span>
-                  <span className="prompt-meta">Try this prompt</span>
                 </button>
               ))}
             </div>
@@ -64,8 +52,7 @@ export default function ChatWindow({
 
         {isLoading ? (
           <div className="message-row assistant">
-            <div className="avatar">AI</div>
-            <div className="message-content">
+            <div className="message-content flat-message-shell assistant-message-content">
               <div className="message-author">{assistantName}</div>
               <Loader />
             </div>

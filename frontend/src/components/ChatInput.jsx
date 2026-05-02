@@ -4,8 +4,6 @@ export default function ChatInput({
   onSend,
   isLoading,
   placeholder,
-  memoryItems,
-  memoryTrail,
   focusSignal,
 }) {
   const [draft, setDraft] = useState("");
@@ -156,26 +154,6 @@ export default function ChatInput({
 
   return (
     <form className="composer-wrap" onSubmit={handleSubmit}>
-      {memoryItems.length ? (
-        <div className="memory-row">
-          <span className="memory-label">Memory active</span>
-          {memoryItems.map((item) => (
-            <span key={`memory-${item}`} className="memory-chip">
-              {item}
-            </span>
-          ))}
-        </div>
-      ) : null}
-      {memoryTrail.length ? (
-        <div className="memory-row memory-trail-row">
-          <span className="memory-label">Recent context</span>
-          {memoryTrail.map((item, index) => (
-            <span key={`trail-${index}`} className="memory-chip memory-trail-chip">
-              {item}
-            </span>
-          ))}
-        </div>
-      ) : null}
       {attachments.length ? (
         <div className="attachment-row">
           {attachments.map((attachment) => (
@@ -189,7 +167,6 @@ export default function ChatInput({
         </div>
       ) : null}
       <div className="composer-box">
-        <div className="composer-glow" />
         <textarea
           ref={textAreaRef}
           value={draft}
@@ -211,7 +188,6 @@ export default function ChatInput({
           </button>
         </div>
       </div>
-      <p className="composer-note">Responses can come from the FastAPI backend or a local fallback when the backend is offline.</p>
     </form>
   );
 }

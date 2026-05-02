@@ -67,29 +67,13 @@ export default function MessageBubble({ message, role, assistantName }) {
 
   return (
     <div className={`message-row ${resolvedRole}`}>
-      {resolvedRole === "assistant" ? (
-        <>
-          <div className="avatar">AI</div>
-          <div className="message-content">
-            <div className="message-author">{assistantName}</div>
-            <div className="message-text markdown-content">
-              <ReactMarkdown components={markdownComponents}>{message.content || ""}</ReactMarkdown>
-            </div>
-            {message.created_at ? <div className="message-timestamp">{formatMessageTime(message.created_at)}</div> : null}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="message-content user-message-content">
-            <div className="message-author">You</div>
-            <div className="message-text markdown-content">
-              <ReactMarkdown components={markdownComponents}>{message.content || ""}</ReactMarkdown>
-            </div>
-            {message.created_at ? <div className="message-timestamp user">{formatMessageTime(message.created_at)}</div> : null}
-          </div>
-          <div className="avatar">You</div>
-        </>
-      )}
+      <div className={`message-content flat-message-shell ${resolvedRole === "user" ? "user-message-content" : "assistant-message-content"}`}>
+        <div className="message-author">{resolvedRole === "assistant" ? assistantName : "You"}</div>
+        <div className="message-text markdown-content">
+          <ReactMarkdown components={markdownComponents}>{message.content || ""}</ReactMarkdown>
+        </div>
+        {message.created_at ? <div className={`message-timestamp ${resolvedRole === "user" ? "user" : ""}`}>{formatMessageTime(message.created_at)}</div> : null}
+      </div>
     </div>
   );
 }

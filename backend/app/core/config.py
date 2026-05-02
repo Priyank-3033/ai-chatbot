@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     auth_token_ttl_hours: int = Field(default=72, alias="AUTH_TOKEN_TTL_HOURS")
     database_path_raw: str = Field(default="./app_data.sqlite3", alias="DATABASE_PATH")
     admin_emails_raw: str = Field(default="admin@smartcommerce.ai", alias="ADMIN_EMAILS")
-    api_title: str = Field(default="Smart AI Commerce API", alias="API_TITLE")
+    api_title: str = Field(default="AI-Powered Chatbot for Customer Support API", alias="API_TITLE")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     vector_store_path_raw: str = Field(default="./rag_store", alias="VECTOR_STORE_PATH")
     embedding_model_name: str = Field(default="text-embedding-3-small", alias="EMBEDDING_MODEL_NAME")

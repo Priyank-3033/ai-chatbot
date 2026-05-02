@@ -6454,3 +6454,3349 @@ body {
   font-size: 0.78rem;
   font-weight: 700;
 }
+
+
+/* Amazon-inspired storefront + Rufus-inspired AI search */
+.amazon-storefront {
+  padding: 0 0 24px;
+  background: #eaeded;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid #d5dbdb;
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.1);
+}
+
+.amazon-top-shell {
+  background: #131921;
+  color: #ffffff;
+}
+
+.amazon-topbar-main {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 18px;
+}
+
+.amazon-brand {
+  font-size: 2.15rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.amazon-location {
+  margin-top: 4px;
+  color: #d6dde7;
+  font-size: 0.88rem;
+}
+
+.amazon-search-shell {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 98px;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 3px solid transparent;
+}
+
+.amazon-search-shell:focus-within {
+  border-color: #f3a847;
+}
+
+.amazon-search-category,
+.amazon-search-button {
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.amazon-search-category {
+  background: #f3f3f3;
+  color: #37475a;
+  border-right: 1px solid #d0d7de;
+}
+
+.amazon-search-shell input {
+  border: none;
+  outline: none;
+  background: #ffffff;
+  color: #111827;
+  padding: 0 14px;
+  font-size: 1.05rem;
+}
+
+.amazon-search-button {
+  background: #febd69;
+  color: #111827;
+  cursor: pointer;
+}
+
+.amazon-account-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.amazon-account-strip div {
+  display: grid;
+  gap: 2px;
+}
+
+.amazon-account-strip span {
+  font-size: 0.78rem;
+  color: #d6dde7;
+}
+
+.amazon-account-strip strong {
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.amazon-topbar-subnav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 18px 14px;
+  background: #232f3e;
+}
+
+.amazon-nav-chip {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.amazon-nav-chip.active,
+.amazon-nav-chip:hover {
+  border-color: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.08);
+}
+
+.rufus-strip {
+  padding: 18px;
+  background: linear-gradient(180deg, #ffd9df 0%, #ffd3da 100%);
+}
+
+.rufus-app-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
+
+.rufus-app-chip {
+  flex: 0 0 auto;
+  min-width: 96px;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.72);
+  color: #111827;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  font-weight: 700;
+  border: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.rufus-app-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #fff8dd, #ffe78a);
+  color: #111827;
+  font-weight: 900;
+}
+
+.rufus-search-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.rufus-search-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.96);
+  box-shadow: 0 12px 26px rgba(190, 76, 98, 0.12);
+}
+
+.rufus-search-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #374151;
+  background: #f8fafc;
+}
+
+.rufus-search-bar input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #111827;
+  font-size: 1.02rem;
+}
+
+.rufus-icon-button {
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.rufus-icon-button.secondary {
+  background: #f8fafc;
+  color: #374151;
+}
+
+.rufus-icon-button.primary {
+  background: #111827;
+  color: #ffffff;
+}
+
+.rufus-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.amazon-hero-banner {
+  margin: 18px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #21412b 0%, #436c2d 48%, #9dbc3f 100%);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.amazon-hero-copy h2 {
+  margin: 6px 0 10px;
+  font-size: 2.15rem;
+  line-height: 1.02;
+}
+
+.amazon-hero-copy p:last-of-type {
+  margin: 0;
+  max-width: 54ch;
+  color: rgba(255,255,255,0.92);
+}
+
+.amazon-hero-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.amazon-hero-actions button {
+  padding: 11px 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.amazon-hero-actions .secondary-button {
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.24);
+}
+
+.amazon-hero-media {
+  display: grid;
+  place-items: center;
+}
+
+.amazon-hero-media img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 30px rgba(0,0,0,0.22));
+}
+
+.amazon-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0 18px 18px;
+}
+
+.amazon-showcase-panel {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.amazon-showcase-panel h3 {
+  margin: 0 0 14px;
+  color: #111827;
+  font-size: 1.18rem;
+}
+
+.amazon-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.amazon-mini-card {
+  text-align: left;
+  background: #ffffff;
+  color: #111827;
+  display: grid;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.amazon-mini-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.amazon-mini-card span {
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.amazon-filters {
+  padding: 0 18px 12px;
+}
+
+.amazon-product-grid {
+  padding: 0 18px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.amazon-product-card {
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.amazon-product-media {
+  min-height: 210px;
+  background: linear-gradient(180deg, #ffffff, #fafafa);
+}
+
+.amazon-product-media img {
+  height: 160px;
+}
+
+.amazon-product-body {
+  background: #ffffff;
+}
+
+.amazon-product-body h3,
+.amazon-product-body .product-brand,
+.amazon-product-body .price-stack strong {
+  color: #111827;
+}
+
+.amazon-product-footer .secondary-button {
+  background: #eef2f7;
+  color: #1f2937;
+}
+
+@media (max-width: 1280px) {
+  .amazon-topbar-main {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  .amazon-account-strip {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .amazon-panel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .amazon-topbar-main {
+    grid-template-columns: 1fr;
+  }
+
+  .amazon-search-shell {
+    grid-template-columns: 90px minmax(0, 1fr) 78px;
+  }
+
+  .rufus-search-bar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .rufus-icon-button.secondary:first-of-type {
+    display: none;
+  }
+
+  .amazon-hero-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .amazon-panel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.amazon-top-shell {
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+}
+
+.amazon-brand {
+  font-size: 2.05rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.amazon-search-shell {
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.amazon-search-category {
+  background: #eceff3;
+  color: #374151;
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.amazon-search-button {
+  min-height: 52px;
+  min-width: 72px;
+  border-radius: 0;
+  background: #f7b955;
+  color: #111827;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.rufus-strip {
+  padding: 16px 18px 20px;
+}
+
+.rufus-app-chip {
+  min-width: 104px;
+  border-radius: 18px;
+  box-shadow: 0 10px 20px rgba(190, 76, 98, 0.08);
+}
+
+.rufus-search-wrap {
+  max-width: 920px;
+}
+
+.rufus-search-bar {
+  min-height: 72px;
+  padding: 12px 14px;
+}
+
+.rufus-search-bar input {
+  font-size: 1.18rem;
+}
+
+.rufus-mobile-panel {
+  display: none;
+  margin: 0 18px 18px;
+  padding: 18px;
+  border-radius: 28px;
+  background: #ff767c;
+  box-shadow: 0 18px 40px rgba(249, 115, 122, 0.28);
+}
+
+.rufus-mobile-panel-head h3 {
+  margin: 0 0 14px;
+  color: #1f1726;
+  font-size: 2rem;
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+}
+
+.rufus-mobile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.rufus-mobile-card {
+  position: relative;
+  padding: 10px;
+  border-radius: 18px;
+  background: #ffffff;
+  min-height: 174px;
+  display: grid;
+  align-items: center;
+}
+
+.rufus-mobile-card img {
+  width: 100%;
+  height: 138px;
+  object-fit: contain;
+}
+
+.rufus-mobile-discount {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: #c61c55;
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.amazon-hero-banner {
+  position: relative;
+  min-height: 360px;
+  align-items: center;
+}
+
+.amazon-hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 92px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111827;
+  font-size: 3rem;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+  z-index: 2;
+}
+
+.amazon-hero-arrow.left {
+  left: 12px;
+}
+
+.amazon-hero-arrow.right {
+  right: 12px;
+}
+
+.amazon-showcase-panel {
+  border-radius: 0;
+  padding: 22px 22px 16px;
+}
+
+.amazon-showcase-panel h3 {
+  font-size: 1.42rem;
+  letter-spacing: -0.03em;
+}
+
+.amazon-mini-card img {
+  border-radius: 0;
+}
+
+.amazon-product-grid {
+  padding-bottom: 96px;
+}
+
+.rufus-bottom-nav {
+  display: none;
+  position: sticky;
+  bottom: 0;
+  z-index: 25;
+  margin-top: 12px;
+  padding: 10px 8px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1px solid #e5e7eb;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.rufus-bottom-item {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  color: #111827;
+  font-size: 0.79rem;
+  font-weight: 700;
+}
+
+.rufus-bottom-item.ai {
+  color: #f97316;
+}
+
+.rufus-bottom-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #f8fafc;
+}
+
+.rufus-bottom-item.ai .rufus-bottom-icon {
+  background: #fff1e8;
+}
+
+@media (max-width: 900px) {
+  .amazon-storefront {
+    background: #f78e96;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+
+  .amazon-top-shell {
+    border-radius: 0;
+  }
+
+  .amazon-topbar-main,
+  .amazon-topbar-subnav,
+  .amazon-hero-banner,
+  .amazon-panel-grid {
+    display: none;
+  }
+
+  .rufus-strip {
+    background: transparent;
+    padding: 16px 14px;
+  }
+
+  .rufus-app-chip {
+    min-width: 88px;
+    padding: 10px 10px;
+    border-radius: 18px;
+    background: rgba(255, 248, 220, 0.92);
+  }
+
+  .rufus-app-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+
+  .rufus-search-bar {
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+    min-height: 64px;
+    border-radius: 24px;
+  }
+
+  .rufus-icon-button.secondary:first-of-type {
+    display: inline-grid;
+  }
+
+  .rufus-suggestions,
+  .amazon-filters,
+  .product-pagination {
+    display: none;
+  }
+
+  .rufus-mobile-panel,
+  .rufus-bottom-nav {
+    display: grid;
+  }
+
+  .amazon-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 0 14px 92px;
+  }
+
+  .amazon-product-card {
+    border-radius: 18px;
+  }
+
+  .amazon-product-media {
+    min-height: 148px;
+  }
+
+  .amazon-product-media img {
+    height: 112px;
+  }
+
+  .amazon-product-body h3 {
+    font-size: 1rem;
+  }
+
+  .amazon-product-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .amazon-product-actions .secondary-button {
+    display: none;
+  }
+}
+
+.store-page-shell {
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  background:
+    radial-gradient(circle at top right, rgba(255, 183, 77, 0.08), transparent 28%),
+    linear-gradient(180deg, #f4f7fb 0%, #eef3f9 100%);
+}
+
+.store-page-panel {
+  width: 100%;
+  max-width: none;
+  padding: 18px 20px 28px;
+}
+
+.store-page-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.store-page-brand {
+  padding: 12px 18px;
+  border-radius: 16px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.store-page-switcher-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.store-page-shell .commerce-layout {
+  grid-template-columns: minmax(0, 1fr) 350px;
+}
+
+.commerce-layout-no-rail {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.store-page-shell .commerce-main {
+  gap: 18px;
+}
+
+@media (max-width: 1100px) {
+  .store-page-shell .commerce-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .store-page-panel {
+    padding: 0 0 24px;
+  }
+
+  .store-page-switcher {
+    padding: 12px 14px 0;
+  }
+
+  .store-page-brand {
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
+
+  .store-page-switcher-actions {
+    gap: 8px;
+  }
+}
+
+/* Flipkart-inspired front page storefront */
+.flipkart-storefront {
+  background: #f1f3f6;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.flipkart-topbar {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 20px;
+  background: #2874f0;
+}
+
+.flipkart-brand-panel {
+  display: grid;
+  gap: 2px;
+  color: #ffffff;
+}
+
+.flipkart-brand {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+
+.flipkart-brand span {
+  color: #ffe11b;
+  margin-left: 4px;
+}
+
+.flipkart-brand-panel small {
+  color: rgba(255,255,255,0.82);
+  font-weight: 600;
+}
+
+.flipkart-search-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px;
+  background: #ffffff;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.flipkart-search-panel input {
+  border: none;
+  outline: none;
+  padding: 14px 16px;
+  font-size: 1rem;
+  color: #111827;
+  background: #ffffff;
+}
+
+.flipkart-search-panel button {
+  background: #ffffff;
+  color: #2874f0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  border-left: 1px solid #e5e7eb;
+}
+
+.flipkart-account-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 18px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.flipkart-account-bar button {
+  background: #ffffff;
+  color: #2874f0;
+  padding: 10px 28px;
+  border-radius: 2px;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.flipkart-account-bar .flipkart-care-ai-button {
+  background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+  white-space: nowrap;
+}
+
+.flipkart-account-bar .flipkart-open-chat-button {
+  background: linear-gradient(135deg, #f97316 0%, #fb7185 100%);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(249, 115, 22, 0.2);
+  white-space: nowrap;
+}
+
+.flipkart-account-bar .flipkart-care-ai-button:hover {
+  transform: translateY(-1px);
+}
+
+.flipkart-account-bar .flipkart-open-chat-button:hover {
+  transform: translateY(-1px);
+}
+
+.storefront-help-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 14px 0 18px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eff6ff 0%, #fff7ed 100%);
+  border: 1px solid rgba(59, 130, 246, 0.12);
+}
+
+.storefront-help-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.storefront-help-copy strong {
+  color: #111827;
+  font-size: 1.05rem;
+}
+
+.storefront-help-copy span {
+  color: #4b5563;
+}
+
+.storefront-help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.storefront-help-actions button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.storefront-help-actions button:first-child {
+  background: linear-gradient(135deg, #f97316 0%, #fb7185 100%);
+  color: #ffffff;
+}
+
+.storefront-help-actions .secondary-button {
+  background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+  color: #ffffff;
+}
+
+.storefront-chat-launcher {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.storefront-chat-launcher-primary,
+.storefront-chat-launcher-secondary {
+  border: none;
+  border-radius: 999px;
+  padding: 14px 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
+}
+
+.storefront-chat-launcher-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #0f172a 100%);
+  color: #ffffff;
+}
+
+.storefront-chat-launcher-secondary {
+  background: #ffffff;
+  color: #1d4ed8;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+}
+
+.flipkart-category-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.flipkart-category-tile {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 10px 6px;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.flipkart-category-tile.active span:last-child {
+  color: #2874f0;
+}
+
+.flipkart-category-image-wrap {
+  width: 70px;
+  height: 70px;
+  border-radius: 999px;
+  background: #f8fafc;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.flipkart-category-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.flipkart-ask-bar {
+  padding: 14px 16px 0;
+}
+
+.flipkart-ask-form {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+}
+
+.flipkart-ask-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #eff6ff;
+  color: #2874f0;
+  font-weight: 900;
+}
+
+.flipkart-ask-form input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+}
+
+.flipkart-ask-form button {
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.flipkart-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: 18px;
+  min-height: 310px;
+  margin: 14px 16px;
+  padding: 22px 64px;
+  background: linear-gradient(90deg, #ffe85c 0%, #ffc80a 100%);
+  overflow: hidden;
+}
+
+.flipkart-hero-image-wrap {
+  display: grid;
+  place-items: center;
+}
+
+.flipkart-hero-image-wrap img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+}
+
+.flipkart-hero-copy {
+  color: #111827;
+}
+
+.flipkart-hero-copy p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.flipkart-hero-copy h2 {
+  margin: 8px 0;
+  font-size: 2.3rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.flipkart-hero-copy h3 {
+  margin: 0 0 10px;
+  font-size: 2rem;
+  color: #c2410c;
+}
+
+.flipkart-hero-copy span {
+  display: inline-block;
+  color: #374151;
+  font-weight: 700;
+}
+
+.flipkart-hero-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.flipkart-hero-actions button {
+  padding: 11px 16px;
+  border-radius: 999px;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.flipkart-hero-actions .secondary-button {
+  background: #ffffff;
+  color: #111827;
+}
+
+.flipkart-hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.94);
+  color: #111827;
+  font-size: 3rem;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+.flipkart-hero-arrow.left { left: 0; border-radius: 0 6px 6px 0; }
+.flipkart-hero-arrow.right { right: 0; border-radius: 6px 0 0 6px; }
+
+.flipkart-section-stack {
+  display: grid;
+  gap: 14px;
+  padding: 0 16px 16px;
+}
+
+.flipkart-section-row {
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.08);
+}
+
+.flipkart-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.flipkart-section-head h3 {
+  margin: 0;
+  font-size: 1.32rem;
+  color: #111827;
+}
+
+.flipkart-section-head p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.flipkart-view-all {
+  padding: 10px 18px;
+  background: #2874f0;
+  color: #ffffff;
+  border-radius: 2px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.flipkart-row-scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(190px, 1fr);
+  gap: 10px;
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.flipkart-product-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  min-height: 100%;
+}
+
+.flipkart-product-image {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  background: #ffffff;
+}
+
+.flipkart-product-image img {
+  width: 100%;
+  height: 165px;
+  object-fit: contain;
+}
+
+.flipkart-product-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.flipkart-product-copy strong {
+  color: #111827;
+  font-size: 0.98rem;
+}
+
+.flipkart-product-copy span {
+  color: #6b7280;
+  font-size: 0.88rem;
+}
+
+.flipkart-product-copy p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.82rem;
+}
+
+.flipkart-price-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flipkart-price-line strong {
+  color: #111827;
+}
+
+.flipkart-price-line span {
+  color: #15803d;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.flipkart-price-subline {
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-size: 0.84rem;
+}
+
+.flipkart-product-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.flipkart-product-actions button {
+  padding: 9px 10px;
+  border-radius: 10px;
+  font-weight: 800;
+  background: #2874f0;
+  color: #ffffff;
+}
+
+.flipkart-product-actions .secondary-button {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.flipkart-product-actions .ghost-button {
+  background: #f8fafc;
+  color: #374151;
+}
+
+.flipkart-product-actions .ghost-button.saved {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+@media (max-width: 1100px) {
+  .flipkart-topbar {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+
+  .flipkart-account-bar {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .flipkart-topbar {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .flipkart-account-bar {
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.9rem;
+  }
+
+  .flipkart-account-bar button {
+    padding: 10px 16px;
+  }
+
+  .flipkart-account-bar .flipkart-care-ai-button {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .flipkart-account-bar .flipkart-open-chat-button {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .storefront-chat-launcher {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+  }
+
+  .storefront-chat-launcher-primary,
+  .storefront-chat-launcher-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .storefront-help-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .storefront-help-actions {
+    flex-direction: column;
+  }
+
+  .storefront-help-actions button {
+    width: 100%;
+  }
+
+  .flipkart-category-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .flipkart-ask-form {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .flipkart-ask-form .secondary-button {
+    display: none;
+  }
+
+  .flipkart-hero {
+    grid-template-columns: 1fr;
+    padding: 20px 18px 24px;
+    min-height: auto;
+  }
+
+  .flipkart-hero-arrow {
+    display: none;
+  }
+
+  .flipkart-row-scroll {
+    grid-auto-columns: minmax(170px, 1fr);
+  }
+
+  .flipkart-product-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .flipkart-product-actions .ghost-button {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Minimal ChatGPT-like chat page */
+.chat-layout {
+  border-radius: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.message-feed {
+  padding-top: 12px;
+}
+
+.chatgpt-empty-state {
+  padding: 72px 0 18px;
+}
+
+.chatgpt-empty-state .hero-orb,
+.chat-status-bar,
+.memory-strip,
+.memory-row,
+.composer-note {
+  display: none !important;
+}
+
+.chatgpt-empty-state h2 {
+  margin: 0;
+  color: #202123;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.chatgpt-empty-state p {
+  max-width: 56ch;
+  margin: 12px auto 0;
+  color: #6b7280;
+  text-align: center;
+}
+
+.compact-prompt-grid {
+  width: min(760px, calc(100% - 24px));
+  margin: 28px auto 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.compact-prompt-grid .prompt-card {
+  text-align: left;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: none;
+}
+
+.compact-prompt-grid .prompt-meta {
+  display: none;
+}
+
+.message-row {
+  width: min(760px, calc(100% - 24px));
+}
+
+.message-row.assistant {
+  align-items: flex-start;
+}
+
+.message-row.user {
+  align-items: flex-start;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+}
+
+.message-content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 2px 0 !important;
+}
+
+.user-message-content {
+  background: #f7f7f8 !important;
+  border: 1px solid #ececf1 !important;
+  border-radius: 18px !important;
+  padding: 14px 16px !important;
+}
+
+.message-author {
+  color: #6b7280 !important;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.message-text {
+  color: #202123;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.composer-wrap {
+  padding: 14px 18px 22px;
+  background: linear-gradient(180deg, rgba(241, 243, 246, 0) 0%, rgba(241, 243, 246, 0.94) 28%, rgba(241, 243, 246, 1) 100%);
+  border-top: none;
+}
+
+.composer-box,
+.composer-note,
+.attachment-row {
+  width: min(760px, calc(100% - 8px));
+}
+
+.composer-box {
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 22px;
+  background: #ffffff !important;
+  border: 1px solid #d9d9e3 !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06) !important;
+}
+
+.composer-box textarea {
+  min-height: 28px;
+  font-size: 1rem;
+  color: #202123 !important;
+}
+
+.composer-box textarea::placeholder {
+  color: #8a8f98 !important;
+}
+
+.composer-actions {
+  gap: 8px;
+}
+
+.composer-icon-button.secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.composer-box button[type="submit"] {
+  background: #202123 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.chat-minimal-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 0.84rem;
+}
+
+.chat-minimal-meta span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+@media (max-width: 900px) {
+  .compact-prompt-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .message-row,
+  .composer-box,
+  .attachment-row {
+    width: min(100%, calc(100% - 18px));
+  }
+
+  .chatgpt-empty-state {
+    padding-top: 36px;
+  }
+
+  .chatgpt-empty-state h2 {
+    font-size: 1.6rem;
+  }
+}
+
+/* ChatGPT-like shell pass */
+.app-shell:not(.store-page-shell) {
+  background: #ffffff;
+}
+
+.app-shell:not(.store-page-shell) .sidebar {
+  width: 260px;
+  background: #f7f7f8;
+  border-right: 1px solid #ececf1;
+  padding: 10px 10px 14px;
+  box-shadow: none;
+}
+
+.app-shell:not(.store-page-shell) .sidebar-collapse-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: transparent;
+  color: #4b5563;
+  box-shadow: none;
+}
+
+.app-shell:not(.store-page-shell) .new-chat-button {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #202123;
+  border: 1px solid #e5e7eb;
+  box-shadow: none;
+}
+
+.app-shell:not(.store-page-shell) .sidebar-section {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 10px 0 0;
+}
+
+.app-shell:not(.store-page-shell) .sidebar-label {
+  color: #8b8d97;
+  font-size: 0.78rem;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 0 6px;
+}
+
+.app-shell:not(.store-page-shell) .history-item,
+.app-shell:not(.store-page-shell) .session-item {
+  border-radius: 10px;
+  background: transparent;
+  color: #202123;
+  border: none;
+  box-shadow: none;
+}
+
+.app-shell:not(.store-page-shell) .history-item.active,
+.app-shell:not(.store-page-shell) .session-card.active .session-item {
+  background: #ececf1;
+  color: #202123;
+}
+
+.app-shell:not(.store-page-shell) .profile-card,
+.app-shell:not(.store-page-shell) .sidebar-footer {
+  display: none;
+}
+
+.app-shell:not(.store-page-shell) .session-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.app-shell:not(.store-page-shell) .session-delete-button {
+  background: transparent;
+  color: #6b7280;
+  border: none;
+  box-shadow: none;
+}
+
+.app-shell:not(.store-page-shell) .main-panel {
+  background: #ffffff;
+  padding: 0;
+}
+
+.chatgpt-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px 8px;
+  background: #ffffff;
+  border: none;
+  box-shadow: none;
+}
+
+.chatgpt-header-title h1 {
+  margin: 0;
+  color: #202123;
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+.chatgpt-header-actions {
+  gap: 8px;
+}
+
+.chatgpt-page-header .page-error-toast {
+  width: min(760px, 100%);
+  margin: 8px auto 0;
+}
+
+.chat-layout {
+  height: calc(100vh - 84px);
+}
+
+.message-feed {
+  padding-bottom: 24px;
+}
+
+.markdown-code-shell {
+  background: #f7f7f8;
+  border: 1px solid #ececf1;
+}
+
+.markdown-copy-button {
+  background: transparent;
+  color: #4b5563;
+}
+
+.theme-dark .app-shell:not(.store-page-shell) {
+  background: #212121;
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .sidebar {
+  background: #171717;
+  border-right-color: #2f2f2f;
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .new-chat-button {
+  background: #212121;
+  color: #f5f5f5;
+  border-color: #343434;
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .history-item,
+.theme-dark .app-shell:not(.store-page-shell) .session-item,
+.theme-dark .chatgpt-header-title h1 {
+  color: #f5f5f5;
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .history-item.active,
+.theme-dark .app-shell:not(.store-page-shell) .session-card.active .session-item {
+  background: #2a2a2a;
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .main-panel,
+.theme-dark .chatgpt-page-header {
+  background: #212121;
+}
+
+.theme-dark .message-text {
+  color: #ececf1;
+}
+
+.theme-dark .user-message-content {
+  background: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.theme-dark .composer-box {
+  background: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+}
+
+.theme-dark .composer-box textarea {
+  color: #ececf1 !important;
+}
+
+.theme-dark .composer-box textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+.theme-dark .composer-icon-button.secondary {
+  background: #343434;
+  color: #ececf1;
+}
+
+@media (max-width: 900px) {
+  .app-shell:not(.store-page-shell) .sidebar {
+    width: 78px;
+    padding: 10px 8px 14px;
+  }
+
+  .app-shell:not(.store-page-shell) .sidebar:not(.collapsed) .sidebar-label,
+  .app-shell:not(.store-page-shell) .sidebar:not(.collapsed) .session-list,
+  .app-shell:not(.store-page-shell) .sidebar:not(.collapsed) .new-chat-button {
+    font-size: 0.9rem;
+  }
+
+  .chatgpt-page-header {
+    padding: 12px 14px 6px;
+  }
+
+  .chatgpt-header-title h1 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Final minimal chat cleanup */
+.app-shell:not(.store-page-shell) .sidebar {
+  width: 72px;
+  padding: 10px 8px 14px;
+}
+
+.app-shell:not(.store-page-shell) .sidebar-collapse-button,
+.app-shell:not(.store-page-shell) .sidebar-label,
+.app-shell:not(.store-page-shell) .session-list,
+.app-shell:not(.store-page-shell) .sidebar-icon-label {
+  display: none !important;
+}
+
+.app-shell:not(.store-page-shell) .new-chat-button,
+.app-shell:not(.store-page-shell) .history-item {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px;
+}
+
+.sidebar-icon-only {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.chatgpt-header-actions {
+  justify-content: flex-end;
+}
+
+.message-row {
+  gap: 0;
+}
+
+.avatar {
+  display: none !important;
+}
+
+.message-row.assistant,
+.message-row.user {
+  width: min(760px, calc(100% - 24px));
+}
+
+.message-content,
+.user-message-content {
+  width: 100%;
+}
+
+.user-message-content {
+  background: #f2f2f4 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.message-text {
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+.message-author,
+.message-timestamp {
+  opacity: 0.82;
+}
+
+.markdown-code-shell {
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+.theme-dark .user-message-content {
+  background: #2b2b2f !important;
+}
+
+@media (max-width: 900px) {
+  .app-shell:not(.store-page-shell) .sidebar {
+    width: 64px;
+  }
+}
+
+/* Final chat shell fix */
+.chatgpt-page-header {
+  min-height: 56px;
+  padding: 10px 18px 4px;
+  justify-content: flex-end;
+}
+
+.chatgpt-header-title {
+  display: none !important;
+}
+
+.chatgpt-header-actions {
+  margin-left: auto;
+}
+
+.sidebar-icon-only {
+  width: 20px;
+  height: 20px;
+  color: #4b5563;
+}
+
+.sidebar-icon-only svg {
+  width: 20px;
+  height: 20px;
+}
+
+.app-shell:not(.store-page-shell) .history-item.active .sidebar-icon-only,
+.app-shell:not(.store-page-shell) .new-chat-button .sidebar-icon-only {
+  color: #202123;
+}
+
+.message-feed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.message-row {
+  display: flex !important;
+  width: min(780px, calc(100% - 32px)) !important;
+  margin: 0 auto;
+  padding: 10px 0;
+}
+
+.message-row.user {
+  justify-content: flex-end;
+}
+
+.message-row.assistant {
+  justify-content: flex-start;
+}
+
+.flat-message-shell {
+  width: auto !important;
+  max-width: min(720px, 100%);
+  padding: 0 !important;
+}
+
+.assistant-message-content {
+  max-width: min(720px, 100%);
+}
+
+.user-message-content {
+  width: auto !important;
+  max-width: min(640px, 82%);
+  padding: 14px 18px !important;
+  border-radius: 20px !important;
+}
+
+.assistant-message-content .message-text,
+.user-message-content .message-text {
+  width: auto !important;
+  max-width: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.assistant-message-content .message-author {
+  margin-bottom: 6px;
+}
+
+.user-message-content .message-author {
+  display: none;
+}
+
+.message-timestamp {
+  margin-top: 8px;
+  font-size: 0.78rem;
+}
+
+.chat-layout {
+  height: calc(100vh - 64px);
+}
+
+.composer-wrap {
+  padding-top: 10px;
+}
+
+.composer-box,
+.attachment-row {
+  width: min(780px, calc(100% - 12px));
+}
+
+.theme-dark .sidebar-icon-only {
+  color: #d1d5db;
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .history-item.active .sidebar-icon-only,
+.theme-dark .app-shell:not(.store-page-shell) .new-chat-button .sidebar-icon-only {
+  color: #f5f5f5;
+}
+
+@media (max-width: 900px) {
+  .message-row {
+    width: min(100%, calc(100% - 18px)) !important;
+  }
+
+  .user-message-content {
+    max-width: 90%;
+  }
+
+  .chat-layout {
+    height: calc(100vh - 58px);
+  }
+}
+
+/* Colorful old-type chat rail */
+.app-shell:not(.store-page-shell) {
+  background: linear-gradient(180deg, #fff8f2 0%, #fffdf8 42%, #f7fbff 100%);
+}
+
+.app-shell:not(.store-page-shell) .sidebar {
+  width: 250px;
+  padding: 12px;
+  background: linear-gradient(180deg, #fff7ef 0%, #fffdf8 100%);
+  border-right: 1px solid rgba(255, 166, 77, 0.14);
+}
+
+.app-shell:not(.store-page-shell) .sidebar-collapse-button {
+  display: none;
+}
+
+.app-shell:not(.store-page-shell) .sidebar-label,
+.app-shell:not(.store-page-shell) .session-list,
+.app-shell:not(.store-page-shell) .sidebar-icon-label {
+  display: block !important;
+}
+
+.app-shell:not(.store-page-shell) .new-chat-button,
+.app-shell:not(.store-page-shell) .history-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.app-shell:not(.store-page-shell) .new-chat-button {
+  background: linear-gradient(135deg, #ff905f 0%, #f7b14a 100%);
+  color: #ffffff;
+  border: none;
+}
+
+.app-shell:not(.store-page-shell) .history-item {
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(245, 158, 11, 0.1);
+}
+
+.app-shell:not(.store-page-shell) .history-item.active {
+  background: linear-gradient(135deg, rgba(255, 237, 213, 0.98), rgba(254, 249, 195, 0.92));
+  color: #9a3412;
+  border-color: rgba(251, 146, 60, 0.18);
+}
+
+.app-shell:not(.store-page-shell) .sidebar-icon-only {
+  color: currentColor;
+}
+
+.app-shell:not(.store-page-shell) .sidebar-icon-label {
+  font-weight: 700;
+}
+
+.app-shell:not(.store-page-shell) .sidebar-section {
+  padding-top: 12px;
+}
+
+.app-shell:not(.store-page-shell) .sidebar-section + .sidebar-section {
+  margin-top: 12px;
+}
+
+.app-shell:not(.store-page-shell) .session-card {
+  padding: 8px 0;
+}
+
+.app-shell:not(.store-page-shell) .session-item {
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.app-shell:not(.store-page-shell) .session-card.active .session-item {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.chat-layout {
+  background: radial-gradient(circle at top, rgba(255, 208, 122, 0.08), transparent 26%) !important;
+}
+
+.message-feed {
+  padding-top: 18px;
+}
+
+.chatgpt-empty-state h2 {
+  color: #243446;
+}
+
+.compact-prompt-grid .prompt-card {
+  background: linear-gradient(180deg, #ffffff, #fff8f2);
+  border-color: rgba(255, 166, 77, 0.16);
+}
+
+.flat-message-shell.assistant-message-content {
+  padding: 14px 16px !important;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #fffaf5) !important;
+  border: 1px solid rgba(255, 184, 107, 0.18) !important;
+}
+
+.user-message-content {
+  background: linear-gradient(180deg, #eef7ff, #f6fbff) !important;
+  border: 1px solid rgba(88, 145, 255, 0.14) !important;
+}
+
+.composer-box {
+  background: linear-gradient(180deg, #ffffff, #fff8f2) !important;
+  border-color: rgba(255, 184, 107, 0.24) !important;
+  box-shadow: 0 10px 24px rgba(255, 166, 77, 0.08) !important;
+}
+
+.composer-box button[type="submit"] {
+  background: linear-gradient(135deg, #ff8d52 0%, #f4a93e 100%) !important;
+}
+
+.chatgpt-page-header {
+  background: transparent;
+}
+
+.theme-dark .app-shell:not(.store-page-shell) {
+  background: linear-gradient(180deg, #1c1b1a 0%, #18181b 100%);
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .sidebar {
+  background: linear-gradient(180deg, #1f1d1b 0%, #161616 100%);
+  border-right-color: rgba(251, 146, 60, 0.16);
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .history-item {
+  background: rgba(39, 39, 42, 0.9);
+  border-color: rgba(251, 146, 60, 0.1);
+}
+
+.theme-dark .app-shell:not(.store-page-shell) .history-item.active {
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.42), rgba(133, 77, 14, 0.3));
+  color: #fed7aa;
+}
+
+.theme-dark .flat-message-shell.assistant-message-content {
+  background: linear-gradient(180deg, #2b2622, #211d1a) !important;
+  border-color: rgba(251, 146, 60, 0.16) !important;
+}
+
+.theme-dark .user-message-content {
+  background: linear-gradient(180deg, #1f2937, #1e2530) !important;
+  border-color: rgba(96, 165, 250, 0.18) !important;
+}
+
+@media (max-width: 900px) {
+  .app-shell:not(.store-page-shell) .sidebar {
+    width: 220px;
+  }
+}
+
+.support-assistant-banner {
+  display: grid;
+  gap: 18px;
+  margin: 20px 0 28px;
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #fff4dc 0%, #ffe3c2 52%, #ffd2bb 100%);
+  border: 1px solid rgba(199, 116, 31, 0.18);
+  box-shadow: 0 18px 40px rgba(163, 94, 26, 0.12);
+}
+
+.support-assistant-kicker {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a24f15;
+}
+
+.support-assistant-copy h3 {
+  margin: 0 0 10px;
+  font-size: clamp(1.3rem, 2vw, 1.9rem);
+  line-height: 1.2;
+  color: #1f2937;
+}
+
+.support-assistant-copy p:last-child {
+  margin: 0;
+  max-width: 72ch;
+  color: #5f4b3a;
+}
+
+.support-assistant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.support-assistant-actions button,
+.support-assistant-card {
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.support-assistant-actions button {
+  padding: 12px 18px;
+  font-weight: 700;
+  background: #1f5eff;
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(31, 94, 255, 0.2);
+}
+
+.support-assistant-actions .secondary-button {
+  background: rgba(255, 255, 255, 0.72);
+  color: #8d4b1d;
+  box-shadow: none;
+}
+
+.support-assistant-actions button:hover,
+.support-assistant-card:hover {
+  transform: translateY(-1px);
+}
+
+.support-assistant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.support-assistant-card {
+  padding: 16px 18px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.76);
+  color: #2c2a28;
+  box-shadow: inset 0 0 0 1px rgba(180, 98, 24, 0.12);
+}
+
+.support-assistant-card:hover {
+  box-shadow: inset 0 0 0 1px rgba(180, 98, 24, 0.2), 0 14px 30px rgba(163, 94, 26, 0.1);
+}
+
+.theme-dark .support-assistant-banner {
+  background: linear-gradient(135deg, rgba(86, 48, 20, 0.9) 0%, rgba(125, 70, 28, 0.88) 55%, rgba(82, 39, 19, 0.95) 100%);
+  border-color: rgba(255, 195, 132, 0.14);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.theme-dark .support-assistant-kicker {
+  color: #ffd08a;
+}
+
+.theme-dark .support-assistant-copy h3,
+.theme-dark .support-assistant-copy p:last-child,
+.theme-dark .support-assistant-card {
+  color: #fff7ed;
+}
+
+.theme-dark .support-assistant-card {
+  background: rgba(16, 23, 40, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(255, 214, 170, 0.12);
+}
+
+.theme-dark .support-assistant-actions .secondary-button {
+  background: rgba(16, 23, 40, 0.4);
+  color: #fff1db;
+}
+
+@media (max-width: 720px) {
+  .support-assistant-banner {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .support-assistant-actions {
+    flex-direction: column;
+  }
+
+  .support-assistant-actions button {
+    width: 100%;
+  }
+}
+
+/* Conversational sidebar polish */
+.app-shell:not(.store-page-shell) .sidebar-collapse-button {
+  display: none !important;
+}
+
+.chat-sidebar-top {
+  padding: 4px 2px 10px;
+}
+
+.chat-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+}
+
+.chat-sidebar-brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #ff8d52 0%, #8b5cf6 100%);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.chat-sidebar-brand-copy {
+  display: grid;
+  gap: 1px;
+}
+
+.chat-sidebar-brand-copy strong {
+  color: #202123;
+  font-size: 0.95rem;
+}
+
+.chat-sidebar-brand-copy span {
+  color: #7c8695;
+  font-size: 0.8rem;
+}
+
+.chat-sidebar-search {
+  margin-bottom: 12px;
+}
+
+.chat-sidebar-search input {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: rgba(255,255,255,0.82);
+  color: #202123;
+}
+
+.chat-sidebar-search input::placeholder {
+  color: #8a93a2;
+}
+
+.app-shell:not(.store-page-shell) .session-list {
+  display: grid;
+  gap: 4px;
+}
+
+.app-shell:not(.store-page-shell) .session-card {
+  padding: 0;
+}
+
+.app-shell:not(.store-page-shell) .session-item {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.app-shell:not(.store-page-shell) .session-item strong {
+  font-size: 0.92rem;
+  color: #202123;
+}
+
+.app-shell:not(.store-page-shell) .session-item span {
+  color: #6b7280;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.app-shell:not(.store-page-shell) .session-delete-button {
+  display: none;
+}
+
+.chat-sidebar-account {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px 10px !important;
+  background: rgba(255,255,255,0.76) !important;
+  border: 1px solid rgba(255, 166, 77, 0.12) !important;
+  border-radius: 16px;
+}
+
+.chat-sidebar-account-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #202123;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.chat-sidebar-account-copy {
+  min-width: 0;
+}
+
+.chat-sidebar-account-copy strong {
+  display: block;
+  color: #202123;
+  font-size: 0.9rem;
+}
+
+.chat-sidebar-account-copy p {
+  margin: 2px 0 0;
+  color: #6b7280;
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-sidebar-account .logout-button {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+.theme-dark .chat-sidebar-brand-copy strong,
+.theme-dark .chat-sidebar-account-copy strong,
+.theme-dark .app-shell:not(.store-page-shell) .session-item strong {
+  color: #f5f5f5;
+}
+
+.theme-dark .chat-sidebar-brand-copy span,
+.theme-dark .chat-sidebar-account-copy p,
+.theme-dark .app-shell:not(.store-page-shell) .session-item span {
+  color: #a1a1aa;
+}
+
+.theme-dark .chat-sidebar-search input {
+  background: rgba(39,39,42,0.92);
+  border-color: #34343a;
+  color: #f5f5f5;
+}
+
+.theme-dark .chat-sidebar-account {
+  background: rgba(39,39,42,0.92) !important;
+  border-color: rgba(251, 146, 60, 0.1) !important;
+}
+
+.theme-dark .chat-sidebar-account-avatar {
+  background: #f5f5f5;
+  color: #202123;
+}
+
+.theme-dark .chat-sidebar-account .logout-button {
+  border-color: #3f3f46;
+  color: #d4d4d8;
+}
+
+/* Storefront pass: closer shopping homepage */
+.flipkart-storefront {
+  background: #f1f3f6;
+  padding-bottom: 18px;
+}
+
+.flipkart-topbar {
+  background: #2874f0;
+  padding: 12px 16px;
+  grid-template-columns: 220px minmax(0, 1fr) 260px;
+  gap: 18px;
+}
+
+.flipkart-brand {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.flipkart-brand-panel small {
+  font-size: 0.82rem;
+}
+
+.flipkart-search-panel {
+  min-height: 48px;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.14);
+}
+
+.flipkart-search-panel input {
+  font-size: 0.98rem;
+}
+
+.flipkart-search-panel button {
+  font-size: 1.15rem;
+}
+
+.flipkart-account-bar {
+  gap: 16px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.flipkart-account-bar button {
+  min-width: 112px;
+  padding: 10px 18px;
+  font-weight: 800;
+}
+
+.flipkart-category-strip {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 14px 18px;
+  gap: 16px;
+}
+
+.flipkart-category-tile {
+  gap: 10px;
+  padding: 6px 4px;
+}
+
+.flipkart-category-tile span:last-child {
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.flipkart-category-image-wrap {
+  width: 68px;
+  height: 68px;
+  background: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
+}
+
+.flipkart-hero {
+  margin: 14px 16px 0;
+  min-height: 260px;
+  padding: 20px 72px;
+  background: linear-gradient(90deg, #ffd31a 0%, #ffd31a 100%);
+  border-radius: 0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.flipkart-hero-copy p {
+  color: #7c2d12;
+  font-size: 0.95rem;
+}
+
+.flipkart-hero-copy h2 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+}
+
+.flipkart-hero-copy h3 {
+  font-size: clamp(1.7rem, 2.2vw, 2.3rem);
+}
+
+.flipkart-hero-copy span {
+  color: #374151;
+  font-size: 0.92rem;
+}
+
+.flipkart-hero-actions button {
+  border-radius: 999px;
+  padding: 10px 16px;
+}
+
+.flipkart-hero-actions .ghost-button {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.flipkart-section-stack {
+  gap: 16px;
+  padding: 14px 16px 0;
+}
+
+.flipkart-section-row {
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.flipkart-section-head {
+  padding: 18px 20px 8px;
+}
+
+.flipkart-section-head h3 {
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.flipkart-section-head p {
+  font-size: 0.82rem;
+}
+
+.flipkart-view-all {
+  min-width: 88px;
+  padding: 9px 14px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.flipkart-row-scroll {
+  padding: 6px 10px 18px;
+  grid-auto-columns: minmax(200px, 1fr);
+}
+
+.flipkart-product-card {
+  padding: 16px 12px 10px;
+  border-right: 1px solid #eef2f7;
+  background: #ffffff;
+}
+
+.flipkart-product-card:last-child {
+  border-right: none;
+}
+
+.flipkart-product-image {
+  min-height: 168px;
+}
+
+.flipkart-product-image img {
+  height: 140px;
+}
+
+.flipkart-product-copy {
+  gap: 2px;
+}
+
+.flipkart-product-copy strong {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.flipkart-product-copy span,
+.flipkart-product-copy p {
+  font-size: 0.8rem;
+}
+
+.flipkart-product-actions button {
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 1080px) {
+  .flipkart-topbar {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+
+  .flipkart-account-bar {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .flipkart-topbar {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .flipkart-category-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 12px;
+  }
+
+  .flipkart-hero {
+    margin: 12px;
+    padding: 18px 18px 20px;
+    min-height: auto;
+  }
+
+  .flipkart-row-scroll {
+    grid-auto-columns: minmax(170px, 1fr);
+  }
+}
+
+/* Storefront full-width no-rail fix */
+.store-page-shell .main-panel,
+.store-page-shell .store-page-panel,
+.store-page-shell .commerce-layout,
+.store-page-shell .commerce-layout-no-rail,
+.store-page-shell .commerce-main,
+.store-page-shell .flipkart-storefront,
+.store-page-shell .storefront-card {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.store-page-shell .commerce-layout-no-rail {
+  grid-template-columns: minmax(0, 1fr) !important;
+  padding-right: 0 !important;
+}
+
+.store-page-shell .commerce-layout-no-rail .commerce-main {
+  grid-column: 1 / -1;
+}
+
+.store-page-shell .storefront-card {
+  padding: 12px 0 18px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.store-page-shell .flipkart-storefront {
+  padding-bottom: 20px;
+}
+
+.store-page-shell .flipkart-topbar,
+.store-page-shell .flipkart-category-strip,
+.store-page-shell .flipkart-hero,
+.store-page-shell .flipkart-section-stack {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.store-page-shell .flipkart-hero,
+.store-page-shell .flipkart-section-row {
+  width: 100%;
+}
+
+/* Storefront polish: cleaner top bar, colorful icons, tighter rows */
+.store-page-switcher {
+  padding: 10px 0 8px !important;
+  margin-bottom: 6px;
+}
+
+.store-page-switcher-actions {
+  margin-left: auto;
+}
+
+.store-page-switcher .topbar-view-tab {
+  min-width: 88px;
+  padding: 10px 16px;
+  border-radius: 12px;
+}
+
+.flipkart-topbar {
+  padding: 10px 18px !important;
+  grid-template-columns: 210px minmax(0, 1fr) 220px !important;
+}
+
+.flipkart-brand {
+  font-size: 1.8rem !important;
+}
+
+.flipkart-search-panel {
+  min-height: 44px !important;
+}
+
+.flipkart-account-bar {
+  justify-content: flex-end;
+  gap: 14px !important;
+}
+
+.flipkart-category-strip {
+  padding: 12px 16px !important;
+  gap: 12px !important;
+}
+
+.flipkart-category-tile {
+  border-radius: 12px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.flipkart-category-tile:hover {
+  transform: translateY(-1px);
+}
+
+.flipkart-category-image-wrap {
+  width: 72px !important;
+  height: 72px !important;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.flipkart-category-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.flipkart-category-image-wrap.category-all {
+  background: linear-gradient(135deg, #fff7cc, #ffe066);
+}
+
+.flipkart-category-image-wrap.category-phone {
+  background: linear-gradient(135deg, #dbeafe, #93c5fd);
+}
+
+.flipkart-category-image-wrap.category-laptop {
+  background: linear-gradient(135deg, #ede9fe, #c4b5fd);
+}
+
+.flipkart-category-image-wrap.category-tablet {
+  background: linear-gradient(135deg, #dcfce7, #86efac);
+}
+
+.flipkart-category-image-wrap.category-watch {
+  background: linear-gradient(135deg, #fee2e2, #fca5a5);
+}
+
+.flipkart-category-image-wrap.category-accessory {
+  background: linear-gradient(135deg, #fde68a, #fdba74);
+}
+
+.flipkart-hero {
+  margin-top: 10px !important;
+  min-height: 220px !important;
+  padding: 18px 60px !important;
+}
+
+.flipkart-hero-image-wrap img {
+  max-height: 210px !important;
+}
+
+.flipkart-hero-copy h2 {
+  margin: 6px 0 !important;
+  font-size: clamp(1.9rem, 2.8vw, 2.6rem) !important;
+}
+
+.flipkart-hero-copy h3 {
+  margin-bottom: 8px !important;
+}
+
+.flipkart-hero-actions {
+  margin-top: 14px !important;
+}
+
+.flipkart-section-stack {
+  gap: 12px !important;
+  padding-top: 12px !important;
+}
+
+.flipkart-section-head {
+  padding: 14px 18px 6px !important;
+}
+
+.flipkart-row-scroll {
+  padding: 4px 10px 14px !important;
+  gap: 8px !important;
+}
+
+.flipkart-product-card {
+  padding: 14px 10px 10px !important;
+}
+
+.flipkart-product-image {
+  min-height: 150px !important;
+}
+
+.flipkart-product-image img {
+  height: 124px !important;
+}
+
+.flipkart-product-actions {
+  gap: 6px;
+}
+
+.flipkart-product-actions button {
+  padding: 7px 8px !important;
+}
+
+@media (max-width: 900px) {
+  .store-page-switcher {
+    padding: 8px 0 6px !important;
+  }
+
+  .flipkart-topbar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .flipkart-account-bar {
+    justify-content: flex-start;
+  }
+
+  .flipkart-category-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Storefront routes-style browse flow */
+.flipkart-dept-bar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px 12px;
+  background: #ffffff;
+  border-top: 1px solid #eef2f7;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+
+.flipkart-dept-trigger {
+  background: transparent;
+  color: #111827;
+  font-weight: 700;
+  padding: 8px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.flipkart-dept-trigger.active {
+  color: #2563eb;
+}
+
+.flipkart-mega-menu {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  margin: 0 16px;
+  position: relative;
+  z-index: 4;
+}
+
+.flipkart-mega-column {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 18px 20px 22px;
+  border-right: 1px solid #eef2f7;
+}
+
+.flipkart-mega-column:last-child {
+  border-right: none;
+}
+
+.flipkart-mega-column strong {
+  color: #111827;
+  font-size: 1rem;
+}
+
+.flipkart-mega-link {
+  background: transparent;
+  color: #4b5563;
+  text-align: left;
+  padding: 2px 0;
+}
+
+.flipkart-mega-link:hover {
+  color: #2563eb;
+}
+
+.flipkart-listing-shell {
+  padding: 12px 16px 4px;
+}
+
+.flipkart-listing-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 14px;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.flipkart-listing-breadcrumbs button {
+  background: transparent;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.flipkart-listing-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.flipkart-filter-panel {
+  min-width: 0;
+}
+
+.flipkart-filter-card {
+  display: grid;
+  gap: 18px;
+  background: #ffffff;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+}
+
+.flipkart-filter-card h3 {
+  margin: 0;
+  font-size: 1.7rem;
+  color: #111827;
+}
+
+.flipkart-filter-group {
+  display: grid;
+  gap: 10px;
+}
+
+.flipkart-filter-group strong {
+  color: #111827;
+  font-size: 1rem;
+}
+
+.flipkart-filter-group span,
+.flipkart-filter-link {
+  color: #4b5563;
+  font-size: 0.98rem;
+  text-align: left;
+  background: transparent;
+}
+
+.flipkart-filter-link.active {
+  color: #111827;
+  font-weight: 800;
+}
+
+.flipkart-listing-main {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.flipkart-listing-head {
+  display: grid;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 16px 18px;
+}
+
+.flipkart-listing-head h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 2rem;
+}
+
+.flipkart-listing-head p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.flipkart-sort-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.flipkart-sort-row span {
+  color: #111827;
+  font-weight: 700;
+}
+
+.flipkart-sort-row button {
+  background: transparent;
+  color: #374151;
+}
+
+.flipkart-sort-row button.active {
+  color: #2563eb;
+  font-weight: 800;
+}
+
+.flipkart-listing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.flipkart-listing-grid .flipkart-product-card {
+  border: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+}
+
+@media (max-width: 1200px) {
+  .flipkart-listing-layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .flipkart-listing-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .flipkart-mega-menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0 12px;
+  }
+
+  .flipkart-listing-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .flipkart-listing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .flipkart-listing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .flipkart-mega-menu {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Richer marketplace color pass */
+.flipkart-storefront {
+  background:
+    linear-gradient(180deg, #eef5ff 0%, #f7f9fc 18%, #f1f3f6 100%) !important;
+}
+
+.flipkart-topbar {
+  background: linear-gradient(90deg, #2874f0 0%, #1d63d3 55%, #1e40af 100%) !important;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
+}
+
+.flipkart-brand {
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(15, 23, 42, 0.14);
+}
+
+.flipkart-search-panel {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+}
+
+.flipkart-account-bar button {
+  background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+}
+
+.flipkart-category-strip {
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.flipkart-category-tile {
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(248,250,252,0.95));
+  border: 1px solid rgba(37, 99, 235, 0.08);
+}
+
+.flipkart-category-tile.active {
+  background: linear-gradient(180deg, #eef4ff, #ffffff);
+  border-color: rgba(37, 99, 235, 0.18);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.08);
+}
+
+.flipkart-dept-bar {
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.flipkart-dept-trigger.active {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.flipkart-mega-menu {
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+}
+
+.flipkart-hero {
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,0.28), transparent 16%),
+    radial-gradient(circle at 82% 28%, rgba(255,255,255,0.18), transparent 18%),
+    linear-gradient(90deg, #ffd814 0%, #ffc83d 55%, #ffb703 100%) !important;
+}
+
+.flipkart-hero-copy h2 {
+  color: #111827;
+}
+
+.flipkart-hero-copy h3 {
+  color: #c2410c !important;
+}
+
+.flipkart-hero-actions button {
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+}
+
+.flipkart-section-row {
+  border: 1px solid rgba(37, 99, 235, 0.06);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+}
+
+.flipkart-section-head {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+}
+
+.flipkart-view-all {
+  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
+}
+
+.flipkart-product-card {
+  position: relative;
+  border-radius: 14px;
+  margin: 4px 2px;
+  border: 1px solid rgba(37, 99, 235, 0.08);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.flipkart-product-image {
+  position: relative;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+}
+
+.flipkart-offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  box-shadow: 0 10px 18px rgba(239, 68, 68, 0.25);
+}
+
+.flipkart-price-line strong {
+  font-size: 1.04rem;
+}
+
+.flipkart-product-actions button {
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+}
+
+.flipkart-product-actions .secondary-button {
+  background: linear-gradient(180deg, #eff6ff, #dbeafe) !important;
+}
+
+.flipkart-product-actions .ghost-button.saved {
+  background: linear-gradient(180deg, #fff7ed, #ffedd5) !important;
+}
+
+.flipkart-filter-card,
+.flipkart-listing-head,
+.flipkart-listing-grid .flipkart-product-card {
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.flipkart-filter-card {
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+}
+
+.flipkart-listing-head {
+  border-radius: 18px;
+}
+
+.flipkart-listing-grid .flipkart-product-card {
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+}
+
+/* Storefront interaction menus */
+.flipkart-account-bar {
+  position: relative;
+}
+
+.flipkart-account-menu-wrap {
+  position: relative;
+}
+
+.flipkart-inline-button {
+  background: transparent;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 8px 6px;
+}
+
+.flipkart-account-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 180px;
+  display: grid;
+  gap: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.flipkart-account-menu button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid #eef2f7;
+  background: #ffffff;
+  color: #111827;
+  padding: 12px 14px;
+  font-weight: 600;
+}
+
+.flipkart-account-menu button:last-child {
+  border-bottom: none;
+}
+
+.flipkart-account-menu button:hover {
+  background: #f8fbff;
+}
+
+.flipkart-account-menu.more-menu {
+  min-width: 200px;
+}
+
+.flipkart-search-panel {
+  display: grid;
+}
+
+/* Checkout panel and auth polish */
+.login-form {
+  gap: 14px;
+}
+
+.login-form label {
+  font-size: 0.95rem;
+}
+
+.commerce-overview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.commerce-close-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.88);
+  color: #1f2937;
+  font-size: 1.45rem;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
+}
+
+.checkout-frame {
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(248,250,252,0.96));
+  border: 1px solid rgba(59, 130, 246, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85);
+}
+
+.checkout-form {
+  gap: 10px;
+}
+
+.checkout-form input,
+.checkout-form select {
+  min-height: 48px;
+}
+
+.theme-dark .commerce-close-button {
+  background: rgba(39, 39, 42, 0.92);
+  color: #f5f5f5;
+}
+
+.theme-dark .checkout-frame {
+  background: linear-gradient(180deg, rgba(24,24,27,0.92), rgba(39,39,42,0.96));
+  border-color: rgba(255,255,255,0.08);
+}

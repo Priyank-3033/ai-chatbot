@@ -9,10 +9,14 @@ from textwrap import shorten
 
 from app.core.config import Settings
 from app.models import ChatResponse, Source
+from app.services.answer_validator import AnswerValidator
 from app.services.ai_service import AIProviderError, AIService
 from app.services.document_service import DocumentService
 from app.services.embedding_service import EmbeddingService
+from app.services.fallback_service import FallbackService
+from app.services.intent_classifier import IntentClassifier
 from app.services.knowledge_base import KnowledgeBaseService, KnowledgeEntry
+from app.services.llm_service import LLMService
 from app.services.product_catalog import ProductCatalogService
 from app.services.vector_store import VectorStoreService
 
@@ -32,6 +36,10 @@ class ChatbotService:
         self.embedding_service = embedding_service
         self.vector_store = vector_store
         self.ai_service = AIService(settings)
+        self.intent_classifier = IntentClassifier()
+        self.llm_service = LLMService(self.ai_service)
+        self.fallback_service = FallbackService(self)
+        self.answer_validator = AnswerValidator()
         self._llm_disabled_until = 0.0
 
     @staticmethod
@@ -78,21 +86,24 @@ class ChatbotService:
         chat_mode = mode if mode in {"general", "support"} else "general"
         selected_model = self.ai_service.resolve_model(self._normalize_model(model, self.ai_service.default_model()))
         cleaned_prompt = (custom_prompt or "").strip()
-        entries = self.knowledge_base.retrieve(question) if chat_mode == "support" else self.knowledge_base.retrieve(question, limit=4)
-        products = self.product_catalog.recommend_products(question, limit=4) if chat_mode == "general" else []
-        document_matches = self._retrieve_uploaded_documents(question, user_id=user_id, uploaded_documents=uploaded_documents or [])
+        intent = self.intent_classifier.detect(question, chat_mode)
+        context = self._build_context(question, intent=intent, mode=chat_mode, user_id=user_id, uploaded_documents=uploaded_documents or [])
+        entries = context["entries"]
+        products = context["products"]
+        document_matches = context["documents"]
         sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
+        system_prompt = self._build_intent_prompt(intent, chat_mode, cleaned_prompt)
 
         if self.ai_service.available(selected_model) and not self._llm_temporarily_disabled():
             try:
-                answer = self._generate_llm_answer(question, history, entries, products, document_matches, chat_mode, selected_model, cleaned_prompt)
+                answer = self._generate_llm_answer(question, history, context, chat_mode, selected_model, system_prompt)
                 result_mode = f"llm+{chat_mode}+{selected_model}"
             except AIProviderError:
                 self._temporarily_disable_llm()
-                answer = self._generate_fallback_answer(question, entries, products, document_matches, chat_mode, history)
+                answer = self._generate_fallback_answer(question, context, chat_mode, history, intent)
                 result_mode = f"fallback+{chat_mode}"
         else:
-            answer = self._generate_fallback_answer(question, entries, products, document_matches, chat_mode, history)
+            answer = self._generate_fallback_answer(question, context, chat_mode, history, intent)
             result_mode = f"fallback+{chat_mode}"
 
         return ChatResponse(answer=answer, sources=sources, mode=result_mode)
@@ -110,31 +121,25 @@ class ChatbotService:
         chat_mode = mode if mode in {"general", "support"} else "general"
         selected_model = self.ai_service.resolve_model(self._normalize_model(model, self.ai_service.default_model()))
         cleaned_prompt = (custom_prompt or "").strip()
-        entries = self.knowledge_base.retrieve(question) if chat_mode == "support" else self.knowledge_base.retrieve(question, limit=4)
-        products = self.product_catalog.recommend_products(question, limit=4) if chat_mode == "general" else []
-        document_matches = self._retrieve_uploaded_documents(question, user_id=user_id, uploaded_documents=uploaded_documents or [])
+        intent = self.intent_classifier.detect(question, chat_mode)
+        context = self._build_context(question, intent=intent, mode=chat_mode, user_id=user_id, uploaded_documents=uploaded_documents or [])
+        entries = context["entries"]
+        products = context["products"]
+        document_matches = context["documents"]
         sources = self._build_sources(entries) if chat_mode == "support" else self._build_combined_sources(entries, products, document_matches)
+        system_prompt = self._build_intent_prompt(intent, chat_mode, cleaned_prompt)
 
         if self.ai_service.available(selected_model) and not self._llm_temporarily_disabled():
             try:
                 return (
-                    self.ai_service.generate_answer_stream(
-                        question=question,
-                        history=history,
-                        mode=chat_mode,
-                        model=selected_model,
-                        custom_prompt=cleaned_prompt,
-                        entries=entries,
-                        products=products,
-                        document_matches=document_matches,
-                    ),
+                    self.llm_service.generate_stream(question=question, history=history, mode=chat_mode, model=selected_model, system_prompt=system_prompt, context=context),
                     sources,
                     f"llm+{chat_mode}+{selected_model}",
                 )
             except AIProviderError:
                 self._temporarily_disable_llm()
 
-        fallback_answer = self._generate_fallback_answer(question, entries, products, document_matches, chat_mode, history)
+        fallback_answer = self._generate_fallback_answer(question, context, chat_mode, history, intent)
         return self._stream_text(fallback_answer), sources, f"fallback+{chat_mode}"
 
     def welcome_message(self, mode: str) -> str:
@@ -163,71 +168,46 @@ class ChatbotService:
         for token in re.findall(r"\S+\s*|\n", text):
             yield token
 
-    def _generate_llm_answer(
-        self,
-        question: str,
-        history: list[dict[str, str]],
-        entries: list[KnowledgeEntry],
-        products,
-        document_matches: list[dict[str, str]],
-        mode: str,
-        model: str,
-        custom_prompt: str,
-    ) -> str:
-        response = self.ai_service.generate_answer(
+    def _generate_llm_answer(self, question: str, history: list[dict[str, str]], context: dict[str, list], mode: str, model: str, system_prompt: str) -> str:
+        response = self.llm_service.generate(
             question=question,
             history=history,
             mode=mode,
             model=model,
-            custom_prompt=custom_prompt,
-            entries=entries,
-            products=products,
-            document_matches=document_matches,
+            system_prompt=system_prompt,
+            context=context,
         )
-        final_answer = response or self._generate_fallback_answer(question, entries, products, document_matches, mode, history)
+        final_answer = response or self._generate_fallback_answer(
+            question,
+            context,
+            mode,
+            history,
+            self.intent_classifier.detect(question, mode),
+        )
+        final_answer = self.answer_validator.validate(answer=final_answer, intent=context.get("intent", "general"), mode=mode, context=context) or final_answer
         return self._polish_answer(final_answer, mode)
 
-    def _generate_fallback_answer(
-        self,
-        question: str,
-        entries: list[KnowledgeEntry],
-        products,
-        document_matches: list[dict[str, str]],
-        mode: str,
-        history: list[dict[str, str]] | None = None,
-    ) -> str:
+    def _generate_fallback_answer(self, question: str, context: dict[str, list], mode: str, history: list[dict[str, str]] | None = None, intent: str | None = None) -> str:
         normalized = re.sub(r"\s+", " ", question.lower().strip())
         history = history or []
         recent_context = self._recent_user_context(history)
         contextual_normalized = self._merge_with_recent_context(normalized, recent_context)
+        resolved_intent = intent or self.intent_classifier.detect(question, mode)
 
-        if document_matches and any(term in contextual_normalized for term in ["pdf", "document", "file", "notes", "from this file", "from the file", "uploaded"]):
-            top = document_matches[0]
-            return self._format_answer(
-                f"Your uploaded file suggests: {top['snippet'][:160]}",
-                f"I matched your question against the uploaded document `{top['name']}` and used the closest text I found there.",
-                "Ask a more specific question from the file if you want a sharper answer, for example a summary, explanation, or answer from one section."
-            )
+        direct_answer = self.fallback_service.handle(
+            intent=resolved_intent,
+            question=question,
+            normalized=contextual_normalized,
+            mode=mode,
+            history=history,
+            context=context,
+        )
+        if direct_answer:
+            return self._polish_answer(direct_answer, mode)
 
-        math_answer = self._simple_math_answer(question.strip())
-        if math_answer is not None:
-            return math_answer
-
-        if mode == "support":
-            if "help" in normalized and len(normalized.split()) <= 4:
-                return (
-                    "Of course. I can help with refunds, billing, login issues, order updates, shipping, and account access.\n\n"
-                    "Tell me your issue in one sentence, for example:\n"
-                    "- I forgot my password\n"
-                    "- My OTP is not working\n"
-                    "- I want a refund\n"
-                    "- I need to update my order"
-                )
-            if not entries:
-                if self._is_support_question(contextual_normalized):
-                    return "I don’t have enough information to answer that accurately."
-                return "I can only help with support-related questions."
-            return self._build_support_fallback(entries, contextual_normalized)
+        entries = context.get("entries", [])
+        products = context.get("products", [])
+        document_matches = context.get("documents", [])
 
         if self._looks_like_comparison_request(contextual_normalized):
             matched_products = self._match_products_from_text(question)
@@ -1232,6 +1212,34 @@ class ChatbotService:
             + (f" This also looks related to our recent chat about {recent_context}." if recent_context else ""),
             "Tell me your exact situation in one or two lines, and I will give you a more direct answer."
         )
+
+    def _build_context(
+        self,
+        question: str,
+        *,
+        intent: str,
+        mode: str,
+        user_id: int | None,
+        uploaded_documents: list[dict[str, str]],
+    ) -> dict[str, list]:
+        entries = self.knowledge_base.retrieve(question) if mode == "support" or intent == "support" else self.knowledge_base.retrieve(question, limit=4)
+        products = self.product_catalog.recommend_products(question, limit=4) if intent in {"product", "general"} and mode == "general" else []
+        documents = self._retrieve_uploaded_documents(question, user_id=user_id, uploaded_documents=uploaded_documents)
+        return {"entries": entries, "products": products, "documents": documents, "intent": intent}
+
+    @staticmethod
+    def _build_intent_prompt(intent: str, mode: str, custom_prompt: str) -> str:
+        base_rules = {
+            "product": "Intent: product.\n- Recommend based on the user's need and budget\n- Prefer concrete options over generic advice\n- If budget or priority is missing, ask for it briefly",
+            "support": "Intent: support.\n- Give a step-by-step support solution\n- Stay accurate and do not guess policy details\n- Ask a follow-up only when needed",
+            "coding": "Intent: coding.\n- Give working code when asked\n- Explain the likely issue clearly if debugging\n- Keep answers practical and direct",
+            "general": "Intent: general.\n- Give a helpful direct answer first\n- Be natural, accurate, and concise\n- Ask a brief clarification only when necessary",
+        }
+        intent_prompt = base_rules.get(intent, base_rules["general"])
+        mode_line = "Support mode is active." if mode == "support" else "General mode is active."
+        if custom_prompt:
+            return f"{mode_line}\n{intent_prompt}\n\nAdditional instructions:\n{custom_prompt}"
+        return f"{mode_line}\n{intent_prompt}"
 
     @staticmethod
     def _is_programming_question(normalized: str) -> bool:

@@ -154,16 +154,20 @@ const MODE_CONFIG = {
       "Help me plan a study schedule for exams",
       "I need to choose between two job offers",
     ],
+    placeholder: "Ask about products, ecommerce issues, life decisions, study, career, or everyday questions...",
+    emptyDescription: "Use Smart AI for recommendations, comparisons, practical planning, and general guidance.",
   },
   support: {
-    title: "Smart AI assistant",
-    subtitle: "One AI that can help with shopping, ecommerce problems, support questions, and everyday real-life decisions.",
+    title: "Customer Support AI",
+    subtitle: "Instant support for orders, refunds, account access, billing, delivery issues, and troubleshooting.",
     starterPrompts: [
       "How do I reset my password?",
       "What is your refund policy?",
       "My login OTP is not working.",
       "Can I change my shipping address after ordering?",
     ],
+    placeholder: "Describe your support issue: order delay, refund, login, billing, address, delivery, or account access...",
+    emptyDescription: "Use Support AI for customer-service help grounded in your support knowledge and store workflows.",
   },
 };
 
@@ -305,7 +309,9 @@ export default function App() {
   const [theme, setTheme] = useState(() => window.localStorage.getItem(THEME_KEY) || "light");
   const [user, setUser] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activePanel, setActivePanel] = useState("chat");
+  const [activePanel, setActivePanel] = useState("store");
+  const [storeRailVisible, setStoreRailVisible] = useState(false);
+  const [commerceTab, setCommerceTab] = useState("checkout");
   const [products, setProducts] = useState([]);
   const [productTotal, setProductTotal] = useState(0);
   const [productPage, setProductPage] = useState(1);
@@ -331,11 +337,13 @@ export default function App() {
     payment_reference: "",
   });
   const [authMode, setAuthMode] = useState("login");
-  const [authForm, setAuthForm] = useState({ name: "", email: "", password: "" });
+  const [authForm, setAuthForm] = useState({ name: "", phone: "", email: "", password: "" });
   const [authError, setAuthError] = useState("");
   const [pageError, setPageError] = useState("");
   const [retryAction, setRetryAction] = useState(null);
   const [booting, setBooting] = useState(true);
+  const [pendingPrompt, setPendingPrompt] = useState(null);
+  const [sidebarSearch, setSidebarSearch] = useState("");
   const [selectedModel, setSelectedModel] = useState(() => window.localStorage.getItem(MODEL_KEY) || "gpt-4o");
   const [promptState, setPromptState] = useState(() => loadPromptState());
   const [promptTemplates, setPromptTemplates] = useState(() => loadPromptTemplates());
@@ -355,11 +363,77 @@ export default function App() {
   const typingMessageKey = useChatStore((state) => state.typingMessageKey);
   const setTypingMessageKey = useChatStore((state) => state.setTypingMessageKey);
   const clearChat = useChatStore((state) => state.clearChat);
-  const sessionsForMode = useMemo(() => sessions.filter((session) => session.mode === "general"), [sessions]);
+  const sessionsForMode = useMemo(() => sessions.filter((session) => session.mode === activeMode), [sessions, activeMode]);
+  const filteredSessions = useMemo(() => {
+    const query = sidebarSearch.trim().toLowerCase();
+    if (!query) return sessionsForMode;
+    return sessionsForMode.filter((session) => `${session.title} ${session.preview || ""}`.toLowerCase().includes(query));
+  }, [sessionsForMode, sidebarSearch]);
   const wishlistIds = useMemo(() => wishlist.items.map((item) => item.product_id), [wishlist]);
   const memoryItems = useMemo(() => extractMemoryItems(messages), [messages]);
   const memoryTrail = useMemo(() => extractConversationMemory(messages), [messages]);
   const activePrompt = promptState[activeMode] || "";
+  const isStorePage = activePanel === "store";
+  const hasCommerceData = wishlist.items.length > 0 || cart.items.length > 0 || orders.length > 0;
+  const showCommerceSidebar = storeRailVisible && hasCommerceData;
+
+  useEffect(() => {
+    if (!hasCommerceData) {
+      setStoreRailVisible(false);
+    }
+  }, [hasCommerceData]);
+
+  useEffect(() => {
+    function syncFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const panel = params.get("panel");
+      const tab = params.get("tab");
+      const productId = Number(params.get("product"));
+
+      if (panel === "chat" || panel === "store") {
+        setActivePanel(panel);
+      }
+
+      if (["wishlist", "cart", "checkout", "orders"].includes(tab || "")) {
+        setCommerceTab(tab);
+        setStoreRailVisible(true);
+      }
+
+      if (!productId) {
+        setSelectedProduct(null);
+        return;
+      }
+
+      if (!token) return;
+      if (selectedProduct?.id === productId) return;
+      void openProductDetail(productId);
+    }
+
+    syncFromUrl();
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
+  }, [token, selectedProduct?.id]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("panel", activePanel);
+
+    if (activePanel === "store" && showCommerceSidebar) {
+      params.set("tab", commerceTab);
+    } else {
+      params.delete("tab");
+    }
+
+    if (selectedProduct?.id) {
+      params.set("product", String(selectedProduct.id));
+    } else {
+      params.delete("product");
+    }
+
+    const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+    window.history.replaceState({}, "", nextUrl);
+  }, [activePanel, showCommerceSidebar, commerceTab, selectedProduct?.id]);
+
   const apiClient = useMemo(
     () =>
       createApiClient({
@@ -423,6 +497,8 @@ export default function App() {
         ]);
         const shouldRestoreAccurateMode = loadAccurateMode(meData.email);
         setUser(meData);
+        setActivePanel("store");
+        setStoreRailVisible(false);
         setAccurateModeEnabled(shouldRestoreAccurateMode);
         if (shouldRestoreAccurateMode) {
           setSelectedModel("gpt-4o");
@@ -567,11 +643,13 @@ export default function App() {
       await apiClient.request(`/api/chat-sessions/${sessionId}`, { method: "DELETE" });
       const updatedSessions = await refreshSessions();
       if (activeSessionId === sessionId) {
-        const nextSession = updatedSessions.find((session) => session.mode === "general");
+        const deletedSession = sessions.find((session) => session.id === sessionId);
+        const targetMode = deletedSession?.mode || activeMode;
+        const nextSession = updatedSessions.find((session) => session.mode === targetMode);
         if (nextSession) {
-          await openSession(nextSession.id, token, "general");
+          await openSession(nextSession.id, token, targetMode);
         } else {
-          await createSession("general");
+          await createSession(targetMode);
           await refreshSessions();
         }
       }
@@ -602,6 +680,14 @@ export default function App() {
     setTypingMessageKey,
   });
 
+  useEffect(() => {
+    if (!pendingPrompt || isLoading) return;
+    if (pendingPrompt.mode !== activeMode || !activeSessionId) return;
+    const nextPrompt = pendingPrompt.text;
+    setPendingPrompt(null);
+    void sendMessage(nextPrompt);
+  }, [activeMode, activeSessionId, isLoading, pendingPrompt, sendMessage]);
+
   async function handleAuthSubmit(event) {
     event.preventDefault();
     setAuthError("");
@@ -609,15 +695,17 @@ export default function App() {
       const endpoint = authMode === "register" ? "/api/auth/register" : "/api/auth/login";
       const body = authMode === "register" ? authForm : { email: authForm.email, password: authForm.password };
       const data = await apiClient.request(endpoint, { method: "POST", body });
-      const shouldRestoreAccurateMode = loadAccurateMode(data.user.email);
-      setToken(data.token);
-      setUser(data.user);
-      setAccurateModeEnabled(shouldRestoreAccurateMode);
+        const shouldRestoreAccurateMode = loadAccurateMode(data.user.email);
+        setToken(data.token);
+        setUser(data.user);
+        setActivePanel("store");
+        setStoreRailVisible(false);
+        setAccurateModeEnabled(shouldRestoreAccurateMode);
       if (shouldRestoreAccurateMode) {
         setSelectedModel("gpt-4o");
       }
       setCheckoutForm((current) => ({ ...current, full_name: data.user.name }));
-      setAuthForm({ name: "", email: "", password: "" });
+        setAuthForm({ name: "", phone: "", email: "", password: "" });
         await Promise.all([fetchProducts(data.token), fetchWishlist(data.token), fetchCart(data.token), fetchOrders(data.token), fetchDocuments(data.token)]);
         if (data.user.is_admin) {
           await fetchAdminInsights(data.token);
@@ -695,6 +783,12 @@ export default function App() {
     setActivePanel("store");
   }
 
+  function openStoreTab(tab = "checkout") {
+    setActivePanel("store");
+    setStoreRailVisible(true);
+    setCommerceTab(tab);
+  }
+
   function openChatView() {
     setActivePanel("chat");
     setShowAiSettings(false);
@@ -709,6 +803,8 @@ export default function App() {
       setRetryAction(null);
       await apiClient.request("/api/cart/items", { method: "POST", body: { product_id: productId, quantity: 1 } });
       await fetchCart();
+      setStoreRailVisible(true);
+      setCommerceTab("cart");
     } catch (error) {
       setRetryAction(() => () => handleAddToCart(productId));
       setPageError(error instanceof Error ? error.message : "Unable to add item to cart.");
@@ -733,6 +829,8 @@ export default function App() {
       const method = exists ? "DELETE" : "POST";
       const data = await apiClient.request(`/api/wishlist/${productId}`, { method });
       setWishlist(data);
+      setStoreRailVisible(!exists || data.items.length > 0 || cart.items.length > 0 || orders.length > 0);
+      if (!exists) setCommerceTab("wishlist");
     } catch (error) {
       setRetryAction(() => () => handleToggleWishlist(productId));
       setPageError(error instanceof Error ? error.message : "Unable to update wishlist.");
@@ -747,6 +845,8 @@ export default function App() {
     try {
       await apiClient.request("/api/orders/checkout", { method: "POST", body: checkoutForm });
       await Promise.all([fetchCart(), fetchOrders()]);
+      setStoreRailVisible(true);
+      setCommerceTab("orders");
       setCheckoutForm((current) => ({
         ...current,
         address_line: "",
@@ -767,12 +867,17 @@ export default function App() {
   async function openProductDetail(productId) {
     try {
       setRetryAction(null);
+      setActivePanel("store");
       const data = await apiClient.request(`/api/products/${productId}`);
       setSelectedProduct(data);
     } catch (error) {
       setRetryAction(() => () => openProductDetail(productId));
       setPageError(error instanceof Error ? error.message : "Unable to load product details.");
     }
+  }
+
+  function closeProductDetail() {
+    setSelectedProduct(null);
   }
 
   async function handleSaveProduct(payload, isEditing) {
@@ -826,10 +931,20 @@ export default function App() {
     await refreshSessions();
   }
 
+  async function openSupportAssistant(prompt = "") {
+    setActivePanel("chat");
+    if (prompt.trim()) {
+      setPendingPrompt({ mode: "support", text: prompt.trim() });
+    }
+    await switchMode("support");
+  }
+
   function logout() {
     if (isLoading) return;
     setToken("");
-    setUser(null);
+      setUser(null);
+      setStoreRailVisible(false);
+      setCommerceTab("checkout");
     setRetryAction(null);
     setAccurateModeEnabled(false);
     setSessions([]);
@@ -840,6 +955,7 @@ export default function App() {
     setOrders([]);
     setSelectedProduct(null);
     setActiveSessionId(null);
+    setPendingPrompt(null);
     setAuthError("");
     setPageError("");
   }
@@ -879,13 +995,14 @@ export default function App() {
               <button className={`auth-tab ${authMode === "login" ? "active" : ""}`} onClick={() => setAuthMode("login")} type="button">Sign in</button>
               <button className={`auth-tab ${authMode === "register" ? "active" : ""}`} onClick={() => setAuthMode("register")} type="button">Create account</button>
             </div>
-            <p className="eyebrow">Secure Access</p>
-            <h2>{authMode === "login" ? "Sign in to Smart Commerce" : "Create your Smart Commerce account"}</h2>
-            <p className="login-form-copy">{authMode === "login" ? "Enter your email and password to restore your saved chats, wishlist, cart, and orders." : "Create an account to save your chat history and shopping data in the backend database."}</p>
-            <form className="login-form" onSubmit={handleAuthSubmit}>
-              {authMode === "register" ? <label>Name<input type="text" value={authForm.name} onChange={(event) => setAuthForm((current) => ({ ...current, name: event.target.value }))} placeholder="Your name" /></label> : null}
-              <label>Email<input type="email" value={authForm.email} onChange={(event) => setAuthForm((current) => ({ ...current, email: event.target.value }))} placeholder="you@example.com" /></label>
-              <label>Password<input type="password" value={authForm.password} onChange={(event) => setAuthForm((current) => ({ ...current, password: event.target.value }))} placeholder="Enter password" /></label>
+              <p className="eyebrow">Secure Access</p>
+              <h2>{authMode === "login" ? "Sign in to Smart Commerce" : "Create your Smart Commerce account"}</h2>
+              <p className="login-form-copy">{authMode === "login" ? "Enter your email and password to restore your saved chats, wishlist, cart, and orders." : "Create an account to save your chat history and shopping data in the backend database."}</p>
+              <form className="login-form" onSubmit={handleAuthSubmit}>
+                {authMode === "register" ? <label>Name<input type="text" value={authForm.name} onChange={(event) => setAuthForm((current) => ({ ...current, name: event.target.value }))} placeholder="Your name" /></label> : null}
+                {authMode === "register" ? <label>Phone number<input type="tel" value={authForm.phone} onChange={(event) => setAuthForm((current) => ({ ...current, phone: event.target.value }))} placeholder="Phone number" /></label> : null}
+                <label>Email<input type="email" value={authForm.email} onChange={(event) => setAuthForm((current) => ({ ...current, email: event.target.value }))} placeholder="you@example.com" /></label>
+                <label>Password<input type="password" value={authForm.password} onChange={(event) => setAuthForm((current) => ({ ...current, password: event.target.value }))} placeholder="Enter password" /></label>
               {authError ? <p className="auth-error">{authError}</p> : null}
               <button type="submit" className="login-button">{authMode === "login" ? "Continue to store" : "Create account"}</button>
             </form>
@@ -896,45 +1013,64 @@ export default function App() {
   }
 
   return (
-    <div className={`app-shell commerce-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""} ${theme === "dark" ? "theme-dark" : ""}`}>
-      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
-        <button
-          type="button"
-          className="sidebar-collapse-button"
-          onClick={() => setSidebarCollapsed((current) => !current)}
-          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {sidebarCollapsed ? "»" : "«"}
-        </button>
+    <div className={`app-shell commerce-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""} ${theme === "dark" ? "theme-dark" : ""} ${isStorePage ? "store-page-shell" : ""}`}>
+      {!isStorePage ? (
+        <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="chat-sidebar-top">
+          <div className="chat-sidebar-brand">
+            <div className="chat-sidebar-brand-icon">AI</div>
+            <div className="chat-sidebar-brand-copy">
+              <strong>Smart AI</strong>
+              <span>Your workspace</span>
+            </div>
+          </div>
+        </div>
         <button className="new-chat-button" onClick={() => startNewChat()} title="New chat">
-          {sidebarCollapsed ? "+" : "New chat"}
+          <span className="sidebar-icon-only" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+            </svg>
+          </span>
+          <span className="sidebar-icon-label">{sidebarCollapsed ? "+" : "New chat"}</span>
         </button>
         <div className="sidebar-section">
           {sidebarCollapsed ? null : <p className="sidebar-label">Workspace</p>}
           <button className={`history-item ${activePanel === "chat" ? "active" : ""}`} onClick={() => setActivePanel("chat")} title="Smart Chat">
-            {sidebarCollapsed ? "Chat" : "Smart Chat"}
+            <span className="sidebar-icon-only" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 11.5 12 4l9 7.5" />
+                <path d="M5 10.5V20h14v-9.5" />
+              </svg>
+            </span>
+            <span className="sidebar-icon-label">{sidebarCollapsed ? "Chat" : "Smart Chat"}</span>
           </button>
           <button className={`history-item ${activePanel === "store" ? "active" : ""}`} onClick={() => setActivePanel("store")} title="Store & Orders">
-            {sidebarCollapsed ? "Store" : "Store & Orders"}
+            <span className="sidebar-icon-only" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="20" r="1.25" />
+                <circle cx="18" cy="20" r="1.25" />
+                <path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8h9.8a1 1 0 0 0 1-.8L21 7H7" />
+              </svg>
+            </span>
+            <span className="sidebar-icon-label">{sidebarCollapsed ? "Store" : "Store & Orders"}</span>
           </button>
         </div>
         {sidebarCollapsed ? null : (
-          <div className="sidebar-section profile-card">
-            <p className="sidebar-label">Signed In</p>
-            <strong>{user.name}</strong>
-            <p className="profile-email">{user.email}</p>
-            {user.is_admin ? <p className="admin-chip">Admin access enabled</p> : null}
-            <button className="logout-button" onClick={logout}>Log out</button>
-          </div>
-        )}
-        {sidebarCollapsed ? null : (
           <div className="sidebar-section">
-            <p className="sidebar-label">Saved AI Chats</p>
+            <div className="chat-sidebar-search">
+              <input
+                type="text"
+                value={sidebarSearch}
+                onChange={(event) => setSidebarSearch(event.target.value)}
+                placeholder="Search chats"
+              />
+            </div>
+            <p className="sidebar-label">Recents</p>
             <div className="session-list">
-              {sessionsForMode.map((session) => (
+              {filteredSessions.map((session) => (
                 <article key={session.id} className={`session-card ${session.id === activeSessionId ? "active" : ""}`}>
-                  <button className="session-item" onClick={() => openSession(session.id, token, "general")}>
+                  <button className="session-item" onClick={() => openSession(session.id, token, session.mode)}>
                     <strong>{session.title}</strong><span>{session.preview}</span>
                   </button>
                   <button className="session-delete-button" type="button" onClick={() => handleDeleteSession(session.id)}>
@@ -945,19 +1081,45 @@ export default function App() {
             </div>
           </div>
         )}
-        {sidebarCollapsed ? null : <div className="sidebar-footer"><div className="product-badge">AI</div><div><strong>Smart AI</strong><p>One assistant for shopping, support, and real-life help</p></div></div>}
+        {sidebarCollapsed ? null : (
+          <div className="sidebar-footer chat-sidebar-account">
+            <div className="chat-sidebar-account-avatar">{String(user?.name || "U").slice(0, 1).toUpperCase()}</div>
+            <div className="chat-sidebar-account-copy">
+              <strong>{user.name}</strong>
+              <p>{user.email}</p>
+            </div>
+            <button className="logout-button" onClick={logout}>Log out</button>
+          </div>
+        )}
       </aside>
+      ) : null}
 
-        <main className="main-panel">
-          <header className="topbar">
-            <div className="topbar-copy">
-              <p className="eyebrow">Single AI Workspace</p>
-              <h1>{activePanel === "chat" ? "Smart AI assistant" : "Store and orders"}</h1>
-            <p className="topbar-subtitle">
-              {activePanel === "chat"
-                ? "Ask one AI for shopping advice, ecommerce problem solving, support help, and everyday real-life questions."
-                : "Browse products, save wishlist items, place orders, and track shipments from one shopping workspace."}
-            </p>
+        <main className={`main-panel ${isStorePage ? "store-page-panel" : ""}`}>
+          {!isStorePage ? (
+          <header className="topbar chatgpt-page-header">
+            <div className="topbar-view-tabs chatgpt-header-actions">
+              <button
+                type="button"
+                className={`topbar-view-tab ${activeMode === "general" ? "active" : ""}`}
+                onClick={() => switchMode("general")}
+              >
+                General AI
+              </button>
+              <button
+                type="button"
+                className={`topbar-view-tab ${activeMode === "support" ? "active" : ""}`}
+                onClick={() => openSupportAssistant()}
+              >
+                Support AI
+              </button>
+              <button
+                type="button"
+                className="topbar-view-tab theme-toggle-tab"
+                onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+              >
+                {theme === "dark" ? "Light" : "Dark"}
+              </button>
+            </div>
             {pageError ? (
               <div className="page-error-toast" role="alert">
                 <div>
@@ -992,108 +1154,12 @@ export default function App() {
                 </div>
               </div>
             ) : null}
-            {activePanel === "chat" ? (
-              <>
-                <div className="ai-settings-toggle-row">
-                  <span className="summary-chip">{selectedModel}</span>
-                  <button
-                    type="button"
-                    className={`ai-settings-toggle ${showAiSettings ? "active" : ""}`}
-                    onClick={() => setShowAiSettings((current) => !current)}
-                  >
-                    {showAiSettings ? "Hide settings" : "AI settings"}
-                  </button>
-                  {accurateModeEnabled ? <span className="summary-chip summary-chip-accent">Accuracy mode</span> : null}
-                  <button type="button" className="accurate-ai-button compact" onClick={applyAccurateSmartAi}>
-                    Accurate mode
-                  </button>
-                </div>
-                {showAiSettings ? (
-                  <div className="ai-settings-panel">
-                    <div className="ai-model-row">
-                      {MODEL_OPTIONS.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          className={`model-chip ${selectedModel === option.value ? "active" : ""}`}
-                          onClick={() => handleModelChange(option.value)}
-                        >
-                          <strong>{option.label}</strong>
-                          <span>{option.meta}</span>
-                        </button>
-                      ))}
-                    </div>
-                    <div className="preset-row">
-                      {Object.entries(PROMPT_PRESETS).map(([key, preset]) => (
-                        <button key={key} type="button" className="preset-chip" onClick={() => applyPreset(key)}>
-                          {preset.label}
-                        </button>
-                      ))}
-                    </div>
-                    <label className="prompt-editor">
-                      <span>Prompt for {activeMode === "general" ? "general mode" : "support mode"}</span>
-                      <textarea
-                        value={activePrompt}
-                        onChange={(event) => updatePromptForMode(activeMode, event.target.value)}
-                        placeholder={"Example:\n- Give short, clear answers\n- Use simple language\n- If coding, give full working code\n- Be helpful and friendly"}
-                        rows="4"
-                      />
-                    </label>
-                    <div className="template-save-row">
-                      <input
-                        type="text"
-                        value={templateName}
-                        onChange={(event) => setTemplateName(event.target.value)}
-                        placeholder="Template name"
-                      />
-                      <button type="button" className="template-save-button" onClick={saveCurrentPromptTemplate}>
-                        Save template
-                      </button>
-                    </div>
-                    {promptTemplates.length ? (
-                      <div className="template-list">
-                        {promptTemplates.map((template) => (
-                          <article key={template.name} className="template-card">
-                            <button type="button" className="template-apply" onClick={() => applyTemplate(template.text)}>
-                              <strong>{template.name}</strong>
-                              <span>{template.text}</span>
-                            </button>
-                            <button type="button" className="template-delete" onClick={() => deleteTemplate(template.name)}>
-                              Delete
-                            </button>
-                          </article>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-              </>
-            ) : null}
-          </div>
-          <div className="topbar-view-tabs">
-            <button
-              type="button"
-              className="topbar-view-tab theme-toggle-tab"
-              onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? "Light" : "Dark"}
-            </button>
-            <button
-              type="button"
-              className={`topbar-view-tab ${activePanel === "chat" ? "active" : ""}`}
-              onClick={() => setActivePanel("chat")}
-            >
-              Chat
-            </button>
-            <button
-              type="button"
-              className={`topbar-view-tab ${activePanel === "store" ? "active" : ""}`}
-              onClick={() => setActivePanel("store")}
-            >
-              Store
-            </button>
-          </div>
-        </header>
+          </header>
+            ) : (
+              <div className="store-page-switcher">
+                <div className="store-page-switcher-actions" />
+              </div>
+            )}
 
         {activePanel === "chat" ? (
           <ChatWindow
@@ -1101,21 +1167,21 @@ export default function App() {
             onSend={sendMessage}
             isLoading={isLoading}
             starterPrompts={modeConfig.starterPrompts}
-            assistantName="Smart AI"
+            assistantName={activeMode === "support" ? "Support AI" : "Smart AI"}
             activeMode={activeMode}
-            placeholder="Ask about products, ecommerce issues, support, life decisions, study, career, or everyday questions..."
-            emptyDescription="Use one AI for product recommendations, order help, support guidance, study plans, decisions, and everyday problem solving."
+            placeholder={modeConfig.placeholder}
+            emptyDescription={modeConfig.emptyDescription}
             memoryItems={memoryItems}
             memoryTrail={memoryTrail}
             typingMessageKey={typingMessageKey}
             focusSignal={`${activePanel}-${activeSessionId}-${messages.length}-${showAiSettings ? "settings" : "chat"}`}
           />
         ) : (
-          <div className="commerce-layout">
+          <div className={`commerce-layout ${showCommerceSidebar ? "" : "commerce-layout-no-rail"}`}>
             <div className="commerce-main">
               <>
-                <ProductStorefront
-                  products={products}
+                  <ProductStorefront
+                    products={products}
                   productTotal={productTotal}
                   productPage={productPage}
                   onPageChange={setProductPage}
@@ -1125,12 +1191,18 @@ export default function App() {
                   productSuggestions={productSuggestions}
                   category={category}
                   setCategory={setCategory}
-                  onAsk={sendMessage}
-                  onAddToCart={handleAddToCart}
-                  onViewDetails={openProductDetail}
-                  onToggleWishlist={handleToggleWishlist}
-                  wishlistIds={wishlistIds}
-                />
+                    user={user}
+                    cartCount={cart.items.length}
+                    onAsk={sendMessage}
+                    onOpenSupportAssistant={openSupportAssistant}
+                    onAddToCart={handleAddToCart}
+                    onViewDetails={openProductDetail}
+                    onToggleWishlist={handleToggleWishlist}
+                    wishlistIds={wishlistIds}
+                    onOpenCart={() => openStoreTab("cart")}
+                    onOpenWishlist={() => openStoreTab("wishlist")}
+                    onOpenOrders={() => openStoreTab("orders")}
+                  />
                 {user.is_admin ? (
                   <AdminPanel
                     products={products}
@@ -1144,20 +1216,24 @@ export default function App() {
                 ) : null}
               </>
             </div>
-            <CommerceSidebar
-              cart={cart}
-              wishlist={wishlist}
-              orders={orders}
-              checkoutForm={checkoutForm}
-              setCheckoutForm={setCheckoutForm}
-              onCheckout={handleCheckout}
-              onUpdateQty={handleUpdateQty}
-              onToggleWishlist={handleToggleWishlist}
-              onViewDetails={openProductDetail}
-              onAdvanceOrder={handleAdvanceOrder}
-              loading={isLoading}
-              isAdmin={user.is_admin}
-            />
+            {showCommerceSidebar ? (
+              <CommerceSidebar
+                cart={cart}
+                wishlist={wishlist}
+                orders={orders}
+                checkoutForm={checkoutForm}
+                setCheckoutForm={setCheckoutForm}
+                onCheckout={handleCheckout}
+                onUpdateQty={handleUpdateQty}
+                onToggleWishlist={handleToggleWishlist}
+                onViewDetails={openProductDetail}
+                onAdvanceOrder={handleAdvanceOrder}
+                loading={isLoading}
+                isAdmin={user.is_admin}
+                initialTab={commerceTab}
+                onClose={() => setStoreRailVisible(false)}
+              />
+            ) : null}
           </div>
         )}
       </main>
@@ -1165,7 +1241,7 @@ export default function App() {
       <ProductDetailModal
         product={selectedProduct}
         inWishlist={selectedProduct ? wishlistIds.includes(selectedProduct.id) : false}
-        onClose={() => setSelectedProduct(null)}
+        onClose={closeProductDetail}
         onAddToCart={handleAddToCart}
         onToggleWishlist={handleToggleWishlist}
         onAsk={sendMessage}

@@ -1,4 +1,4 @@
-ï»¿import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const TRACKING_ORDER = ["Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
 
@@ -15,15 +15,26 @@ export default function CommerceSidebar({
   onAdvanceOrder,
   loading,
   isAdmin,
+  initialTab = "checkout",
+  onClose,
 }) {
-  const [activeTab, setActiveTab] = useState("checkout");
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   return (
     <section className="commerce-panel compact-commerce-panel">
       <div className="commerce-overview-card">
-        <div>
-          <p className="eyebrow">Order center</p>
-          <h3>Your cart, checkout, and tracking</h3>
+        <div className="commerce-overview-head">
+          <div>
+            <p className="eyebrow">Order center</p>
+            <h3>Your cart, checkout, and tracking</h3>
+          </div>
+          <button type="button" className="commerce-close-button" onClick={onClose} aria-label="Close order center">
+            ×
+          </button>
         </div>
         <div className="overview-grid">
           <article>
@@ -111,37 +122,39 @@ export default function CommerceSidebar({
             <span>Payment demo</span>
           </div>
           <p className="checkout-helper">Fill shipping details, choose a payment method, and place the order from this rail.</p>
-          <div className="checkout-form">
-            <input placeholder="Full name" value={checkoutForm.full_name} onChange={(event) => setCheckoutForm((current) => ({ ...current, full_name: event.target.value }))} />
-            <input placeholder="Phone" value={checkoutForm.phone} onChange={(event) => setCheckoutForm((current) => ({ ...current, phone: event.target.value }))} />
-            <input placeholder="Address line" value={checkoutForm.address_line} onChange={(event) => setCheckoutForm((current) => ({ ...current, address_line: event.target.value }))} />
-            <div className="admin-inline-grid">
-              <input placeholder="City" value={checkoutForm.city} onChange={(event) => setCheckoutForm((current) => ({ ...current, city: event.target.value }))} />
-              <input placeholder="State" value={checkoutForm.state} onChange={(event) => setCheckoutForm((current) => ({ ...current, state: event.target.value }))} />
+          <div className="checkout-frame">
+            <div className="checkout-form">
+              <input placeholder="Full name" value={checkoutForm.full_name} onChange={(event) => setCheckoutForm((current) => ({ ...current, full_name: event.target.value }))} />
+              <input placeholder="Phone number" value={checkoutForm.phone} onChange={(event) => setCheckoutForm((current) => ({ ...current, phone: event.target.value }))} />
+              <input placeholder="Address line" value={checkoutForm.address_line} onChange={(event) => setCheckoutForm((current) => ({ ...current, address_line: event.target.value }))} />
+              <div className="admin-inline-grid">
+                <input placeholder="City" value={checkoutForm.city} onChange={(event) => setCheckoutForm((current) => ({ ...current, city: event.target.value }))} />
+                <input placeholder="State" value={checkoutForm.state} onChange={(event) => setCheckoutForm((current) => ({ ...current, state: event.target.value }))} />
+              </div>
+              <input placeholder="Postal code" value={checkoutForm.postal_code} onChange={(event) => setCheckoutForm((current) => ({ ...current, postal_code: event.target.value }))} />
+              <div className="admin-inline-grid">
+                <select value={checkoutForm.payment_method} onChange={(event) => setCheckoutForm((current) => ({ ...current, payment_method: event.target.value }))}>
+                  <option>Cash on Delivery</option>
+                  <option>UPI</option>
+                  <option>Card</option>
+                </select>
+                <select value={checkoutForm.payment_provider} onChange={(event) => setCheckoutForm((current) => ({ ...current, payment_provider: event.target.value }))}>
+                  <option>SmartPay Demo</option>
+                  <option>Razorpay Demo</option>
+                  <option>Stripe Demo</option>
+                </select>
+              </div>
+              {checkoutForm.payment_method !== "Cash on Delivery" ? (
+                <input
+                  placeholder="Payment reference or transaction ID"
+                  value={checkoutForm.payment_reference}
+                  onChange={(event) => setCheckoutForm((current) => ({ ...current, payment_reference: event.target.value }))}
+                />
+              ) : null}
+              <button className="checkout-button" disabled={loading || cart.items.length === 0} onClick={onCheckout} type="button">
+                Pay and place order
+              </button>
             </div>
-            <input placeholder="Postal code" value={checkoutForm.postal_code} onChange={(event) => setCheckoutForm((current) => ({ ...current, postal_code: event.target.value }))} />
-            <div className="admin-inline-grid">
-              <select value={checkoutForm.payment_method} onChange={(event) => setCheckoutForm((current) => ({ ...current, payment_method: event.target.value }))}>
-                <option>Cash on Delivery</option>
-                <option>UPI</option>
-                <option>Card</option>
-              </select>
-              <select value={checkoutForm.payment_provider} onChange={(event) => setCheckoutForm((current) => ({ ...current, payment_provider: event.target.value }))}>
-                <option>SmartPay Demo</option>
-                <option>Razorpay Demo</option>
-                <option>Stripe Demo</option>
-              </select>
-            </div>
-            {checkoutForm.payment_method !== "Cash on Delivery" ? (
-              <input
-                placeholder="Payment reference or transaction ID"
-                value={checkoutForm.payment_reference}
-                onChange={(event) => setCheckoutForm((current) => ({ ...current, payment_reference: event.target.value }))}
-              />
-            ) : null}
-            <button className="checkout-button" disabled={loading || cart.items.length === 0} onClick={onCheckout} type="button">
-              Pay and place order
-            </button>
           </div>
         </div>
       ) : null}
@@ -164,7 +177,7 @@ export default function CommerceSidebar({
                   <span>{order.payment_method}</span>
                 </div>
                 <p>Tracking: {order.tracking_code}</p>
-                <span>{order.payment_status} â€¢ {order.transaction_reference}</span>
+                <span>{order.payment_status} • {order.transaction_reference}</span>
                 <div className="tracking-strip">
                   {TRACKING_ORDER.map((status) => (
                     <span key={status} className={status === order.status ? "active" : order.tracking_events.some((event) => event.label === status && event.complete) ? "done" : ""}>

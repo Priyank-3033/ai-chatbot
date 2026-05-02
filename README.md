@@ -1,19 +1,21 @@
-# Smart AI Commerce Chatbot
+# AI-Powered Chatbot for Customer Support
 
-Smart AI Commerce Chatbot is a full-stack AI commerce workspace built with React, Vite, FastAPI, SQLite, and the OpenAI API. It combines AI chat, product discovery, cart and order flows, saved chat sessions, document-aware answers, and admin tooling in one project.
+AI-Powered Chatbot for Customer Support is a full-stack web application built with React, Vite, FastAPI, Python, SQLite, and LLM-powered retrieval. It is designed to automate customer interactions, answer FAQs, support troubleshooting, retrieve information from uploaded documents, and assist with ecommerce-style product discovery, wishlist, cart, and order workflows.
+
+The system combines a modern shopping-inspired frontend with an AI backend that supports streaming responses, chat memory, document-aware answers, and protected user sessions. The goal is to improve support speed, reduce repetitive manual work, and deliver more accurate, context-aware assistance.
 
 ## Highlights
 
-- Real AI chat with `gpt-4o` / `gpt-4o-mini`
-- Fallback answer engine when OpenAI is unavailable
-- JWT-based signup, login, and protected APIs
+- AI-powered customer support chat
+- FastAPI backend with protected APIs
+- React frontend with dedicated chat and store pages
+- LLM response generation with streaming support
+- JWT-based signup, login, and session protection
 - Saved chat sessions per user
-- Product catalog, wishlist, cart, checkout, and order tracking
-- PDF/text upload with simple retrieval-aware answers
+- PDF/text upload with retrieval-aware answers
 - Persistent vector-style RAG over uploaded documents
+- Product discovery, wishlist, cart, checkout, and order tracking
 - Admin stats, chat logs, and uploaded document visibility
-- FastAPI static image serving for product photos
-- Compact chat + store UI built in React
 
 ## Tech Stack
 
@@ -25,33 +27,32 @@ Smart AI Commerce Chatbot is a full-stack AI commerce workspace built with React
 
 ### Backend
 - FastAPI
+- Python
 - SQLite
-- OpenAI API
+- OpenAI API / Gemini API support
 - PyJWT
 - PyPDF
 - Persistent vector retrieval store
 
 ## Features
 
-### AI
-- Model selection: `gpt-4o` and `gpt-4o-mini`
-- Custom system prompt editor
-- Prompt presets and saved templates
-- Realtime chat foundation with WebSocket fallback
-- Typing animation, markdown rendering, voice input
-- Memory across the active conversation
+### AI and Support
+- Instant AI answers for customer support-style questions
+- Model selection: `gpt-4o`, `gpt-4o-mini`, and Gemini options
+- Streaming chat responses
+- Saved conversation memory per chat session
 - Document-aware answers using uploaded PDFs/text files
-- Fallback support for coding, study, career, health, travel, business, and ecommerce questions
+- Prompt-based support and general chat modes
+- Voice input and markdown rendering
+- Fallback support when a provider is unavailable
 
-### Commerce
+### Customer Support + Ecommerce
 - Product listing with real photo support
 - Search, autocomplete, category filter, and pagination
 - Product detail modal
-- Wishlist
-- Cart
-- Checkout
-- Order history and tracking
+- Wishlist, cart, checkout, and order tracking
 - Product recommendation support from chat and catalog APIs
+- Support-oriented answers for login, refund, order, and troubleshooting flows
 
 ### Auth and Persistence
 - Register and login
@@ -66,13 +67,13 @@ Smart AI Commerce Chatbot is a full-stack AI commerce workspace built with React
 - Recent chat log visibility
 - Uploaded document list
 
-## Project Structure
+## Recommended Architecture
 
 ```text
 backend/
   app/
     main.py
-    config.py
+    core/
     dependencies.py
     models.py
     data/
@@ -82,9 +83,24 @@ frontend/
   src/
     App.jsx
     components/
+    hooks/
+    services/
+    store/
     utils/
 render.yaml
 README.md
+```
+
+## Project Definition
+
+```text
+AI-Powered Chatbot for Customer Support
+
+Recommended Tech:
+React (frontend) + FastAPI backend + Python (LLM / retrieval pipeline) + Vector DB
+
+Description:
+The AI-Powered Chatbot for Customer Support is a web-based application designed to automate customer interactions using AI and Large Language Models (LLMs). The system provides instant responses to customer queries, handles FAQs, assists in troubleshooting, supports information retrieval from uploaded documents, and helps with ecommerce-related guidance such as product discovery, wishlist, cart, and order support.
 ```
 
 ## Environment Variables
@@ -276,6 +292,12 @@ The backend is split into clear route and service layers:
 - Add a stronger rate limiter and centralized logging for production
 - Replace local file storage with cloud storage if uploads grow
 - Keep `.env` files out of Git
+
+## Portfolio Summary
+
+```text
+AI-Powered Chatbot for Customer Support built with React, FastAPI, Python, and a retrieval-aware vector-backed data layer. The project combines AI chat, document-aware answers, chat memory, authentication, and ecommerce-style customer support workflows in one full-stack application.
+```
 
 ## Demo Checklist
 
