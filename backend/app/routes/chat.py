@@ -84,6 +84,13 @@ def generate_chat_response(request: ChatRequest, current_user: UserPublic) -> Ch
         uploaded_documents=uploaded_documents,
     )
     database.append_chat_message(session_id, "assistant", response.answer)
+    database.record_audit_log(
+        event_type="chat.message_processed",
+        severity="low",
+        user_id=current_user.id,
+        description=f"Processed {request.mode} chat message in session {session_id}",
+        metadata={"session_id": session_id, "mode": request.mode},
+    )
     response.session_id = session_id
     return response
 
@@ -195,6 +202,13 @@ def chat_stream(request: ChatRequest, current_user: UserPublic = Depends(require
             return
 
         database.append_chat_message(session_id, "assistant", built)
+        database.record_audit_log(
+            event_type="chat.stream_processed",
+            severity="low",
+            user_id=current_user.id,
+            description=f"Processed streamed {request.mode} chat message in session {session_id}",
+            metadata={"session_id": session_id, "mode": request.mode},
+        )
         yield json.dumps(
             {
                 "type": "done",

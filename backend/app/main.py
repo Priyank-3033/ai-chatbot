@@ -19,7 +19,7 @@ if not logger.handlers:
     logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO), format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 RATE_LIMIT_WINDOW_SECONDS = 60
-RATE_LIMIT_MAX_REQUESTS = 120
+RATE_LIMIT_MAX_REQUESTS = settings.global_rate_limit_per_minute
 _request_buckets: dict[str, deque[float]] = defaultdict(deque)
 
 app.add_middleware(
@@ -51,6 +51,7 @@ async def rate_limit_requests(request: Request, call_next):
     while bucket and now - bucket[0] > RATE_LIMIT_WINDOW_SECONDS:
         bucket.popleft()
     if len(bucket) >= RATE_LIMIT_MAX_REQUESTS:
+        logger.warning("Rate limit hit for %s on %s", client_ip, request.url.path)
         return JSONResponse(
             status_code=429,
             content={"detail": "Rate limit exceeded. Please slow down and try again shortly."},

@@ -46,7 +46,7 @@ function getDocumentStatusLabel(status) {
   return "Queued";
 }
 
-export default function AdminPanel({ products, stats, chatLogs = [], documents = [], onSave, onDelete, busy }) {
+export default function AdminPanel({ products, stats, chatLogs = [], securityOverview, documents = [], onSave, onDelete, busy }) {
   const [form, setForm] = useState(EMPTY_PRODUCT);
   const [editingId, setEditingId] = useState("");
   const [message, setMessage] = useState("");
@@ -117,6 +117,9 @@ export default function AdminPanel({ products, stats, chatLogs = [], documents =
           <article className="admin-stat-card"><strong>{stats.order_count}</strong><span>Orders</span></article>
           <article className="admin-stat-card"><strong>{stats.chat_session_count}</strong><span>Chat sessions</span></article>
           <article className="admin-stat-card"><strong>{stats.uploaded_document_count}</strong><span>Uploaded docs</span></article>
+          <article className="admin-stat-card"><strong>{stats.audit_log_count}</strong><span>Audit logs</span></article>
+          <article className="admin-stat-card"><strong>{stats.open_security_alert_count}</strong><span>Open alerts</span></article>
+          <article className="admin-stat-card"><strong>{stats.failed_login_count}</strong><span>Risky logins</span></article>
         </div>
       ) : null}
 
@@ -173,6 +176,51 @@ export default function AdminPanel({ products, stats, chatLogs = [], documents =
       </div>
 
       <div className="admin-layout admin-insights-layout">
+        <section className="admin-insight-panel">
+          <div className="commerce-head">
+            <div>
+              <p className="eyebrow">Security dashboard</p>
+              <h3>Alerts and audit activity</h3>
+            </div>
+          </div>
+          <div className="admin-security-grid">
+            <div className="admin-security-card">
+              <strong>Recent security alerts</strong>
+              <div className="admin-product-list">
+                {securityOverview?.recent_security_alerts?.length ? securityOverview.recent_security_alerts.slice(0, 6).map((alert) => (
+                  <article key={alert.id} className="admin-product-card">
+                    <div>
+                      <div className="admin-doc-head">
+                        <strong>{alert.alert_type}</strong>
+                        <span className={`document-status-chip ${String(alert.severity || "").toLowerCase()}`}>{alert.severity}</span>
+                      </div>
+                      <p>{alert.message}</p>
+                      <span>{alert.user_email || alert.ip_address || "System"}</span>
+                    </div>
+                  </article>
+                )) : <p className="empty-mini">No security alerts right now.</p>}
+              </div>
+            </div>
+            <div className="admin-security-card">
+              <strong>Recent audit logs</strong>
+              <div className="admin-product-list">
+                {securityOverview?.recent_audit_logs?.length ? securityOverview.recent_audit_logs.slice(0, 8).map((log) => (
+                  <article key={log.id} className="admin-product-card">
+                    <div>
+                      <div className="admin-doc-head">
+                        <strong>{log.event_type}</strong>
+                        <span className={`document-status-chip ${String(log.severity || "").toLowerCase()}`}>{log.severity}</span>
+                      </div>
+                      <p>{log.description}</p>
+                      <span>{log.actor_email || log.ip_address || "System"}</span>
+                    </div>
+                  </article>
+                )) : <p className="empty-mini">No audit events yet.</p>}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="admin-insight-panel">
           <div className="commerce-head">
             <div>

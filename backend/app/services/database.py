@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+import json
 from uuid import uuid4
 
 from app.config import Settings
@@ -48,6 +49,9 @@ class DatabaseService:
                     name TEXT NOT NULL,
                     email TEXT NOT NULL UNIQUE,
                     password_hash TEXT NOT NULL,
+                    phone TEXT NOT NULL DEFAULT '',
+                    role TEXT NOT NULL DEFAULT 'user',
+                    token_version INTEGER NOT NULL DEFAULT 0,
                     created_at TEXT NOT NULL
                 );
 
@@ -123,6 +127,38 @@ class DatabaseService:
                     created_at TEXT NOT NULL,
                     FOREIGN KEY(user_id) REFERENCES users(id)
                 );
+
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    event_type TEXT NOT NULL,
+                    severity TEXT NOT NULL,
+                    ip_address TEXT,
+                    description TEXT NOT NULL,
+                    metadata_json TEXT NOT NULL DEFAULT '{}',
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(user_id) REFERENCES users(id)
+                );
+
+                CREATE TABLE IF NOT EXISTS security_alerts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    alert_type TEXT NOT NULL,
+                    severity TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'open',
+                    ip_address TEXT,
+                    message TEXT NOT NULL,
+                    metadata_json TEXT NOT NULL DEFAULT '{}',
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(user_id) REFERENCES users(id)
+                );
+
+                CREATE TABLE IF NOT EXISTS login_attempts (
+                    email TEXT PRIMARY KEY,
+                    attempt_count INTEGER NOT NULL DEFAULT 0,
+                    last_attempt_at TEXT NOT NULL,
+                    locked_until TEXT
+                );
                 """
             )
             self._ensure_column(connection, "orders", "payment_provider", "TEXT NOT NULL DEFAULT 'SmartPay Demo'")
@@ -131,6 +167,9 @@ class DatabaseService:
             self._ensure_column(connection, "orders", "tracking_code", "TEXT NOT NULL DEFAULT ''")
             self._ensure_column(connection, "orders", "tracking_updated_at", "TEXT NOT NULL DEFAULT ''")
             self._ensure_column(connection, "uploaded_documents", "status", "TEXT NOT NULL DEFAULT 'ready'")
+            self._ensure_column(connection, "users", "phone", "TEXT NOT NULL DEFAULT ''")
+            self._ensure_column(connection, "users", "role", "TEXT NOT NULL DEFAULT 'user'")
+            self._ensure_column(connection, "users", "token_version", "INTEGER NOT NULL DEFAULT 0")
             self._ensure_tracking_rows(connection)
 
     @staticmethod
@@ -160,15 +199,15 @@ class DatabaseService:
                 sets = ", ".join(f"{key} = ?" for key in updates)
                 connection.execute(f"UPDATE orders SET {sets} WHERE id = ?", (*updates.values(), row["id"]))
 
-    def create_user(self, name: str, email: str, password_hash: str) -> sqlite3.Row:
+    def create_user(self, name: str, email: str, password_hash: str, phone: str = "", role: str = "user") -> sqlite3.Row:
         created_at = utc_now_iso()
         with self.connect() as connection:
             cursor = connection.execute(
-                "INSERT INTO users (name, email, password_hash, created_at) VALUES (?, ?, ?, ?)",
-                (name, email.lower(), password_hash, created_at),
+                "INSERT INTO users (name, email, password_hash, phone, role, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (name, email.lower(), password_hash, phone, role, created_at),
             )
             user_id = cursor.lastrowid
-            return connection.execute("SELECT id, name, email FROM users WHERE id = ?", (user_id,)).fetchone()
+            return connection.execute("SELECT id, name, email, phone, role, token_version FROM users WHERE id = ?", (user_id,)).fetchone()
 
     def get_user_by_email(self, email: str) -> sqlite3.Row | None:
         with self.connect() as connection:
@@ -176,7 +215,127 @@ class DatabaseService:
 
     def get_user_by_id(self, user_id: int) -> sqlite3.Row | None:
         with self.connect() as connection:
-            return connection.execute("SELECT id, name, email FROM users WHERE id = ?", (user_id,)).fetchone()
+            return connection.execute("SELECT id, name, email, phone, role, token_version FROM users WHERE id = ?", (user_id,)).fetchone()
+
+    def rotate_token_version(self, user_id: int) -> sqlite3.Row | None:
+        with self.connect() as connection:
+            connection.execute(
+                "UPDATE users SET token_version = COALESCE(token_version, 0) + 1 WHERE id = ?",
+                (user_id,),
+            )
+            return connection.execute(
+                "SELECT id, name, email, phone, role, token_version FROM users WHERE id = ?",
+                (user_id,),
+            ).fetchone()
+
+    def reset_password_with_phone(self, email: str, phone: str, password_hash: str) -> sqlite3.Row | None:
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT id FROM users WHERE email = ? AND phone = ?",
+                (email.lower().strip(), phone.strip()),
+            ).fetchone()
+            if not row:
+                return None
+            connection.execute(
+                """
+                UPDATE users
+                SET password_hash = ?, token_version = COALESCE(token_version, 0) + 1
+                WHERE id = ?
+                """,
+                (password_hash, row["id"]),
+            )
+            return connection.execute(
+                "SELECT id, name, email, phone, role, token_version FROM users WHERE id = ?",
+                (row["id"],),
+            ).fetchone()
+
+    def record_audit_log(
+        self,
+        *,
+        event_type: str,
+        severity: str,
+        description: str,
+        user_id: int | None = None,
+        ip_address: str | None = None,
+        metadata: dict[str, str] | None = None,
+    ) -> None:
+        with self.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO audit_logs (user_id, event_type, severity, ip_address, description, metadata_json, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    user_id,
+                    event_type,
+                    severity,
+                    ip_address or "",
+                    description,
+                    json.dumps(metadata or {}, ensure_ascii=True),
+                    utc_now_iso(),
+                ),
+            )
+
+    def create_security_alert(
+        self,
+        *,
+        alert_type: str,
+        severity: str,
+        message: str,
+        user_id: int | None = None,
+        ip_address: str | None = None,
+        metadata: dict[str, str] | None = None,
+    ) -> None:
+        with self.connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO security_alerts (user_id, alert_type, severity, status, ip_address, message, metadata_json, created_at)
+                VALUES (?, ?, ?, 'open', ?, ?, ?, ?)
+                """,
+                (
+                    user_id,
+                    alert_type,
+                    severity,
+                    ip_address or "",
+                    message,
+                    json.dumps(metadata or {}, ensure_ascii=True),
+                    utc_now_iso(),
+                ),
+            )
+
+    def register_failed_login_attempt(self, email: str, *, max_attempts: int, lock_minutes: int) -> tuple[int, str | None]:
+        normalized = email.lower().strip()
+        now = datetime.now(timezone.utc)
+        with self.connect() as connection:
+            row = connection.execute(
+                "SELECT attempt_count, locked_until FROM login_attempts WHERE email = ?",
+                (normalized,),
+            ).fetchone()
+            if row:
+                attempt_count = row["attempt_count"] + 1
+                locked_until = None
+                if attempt_count >= max_attempts:
+                    locked_until = (now + timedelta(minutes=lock_minutes)).isoformat()
+                connection.execute(
+                    "UPDATE login_attempts SET attempt_count = ?, last_attempt_at = ?, locked_until = ? WHERE email = ?",
+                    (attempt_count, now.isoformat(), locked_until, normalized),
+                )
+            else:
+                attempt_count = 1
+                locked_until = (now + timedelta(minutes=lock_minutes)).isoformat() if attempt_count >= max_attempts else None
+                connection.execute(
+                    "INSERT INTO login_attempts (email, attempt_count, last_attempt_at, locked_until) VALUES (?, ?, ?, ?)",
+                    (normalized, attempt_count, now.isoformat(), locked_until),
+                )
+            return attempt_count, locked_until
+
+    def clear_login_attempts(self, email: str) -> None:
+        with self.connect() as connection:
+            connection.execute("DELETE FROM login_attempts WHERE email = ?", (email.lower().strip(),))
+
+    def get_login_attempt_state(self, email: str) -> sqlite3.Row | None:
+        with self.connect() as connection:
+            return connection.execute("SELECT * FROM login_attempts WHERE email = ?", (email.lower().strip(),)).fetchone()
 
     def create_chat_session(self, user_id: int, mode: str, title: str, welcome_message: str) -> sqlite3.Row:
         session_id = uuid4().hex
@@ -458,7 +617,10 @@ class DatabaseService:
                     (SELECT COUNT(*) FROM users) AS user_count,
                     (SELECT COUNT(*) FROM orders) AS order_count,
                     (SELECT COUNT(*) FROM chat_sessions) AS chat_session_count,
-                    (SELECT COUNT(*) FROM uploaded_documents) AS uploaded_document_count
+                    (SELECT COUNT(*) FROM uploaded_documents) AS uploaded_document_count,
+                    (SELECT COUNT(*) FROM audit_logs) AS audit_log_count,
+                    (SELECT COUNT(*) FROM security_alerts WHERE status = 'open') AS open_security_alert_count,
+                    (SELECT COUNT(*) FROM login_attempts WHERE attempt_count > 0) AS failed_login_count
                 """
             ).fetchone()
 
@@ -480,6 +642,49 @@ class DatabaseService:
                 FROM chat_sessions s
                 JOIN users u ON u.id = s.user_id
                 ORDER BY s.updated_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+
+    def recent_audit_logs(self, limit: int = 30) -> list[sqlite3.Row]:
+        with self.connect() as connection:
+            return connection.execute(
+                """
+                SELECT
+                    a.id,
+                    a.event_type,
+                    a.severity,
+                    a.ip_address,
+                    a.description,
+                    a.metadata_json,
+                    a.created_at,
+                    u.email AS actor_email
+                FROM audit_logs a
+                LEFT JOIN users u ON u.id = a.user_id
+                ORDER BY a.created_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+
+    def recent_security_alerts(self, limit: int = 20) -> list[sqlite3.Row]:
+        with self.connect() as connection:
+            return connection.execute(
+                """
+                SELECT
+                    s.id,
+                    s.alert_type,
+                    s.severity,
+                    s.status,
+                    s.ip_address,
+                    s.message,
+                    s.metadata_json,
+                    s.created_at,
+                    u.email AS user_email
+                FROM security_alerts s
+                LEFT JOIN users u ON u.id = s.user_id
+                ORDER BY s.created_at DESC
                 LIMIT ?
                 """,
                 (limit,),

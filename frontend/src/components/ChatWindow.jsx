@@ -21,6 +21,13 @@ export default function ChatWindow({
   const endRef = useRef(null);
 
   useEffect(() => {
+    if (feedRef.current) {
+      feedRef.current.scrollTo({
+        top: feedRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      return;
+    }
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, isLoading]);
 

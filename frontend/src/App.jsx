@@ -4,6 +4,7 @@ import ChatWindow from "./components/ChatWindow";
 import CommerceSidebar from "./components/CommerceSidebar";
 import ProductDetailModal from "./components/ProductDetailModal";
 import ProductStorefront from "./components/ProductStorefront";
+import SecurityCenter from "./components/SecurityCenter";
 import { useChat } from "./hooks/useChat";
 import { API_BASE_URL, createApiClient } from "./services/apiClient";
 import { useChatStore } from "./store/chatStore";
@@ -321,6 +322,7 @@ export default function App() {
   const [documents, setDocuments] = useState([]);
   const [adminStats, setAdminStats] = useState(null);
   const [adminChatLogs, setAdminChatLogs] = useState([]);
+  const [adminSecurityOverview, setAdminSecurityOverview] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productSearch, setProductSearch] = useState("");
   const [productSuggestions, setProductSuggestions] = useState([]);
@@ -338,7 +340,11 @@ export default function App() {
   });
   const [authMode, setAuthMode] = useState("login");
   const [authForm, setAuthForm] = useState({ name: "", phone: "", email: "", password: "" });
+  const [resetForm, setResetForm] = useState({ email: "", phone: "", new_password: "" });
+  const [showResetForm, setShowResetForm] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [securityMessage, setSecurityMessage] = useState("");
+  const [securityError, setSecurityError] = useState("");
   const [pageError, setPageError] = useState("");
   const [retryAction, setRetryAction] = useState(null);
   const [booting, setBooting] = useState(true);
@@ -374,6 +380,7 @@ export default function App() {
   const memoryTrail = useMemo(() => extractConversationMemory(messages), [messages]);
   const activePrompt = promptState[activeMode] || "";
   const isStorePage = activePanel === "store";
+  const isSecurityPage = activePanel === "security";
   const hasCommerceData = wishlist.items.length > 0 || cart.items.length > 0 || orders.length > 0;
   const showCommerceSidebar = storeRailVisible && hasCommerceData;
 
@@ -390,7 +397,7 @@ export default function App() {
       const tab = params.get("tab");
       const productId = Number(params.get("product"));
 
-      if (panel === "chat" || panel === "store") {
+      if (panel === "chat" || panel === "store" || panel === "security") {
         setActivePanel(panel);
       }
 
@@ -422,6 +429,13 @@ export default function App() {
       params.set("tab", commerceTab);
     } else {
       params.delete("tab");
+    }
+
+    if (activePanel !== "store") {
+      params.delete("view");
+      params.delete("category");
+      params.delete("subcategory");
+      params.delete("search");
     }
 
     if (selectedProduct?.id) {
@@ -500,6 +514,7 @@ export default function App() {
         setActivePanel("store");
         setStoreRailVisible(false);
         setAccurateModeEnabled(shouldRestoreAccurateMode);
+        setResetForm({ email: meData.email || "", phone: meData.phone || "", new_password: "" });
         if (shouldRestoreAccurateMode) {
           setSelectedModel("gpt-4o");
           setPromptState((current) => ({
@@ -511,7 +526,7 @@ export default function App() {
         setCheckoutForm((current) => ({ ...current, full_name: meData.name }));
         setSessions(sessionData);
         await Promise.all([fetchProducts(token), fetchWishlist(token), fetchCart(token), fetchOrders(token), fetchDocuments(token)]);
-        if (meData.is_admin) {
+        if (meData.is_admin || meData.role === "security_analyst") {
           await fetchAdminInsights(token);
         }
         const preferred = sessionData.find((session) => session.mode === "general") || sessionData[0];
@@ -594,13 +609,15 @@ export default function App() {
   }
 
   async function fetchAdminInsights(tokenOverride = token) {
-    if (!user?.is_admin && !tokenOverride) return;
-    const [stats, logs] = await Promise.all([
+    if (!tokenOverride) return;
+    const [stats, logs, securityOverview] = await Promise.all([
       apiClient.request("/api/admin/stats", { token: tokenOverride }),
       apiClient.request("/api/admin/chat-logs", { token: tokenOverride }),
+      apiClient.request("/api/admin/security-overview", { token: tokenOverride }),
     ]);
     setAdminStats(stats);
     setAdminChatLogs(logs);
+    setAdminSecurityOverview(securityOverview);
   }
 
   async function refreshSessions(tokenOverride = token) {
@@ -701,13 +718,15 @@ export default function App() {
         setActivePanel("store");
         setStoreRailVisible(false);
         setAccurateModeEnabled(shouldRestoreAccurateMode);
+      setResetForm({ email: data.user.email || "", phone: data.user.phone || "", new_password: "" });
+      setShowResetForm(false);
       if (shouldRestoreAccurateMode) {
         setSelectedModel("gpt-4o");
       }
       setCheckoutForm((current) => ({ ...current, full_name: data.user.name }));
         setAuthForm({ name: "", phone: "", email: "", password: "" });
         await Promise.all([fetchProducts(data.token), fetchWishlist(data.token), fetchCart(data.token), fetchOrders(data.token), fetchDocuments(data.token)]);
-        if (data.user.is_admin) {
+        if (data.user.is_admin || data.user.role === "security_analyst") {
           await fetchAdminInsights(data.token);
         }
       await createSession("general", data.token);
@@ -796,6 +815,56 @@ export default function App() {
 
   function deleteTemplate(name) {
     setPromptTemplates((current) => current.filter((item) => item.name !== name));
+  }
+
+  async function handlePasswordReset(event) {
+    event.preventDefault();
+    setAuthError("");
+    setSecurityError("");
+    setSecurityMessage("");
+    setIsLoading(true);
+    try {
+      const data = await apiClient.request("/api/auth/password-reset", {
+        method: "POST",
+        body: resetForm,
+      });
+      setToken(data.token);
+      setUser(data.user);
+      setResetForm({ email: data.user.email || "", phone: data.user.phone || "", new_password: "" });
+      setSecurityMessage("Password updated successfully. Other old sessions are now invalid.");
+      if (data.user.is_admin || data.user.role === "security_analyst") {
+        await fetchAdminInsights(data.token);
+      }
+      if (!token) {
+        await Promise.all([fetchProducts(data.token), fetchWishlist(data.token), fetchCart(data.token), fetchOrders(data.token), fetchDocuments(data.token)]);
+      }
+      setShowResetForm(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to reset password.";
+      if (user) setSecurityError(message);
+      else setAuthError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleRevokeSessions() {
+    setSecurityError("");
+    setSecurityMessage("");
+    setIsLoading(true);
+    try {
+      const data = await apiClient.request("/api/auth/revoke-sessions", { method: "POST" });
+      setToken(data.token);
+      setUser(data.user);
+      setSecurityMessage("Other active sessions were revoked. This device stays signed in.");
+      if (data.user.is_admin || data.user.role === "security_analyst") {
+        await fetchAdminInsights(data.token);
+      }
+    } catch (error) {
+      setSecurityError(error instanceof Error ? error.message : "Unable to revoke sessions.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function handleAddToCart(productId) {
@@ -947,6 +1016,9 @@ export default function App() {
       setCommerceTab("checkout");
     setRetryAction(null);
     setAccurateModeEnabled(false);
+    setSecurityMessage("");
+    setSecurityError("");
+    setShowResetForm(false);
     setSessions([]);
     clearChat();
     setProducts([]);
@@ -1006,6 +1078,21 @@ export default function App() {
               {authError ? <p className="auth-error">{authError}</p> : null}
               <button type="submit" className="login-button">{authMode === "login" ? "Continue to store" : "Create account"}</button>
             </form>
+            {authMode === "login" ? (
+              <div className="login-reset-panel">
+                <button type="button" className="ghost-button" onClick={() => setShowResetForm((current) => !current)}>
+                  {showResetForm ? "Hide password reset" : "Forgot password?"}
+                </button>
+                {showResetForm ? (
+                  <form className="security-form compact-security-form" onSubmit={handlePasswordReset}>
+                    <label>Email<input type="email" value={resetForm.email} onChange={(event) => setResetForm((current) => ({ ...current, email: event.target.value }))} placeholder="Registered email" /></label>
+                    <label>Phone number<input type="tel" value={resetForm.phone} onChange={(event) => setResetForm((current) => ({ ...current, phone: event.target.value }))} placeholder="Registered phone number" /></label>
+                    <label>New password<input type="password" value={resetForm.new_password} onChange={(event) => setResetForm((current) => ({ ...current, new_password: event.target.value }))} placeholder="New password" /></label>
+                    <button type="submit" className="security-primary-button" disabled={isLoading}>Reset password</button>
+                  </form>
+                ) : null}
+              </div>
+            ) : null}
           </section>
         </section>
       </main>
@@ -1055,6 +1142,15 @@ export default function App() {
             </span>
             <span className="sidebar-icon-label">{sidebarCollapsed ? "Store" : "Store & Orders"}</span>
           </button>
+          <button className={`history-item ${activePanel === "security" ? "active" : ""}`} onClick={() => setActivePanel("security")} title="Security Center">
+            <span className="sidebar-icon-only" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3 5 6v6c0 4.6 2.8 7.9 7 9 4.2-1.1 7-4.4 7-9V6l-7-3Z" />
+                <path d="m9.5 12 1.7 1.7 3.6-3.9" />
+              </svg>
+            </span>
+            <span className="sidebar-icon-label">{sidebarCollapsed ? "Security" : "Security Center"}</span>
+          </button>
         </div>
         {sidebarCollapsed ? null : (
           <div className="sidebar-section">
@@ -1095,7 +1191,7 @@ export default function App() {
       ) : null}
 
         <main className={`main-panel ${isStorePage ? "store-page-panel" : ""}`}>
-          {!isStorePage ? (
+          {!isStorePage && !isSecurityPage ? (
           <header className="topbar chatgpt-page-header">
             <div className="topbar-view-tabs chatgpt-header-actions">
               <button
@@ -1155,6 +1251,21 @@ export default function App() {
               </div>
             ) : null}
           </header>
+            ) : isSecurityPage ? (
+              <div className="security-page-topbar">
+                <div className="security-page-topbar-copy">
+                  <p className="eyebrow">Workspace security</p>
+                  <strong>Security Center</strong>
+                </div>
+                <div className="security-page-topbar-actions">
+                  <button type="button" className="topbar-view-tab" onClick={() => setActivePanel("store")}>
+                    Back to store
+                  </button>
+                  <button type="button" className="topbar-view-tab" onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}>
+                    {theme === "dark" ? "Light" : "Dark"}
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="store-page-switcher">
                 <div className="store-page-switcher-actions" />
@@ -1176,6 +1287,19 @@ export default function App() {
             typingMessageKey={typingMessageKey}
             focusSignal={`${activePanel}-${activeSessionId}-${messages.length}-${showAiSettings ? "settings" : "chat"}`}
           />
+        ) : activePanel === "security" ? (
+          <SecurityCenter
+            user={user}
+            stats={adminStats}
+            securityOverview={adminSecurityOverview}
+            resetForm={resetForm}
+            setResetForm={setResetForm}
+            onPasswordReset={handlePasswordReset}
+            onRevokeSessions={handleRevokeSessions}
+            working={isLoading}
+            message={securityMessage}
+            error={securityError}
+          />
         ) : (
           <div className={`commerce-layout ${showCommerceSidebar ? "" : "commerce-layout-no-rail"}`}>
             <div className="commerce-main">
@@ -1191,6 +1315,7 @@ export default function App() {
                   productSuggestions={productSuggestions}
                   category={category}
                   setCategory={setCategory}
+                    isActive={activePanel === "store"}
                     user={user}
                     cartCount={cart.items.length}
                     onAsk={sendMessage}
@@ -1203,11 +1328,12 @@ export default function App() {
                     onOpenWishlist={() => openStoreTab("wishlist")}
                     onOpenOrders={() => openStoreTab("orders")}
                   />
-                {user.is_admin ? (
+                {user.is_admin || user.role === "security_analyst" ? (
                   <AdminPanel
                     products={products}
                     stats={adminStats}
                     chatLogs={adminChatLogs}
+                    securityOverview={adminSecurityOverview}
                     documents={documents}
                     onSave={handleSaveProduct}
                     onDelete={handleDeleteProduct}

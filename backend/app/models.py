@@ -115,11 +115,13 @@ class UserPublic(BaseModel):
     id: int
     name: str
     email: EmailStr
+    role: Literal["user", "admin", "security_analyst"] = "user"
     is_admin: bool = False
 
 
 class RegisterRequest(BaseModel):
     name: str = Field(..., min_length=2, max_length=80)
+    phone: str = Field(..., min_length=8, max_length=20)
     email: EmailStr
     password: str = Field(..., min_length=6, max_length=128)
 
@@ -127,6 +129,12 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6, max_length=128)
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+    phone: str = Field(..., min_length=8, max_length=20)
+    new_password: str = Field(..., min_length=6, max_length=128)
 
 
 class AuthResponse(BaseModel):
@@ -223,6 +231,9 @@ class AdminStatsResponse(BaseModel):
     order_count: int
     chat_session_count: int
     uploaded_document_count: int
+    audit_log_count: int = 0
+    open_security_alert_count: int = 0
+    failed_login_count: int = 0
 
 
 class AdminChatLogResponse(BaseModel):
@@ -233,3 +244,31 @@ class AdminChatLogResponse(BaseModel):
     mode: str
     updated_at: str
     preview: str
+
+
+class AuditLogResponse(BaseModel):
+    id: int
+    event_type: str
+    severity: Literal["low", "medium", "high"]
+    actor_email: str | None = None
+    ip_address: str | None = None
+    description: str
+    created_at: str
+    metadata: dict[str, str] = Field(default_factory=dict)
+
+
+class SecurityAlertResponse(BaseModel):
+    id: int
+    alert_type: str
+    severity: Literal["low", "medium", "high"]
+    status: Literal["open", "resolved"] = "open"
+    user_email: str | None = None
+    ip_address: str | None = None
+    message: str
+    created_at: str
+    metadata: dict[str, str] = Field(default_factory=dict)
+
+
+class SecurityOverviewResponse(BaseModel):
+    recent_audit_logs: list[AuditLogResponse] = Field(default_factory=list)
+    recent_security_alerts: list[SecurityAlertResponse] = Field(default_factory=list)

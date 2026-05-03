@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import json
 from pathlib import Path
 from sqlite3 import IntegrityError
 
@@ -8,6 +9,7 @@ from app.config import get_settings
 from app.models import (
     AdminChatLogResponse,
     AdminStatsResponse,
+    AuditLogResponse,
     CartItemResponse,
     CartResponse,
     ChatSessionSummary,
@@ -16,6 +18,8 @@ from app.models import (
     OrderResponse,
     OrderTrackingEvent,
     ProductResponse,
+    SecurityAlertResponse,
+    SecurityOverviewResponse,
     UserPublic,
     WishlistItemResponse,
     WishlistResponse,
@@ -53,8 +57,22 @@ def is_admin_email(email: str) -> bool:
     return lowered in settings.admin_emails or lowered.startswith("admin@")
 
 
+def is_security_analyst_email(email: str) -> bool:
+    lowered = email.lower()
+    return lowered in settings.security_analyst_emails or lowered.startswith("security@")
+
+
+def derive_user_role(email: str) -> str:
+    if is_admin_email(email):
+        return "admin"
+    if is_security_analyst_email(email):
+        return "security_analyst"
+    return "user"
+
+
 def to_user_public(row) -> UserPublic:
-    return UserPublic(id=row["id"], name=row["name"], email=row["email"], is_admin=is_admin_email(row["email"]))
+    role = row["role"] if "role" in row.keys() and row["role"] else derive_user_role(row["email"])
+    return UserPublic(id=row["id"], name=row["name"], email=row["email"], role=role, is_admin=role == "admin")
 
 
 def to_session_summary(row) -> ChatSessionSummary:
@@ -178,6 +196,9 @@ def to_admin_stats_response(row) -> AdminStatsResponse:
         order_count=row["order_count"],
         chat_session_count=row["chat_session_count"],
         uploaded_document_count=row["uploaded_document_count"],
+        audit_log_count=row["audit_log_count"],
+        open_security_alert_count=row["open_security_alert_count"],
+        failed_login_count=row["failed_login_count"],
     )
 
 
@@ -193,14 +214,61 @@ def to_admin_chat_log(row) -> AdminChatLogResponse:
     )
 
 
+def _parse_metadata(metadata_json: str | None) -> dict[str, str]:
+    if not metadata_json:
+        return {}
+    try:
+        parsed = json.loads(metadata_json)
+        return {str(key): str(value) for key, value in parsed.items()}
+    except Exception:
+        return {}
+
+
+def to_audit_log_response(row) -> AuditLogResponse:
+    return AuditLogResponse(
+        id=row["id"],
+        event_type=row["event_type"],
+        severity=row["severity"],
+        actor_email=row["actor_email"],
+        ip_address=row["ip_address"] or None,
+        description=row["description"],
+        created_at=row["created_at"],
+        metadata=_parse_metadata(row["metadata_json"]),
+    )
+
+
+def to_security_alert_response(row) -> SecurityAlertResponse:
+    return SecurityAlertResponse(
+        id=row["id"],
+        alert_type=row["alert_type"],
+        severity=row["severity"],
+        status=row["status"],
+        user_email=row["user_email"],
+        ip_address=row["ip_address"] or None,
+        message=row["message"],
+        created_at=row["created_at"],
+        metadata=_parse_metadata(row["metadata_json"]),
+    )
+
+
+def build_security_overview(limit_logs: int = 20, limit_alerts: int = 12) -> SecurityOverviewResponse:
+    return SecurityOverviewResponse(
+        recent_audit_logs=[to_audit_log_response(row) for row in database.recent_audit_logs(limit_logs)],
+        recent_security_alerts=[to_security_alert_response(row) for row in database.recent_security_alerts(limit_alerts)],
+    )
+
+
 def require_user(authorization: str | None = Header(default=None)) -> UserPublic:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing authentication token.")
     token = authorization.split(" ", maxsplit=1)[1]
-    user_id = auth_service.parse_token(token)
+    claims = auth_service.parse_token_claims(token)
+    user_id = int(claims["sub"])
     user_row = database.get_user_by_id(user_id)
     if not user_row:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found.")
+    if int(user_row["token_version"] or 0) != int(claims.get("ver", 0)):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session has been revoked. Please sign in again.")
     return to_user_public(user_row)
 
 
@@ -210,8 +278,14 @@ def get_required_admin(current_user: UserPublic) -> UserPublic:
     return current_user
 
 
-def register_user(name: str, email: str, password_hash: str):
+def get_required_security_user(current_user: UserPublic) -> UserPublic:
+    if current_user.role not in {"admin", "security_analyst"}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Security access required.")
+    return current_user
+
+
+def register_user(name: str, email: str, password_hash: str, phone: str):
     try:
-        return database.create_user(name, email, password_hash)
+        return database.create_user(name, email, password_hash, phone=phone, role=derive_user_role(email))
     except IntegrityError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists.") from exc

@@ -18,10 +18,15 @@ class Settings(BaseSettings):
     auth_token_ttl_hours: int = Field(default=72, alias="AUTH_TOKEN_TTL_HOURS")
     database_path_raw: str = Field(default="./app_data.sqlite3", alias="DATABASE_PATH")
     admin_emails_raw: str = Field(default="admin@smartcommerce.ai", alias="ADMIN_EMAILS")
+    security_analyst_emails_raw: str = Field(default="security@smartcommerce.ai", alias="SECURITY_ANALYST_EMAILS")
     api_title: str = Field(default="AI-Powered Chatbot for Customer Support API", alias="API_TITLE")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     vector_store_path_raw: str = Field(default="./rag_store", alias="VECTOR_STORE_PATH")
     embedding_model_name: str = Field(default="text-embedding-3-small", alias="EMBEDDING_MODEL_NAME")
+    login_max_attempts: int = Field(default=5, alias="LOGIN_MAX_ATTEMPTS")
+    login_lock_minutes: int = Field(default=15, alias="LOGIN_LOCK_MINUTES")
+    upload_max_mb: int = Field(default=10, alias="UPLOAD_MAX_MB")
+    global_rate_limit_per_minute: int = Field(default=120, alias="GLOBAL_RATE_LIMIT_PER_MINUTE")
 
     model_config = SettingsConfigDict(
         env_file=BACKEND_DIR / ".env",
@@ -67,6 +72,10 @@ class Settings(BaseSettings):
     @property
     def admin_emails(self) -> set[str]:
         return {email.strip().lower() for email in self.admin_emails_raw.split(",") if email.strip()}
+
+    @property
+    def security_analyst_emails(self) -> set[str]:
+        return {email.strip().lower() for email in self.security_analyst_emails_raw.split(",") if email.strip()}
 
 
 @lru_cache

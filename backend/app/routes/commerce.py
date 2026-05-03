@@ -32,12 +32,26 @@ def add_wishlist_item(product_id: str, current_user: UserPublic = Depends(requir
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
     database.add_to_wishlist(current_user.id, product_id)
+    database.record_audit_log(
+        event_type="commerce.wishlist_add",
+        severity="low",
+        user_id=current_user.id,
+        description=f"Added product {product_id} to wishlist",
+        metadata={"product_id": product_id},
+    )
     return build_wishlist_response(current_user.id)
 
 
 @router.delete("/api/wishlist/{product_id}", response_model=WishlistResponse)
 def remove_wishlist_item(product_id: str, current_user: UserPublic = Depends(require_user)) -> WishlistResponse:
     database.remove_from_wishlist(current_user.id, product_id)
+    database.record_audit_log(
+        event_type="commerce.wishlist_remove",
+        severity="low",
+        user_id=current_user.id,
+        description=f"Removed product {product_id} from wishlist",
+        metadata={"product_id": product_id},
+    )
     return build_wishlist_response(current_user.id)
 
 
@@ -52,12 +66,26 @@ def add_cart_item(request: CartAddRequest, current_user: UserPublic = Depends(re
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
     database.add_to_cart(current_user.id, request.product_id, request.quantity)
+    database.record_audit_log(
+        event_type="commerce.cart_add",
+        severity="low",
+        user_id=current_user.id,
+        description=f"Added {request.quantity} of {request.product_id} to cart",
+        metadata={"product_id": request.product_id, "quantity": str(request.quantity)},
+    )
     return build_cart_response(current_user.id)
 
 
 @router.put("/api/cart/items/{product_id}", response_model=CartResponse)
 def update_cart_item(product_id: str, request: CartAddRequest, current_user: UserPublic = Depends(require_user)) -> CartResponse:
     database.update_cart_quantity(current_user.id, product_id, request.quantity)
+    database.record_audit_log(
+        event_type="commerce.cart_update",
+        severity="low",
+        user_id=current_user.id,
+        description=f"Updated cart quantity for {product_id} to {request.quantity}",
+        metadata={"product_id": product_id, "quantity": str(request.quantity)},
+    )
     return build_cart_response(current_user.id)
 
 
@@ -103,4 +131,11 @@ def checkout(request: CheckoutRequest, current_user: UserPublic = Depends(requir
         ],
     )
     order_row = database.get_order(order_id, current_user.id)
+    database.record_audit_log(
+        event_type="commerce.checkout",
+        severity="medium",
+        user_id=current_user.id,
+        description=f"Checkout completed for order {order_id}",
+        metadata={"order_id": order_id, "payment_method": request.payment_method},
+    )
     return build_order_response(order_row)
